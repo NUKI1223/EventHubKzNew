@@ -32,6 +32,9 @@ public class S3Service {
     @Value("${aws.s3.region:eu-north-1}")
     private String region;
 
+    @Value("${aws.s3.public-url:}")
+    private String publicUrl;
+
     @Value("${file.upload.allowed-extensions:jpg,jpeg,png,gif,webp,pdf,doc,docx}")
     private String allowedExtensions;
 
@@ -262,6 +265,9 @@ public class S3Service {
     }
 
     private String generateFileUrl(String fileKey) {
+        if (publicUrl != null && !publicUrl.isBlank()) {
+            return String.format("%s/%s/%s", publicUrl.replaceAll("/$", ""), bucketName, fileKey);
+        }
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileKey);
     }
 }

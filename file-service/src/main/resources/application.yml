@@ -22,6 +22,7 @@ aws:
     region: ${AWS_REGION:eu-north-1}
     bucket-name: ${AWS_S3_BUCKET:eventhubkz-files}
     endpoint: ${AWS_S3_ENDPOINT:}
+    public-url: ${AWS_S3_PUBLIC_URL:}
 
 # File upload settings
 file:
