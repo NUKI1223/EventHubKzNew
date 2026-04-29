@@ -1,5 +1,11 @@
 version: '3.8'
 
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "3"
+
 services:
   # ==================== INFRASTRUCTURE ====================
 
@@ -13,6 +19,7 @@ services:
       - "8761:8761"
     networks:
       - eventhub-network
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8761/actuator/health || exit 1"]
       interval: 30s
@@ -41,6 +48,7 @@ services:
         condition: service_started
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # ==================== MICROSERVICES ====================
 
@@ -74,6 +82,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # User Service
   user-service:
@@ -97,6 +106,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Tag Service
   tag-service:
@@ -120,6 +130,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Event Service
   event-service:
@@ -150,6 +161,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Search Service
   search-service:
@@ -174,6 +186,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Like Service
   like-service:
@@ -200,6 +213,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Notification Service
   notification-service:
@@ -230,6 +244,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # File Service
   file-service:
@@ -252,6 +267,7 @@ services:
         condition: service_healthy
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # ==================== DATABASES ====================
 
@@ -269,6 +285,7 @@ services:
       - "5437:5432"
     networks:
       - eventhub-network
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d users_db"]
       interval: 10s
@@ -289,6 +306,7 @@ services:
       - "5434:5432"
     networks:
       - eventhub-network
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d events_db"]
       interval: 10s
@@ -309,6 +327,7 @@ services:
       - "5435:5432"
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # PostgreSQL - Notifications Database
   postgres-notifications:
@@ -324,6 +343,7 @@ services:
       - "5436:5432"
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Elasticsearch
   elasticsearch:
@@ -339,6 +359,7 @@ services:
       - es-data:/usr/share/elasticsearch/data
     networks:
       - eventhub-network
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
       interval: 10s
@@ -355,6 +376,7 @@ services:
       - redis-data:/data
     networks:
       - eventhub-network
+    logging: *default-logging
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -377,6 +399,7 @@ services:
       - zookeeper-logs:/var/lib/zookeeper/log
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Kafka Broker
   kafka:
@@ -400,6 +423,7 @@ services:
       - kafka-data:/var/lib/kafka/data
     networks:
       - eventhub-network
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
       interval: 30s
@@ -420,6 +444,7 @@ services:
       - kafka
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # ==================== MONITORING ====================
 
@@ -438,6 +463,7 @@ services:
       - '--web.enable-lifecycle'
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Grafana
   grafana:
@@ -456,6 +482,7 @@ services:
       - prometheus
     networks:
       - eventhub-network
+    logging: *default-logging
 
   # Zipkin - Distributed Tracing
   zipkin:
@@ -467,6 +494,7 @@ services:
       - STORAGE_TYPE=mem
     networks:
       - eventhub-network
+    logging: *default-logging
 
 # ==================== VOLUMES ====================
 
