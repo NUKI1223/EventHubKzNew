@@ -261,10 +261,55 @@ services:
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
       - AWS_REGION=${AWS_REGION:-eu-north-1}
       - AWS_S3_BUCKET=${AWS_S3_BUCKET:-eventhubkz-files}
+      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT:-}
+      - AWS_S3_PUBLIC_URL=${AWS_S3_PUBLIC_URL:-}
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       eureka-server:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    networks:
+      - eventhub-network
+    logging: *default-logging
+
+  # MinIO - S3-compatible object storage (dev)
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_KEY:-minioadmin123}
+    ports:
+      - "9100:9000"
+      - "9101:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - eventhub-network
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # MinIO bucket initializer — creates bucket and applies public-read policy
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${AWS_ACCESS_KEY:-minioadmin} ${AWS_SECRET_KEY:-minioadmin123} &&
+      mc mb --ignore-existing local/${AWS_S3_BUCKET:-eventhubkz-files} &&
+      mc anonymous set download local/${AWS_S3_BUCKET:-eventhubkz-files} &&
+      echo 'MinIO ready: bucket=${AWS_S3_BUCKET:-eventhubkz-files} with public-read'
+      "
     networks:
       - eventhub-network
     logging: *default-logging
@@ -510,6 +555,7 @@ volumes:
   kafka-data:
   prometheus-data:
   grafana-data:
+  minio-data:
 
 # ==================== NETWORKS ====================
 
