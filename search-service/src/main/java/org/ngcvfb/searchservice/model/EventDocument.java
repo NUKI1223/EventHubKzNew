@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ngcvfb.searchservice.config.EventDateConverter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.ValueConverter;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -42,6 +44,7 @@ public class EventDocument {
     private boolean online;
 
     @Field(type = FieldType.Date, format = {DateFormat.date_optional_time, DateFormat.epoch_millis})
+    @ValueConverter(EventDateConverter.class)
     private LocalDateTime eventDate;
 
     @Field(type = FieldType.Text)
