@@ -1,0 +1,172 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+        # Auth Service
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<segment>.*), /api/auth/${segment}
+
+        # User Service (authenticated endpoints)
+        - id: user-service-me
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/me
+          filters:
+            - name: AuthenticationFilter
+
+        # User Service (public endpoints)
+        - id: user-service-public
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+
+        # Event Service - POST/PUT/DELETE (authenticated)
+        - id: event-service-write
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/events/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - name: AuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: eventServiceCircuitBreaker
+                fallbackUri: forward:/fallback/events
+
+        # Event Service - GET (public)
+        - id: event-service-read
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/events/**
+            - Method=GET
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: eventServiceCircuitBreaker
+                fallbackUri: forward:/fallback/events
+
+        # Event Requests (authenticated)
+        - id: event-request-service
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/event-requests/**
+          filters:
+            - name: AuthenticationFilter
+
+        # Like Service (public endpoints - count, check)
+        - id: like-service-public
+          uri: lb://LIKE-SERVICE
+          predicates:
+            - Path=/api/likes/event/*/count,/api/likes/check
+
+        # Like Service (authenticated endpoints)
+        - id: like-service-auth
+          uri: lb://LIKE-SERVICE
+          predicates:
+            - Path=/api/likes/**
+          filters:
+            - name: AuthenticationFilter
+
+        # Search Service
+        - id: search-service
+          uri: lb://SEARCH-SERVICE
+          predicates:
+            - Path=/api/search/**
+
+        # Notification Service
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: AuthenticationFilter
+
+        # Tag Service
+        - id: tag-service
+          uri: lb://TAG-SERVICE
+          predicates:
+            - Path=/api/tags/**
+
+        # Admin - Event Requests (routes to event-service)
+        - id: admin-service
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - RewritePath=/api/admin/(?<segment>.*), /api/event-requests/${segment}
+            - name: AuthenticationFilter
+
+        # File Service
+        - id: file-service
+          uri: lb://FILE-SERVICE
+          predicates:
+            - Path=/api/files/**
+          filters:
+            - name: AuthenticationFilter
+            - name: RequestSize
+              args:
+                maxSize: 10MB
+
+      default-filters: []
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET:your-256-bit-secret-key-here-for-development-only}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      eventServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.ngcvfb.apigateway: DEBUG
