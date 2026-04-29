@@ -6,4 +6,4 @@ COPY target/*.jar app.jar
 
 EXPOSE 8083
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dnetworkaddress.cache.ttl=60", "-jar", "app.jar"]
