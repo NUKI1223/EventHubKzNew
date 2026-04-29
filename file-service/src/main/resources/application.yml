@@ -1,0 +1,59 @@
+server:
+  port: 8088
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+spring:
+  application:
+    name: file-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# AWS S3 Configuration
+aws:
+  s3:
+    access-key: ${AWS_ACCESS_KEY:}
+    secret-key: ${AWS_SECRET_KEY:}
+    region: ${AWS_REGION:eu-north-1}
+    bucket-name: ${AWS_S3_BUCKET:eventhubkz-files}
+    endpoint: ${AWS_S3_ENDPOINT:}
+
+# File upload settings
+file:
+  upload:
+    allowed-extensions: jpg,jpeg,png,gif,webp,pdf,doc,docx
+    max-size-mb: 10
+    image-extensions: jpg,jpeg,png,gif,webp
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+
+logging:
+  level:
+    org.ngcvfb.fileservice: DEBUG
+    software.amazon.awssdk: INFO

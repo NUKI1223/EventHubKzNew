@@ -1,0 +1,17 @@
+target/
+*.class
+*.jar
+*.war
+*.log
+*.iml
+.idea/
+.mvn/wrapper/maven-wrapper.jar
+build/
+HELP.md
+.vscode/
+*.swp
+.DS_Store
+backend/pgdata/
+backend/logs/
+node_modules/
+.env.local
