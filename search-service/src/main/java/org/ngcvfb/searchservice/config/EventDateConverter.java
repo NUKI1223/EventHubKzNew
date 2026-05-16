@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class EventDateConverter implements PropertyValueConverter {
 
@@ -22,18 +24,17 @@ public class EventDateConverter implements PropertyValueConverter {
     public Object read(Object value) {
         if (value == null) return null;
         String s = value.toString();
+        return tryParse(() -> LocalDateTime.parse(s))
+                .or(() -> tryParse(() -> LocalDate.parse(s).atStartOfDay()))
+                .or(() -> tryParse(() -> LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(s)), ZoneOffset.UTC)))
+                .orElseThrow(() -> new IllegalArgumentException("Cannot parse eventDate: " + s));
+    }
+
+    private static Optional<LocalDateTime> tryParse(Supplier<LocalDateTime> parser) {
         try {
-            return LocalDateTime.parse(s);
+            return Optional.of(parser.get());
         } catch (Exception ignored) {
-            try {
-                return LocalDate.parse(s).atStartOfDay();
-            } catch (Exception ignored2) {
-                try {
-                    return LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(s)), ZoneOffset.UTC);
-                } catch (Exception finalEx) {
-                    throw new IllegalArgumentException("Cannot parse eventDate: " + s);
-                }
-            }
+            return Optional.empty();
         }
     }
 }
