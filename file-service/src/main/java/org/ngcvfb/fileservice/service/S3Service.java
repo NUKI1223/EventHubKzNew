@@ -63,30 +63,10 @@ public class S3Service {
         checkS3Available();
         validateFile(file);
 
-        String originalFilename = file.getOriginalFilename();
-        String extension = getExtension(originalFilename);
+        String extension = getExtension(file.getOriginalFilename());
         String fileKey = generateFileKey(folder, extension);
 
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileKey)
-                .contentType(file.getContentType())
-                .contentLength(file.getSize())
-                .build();
-
-        s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        String fileUrl = generateFileUrl(fileKey);
-
-        log.info("File uploaded successfully: key={}, size={}", fileKey, file.getSize());
-
-        return FileUploadResponse.builder()
-                .fileKey(fileKey)
-                .fileName(originalFilename)
-                .fileUrl(fileUrl)
-                .contentType(file.getContentType())
-                .size(file.getSize())
-                .build();
+        return putAndBuildResponse(file, fileKey);
     }
 
     public FileUploadResponse uploadEventImage(MultipartFile file, Long eventId) throws IOException {
@@ -96,26 +76,7 @@ public class S3Service {
         String extension = getExtension(file.getOriginalFilename());
         String fileKey = String.format("events/%d/%s.%s", eventId, UUID.randomUUID(), extension);
 
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileKey)
-                .contentType(file.getContentType())
-                .contentLength(file.getSize())
-                .build();
-
-        s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        String fileUrl = generateFileUrl(fileKey);
-
-        log.info("Event image uploaded: eventId={}, key={}", eventId, fileKey);
-
-        return FileUploadResponse.builder()
-                .fileKey(fileKey)
-                .fileName(file.getOriginalFilename())
-                .fileUrl(fileUrl)
-                .contentType(file.getContentType())
-                .size(file.getSize())
-                .build();
+        return putAndBuildResponse(file, fileKey);
     }
 
     public FileUploadResponse uploadUserAvatar(MultipartFile file, Long userId) throws IOException {
@@ -131,6 +92,10 @@ public class S3Service {
         } catch (Exception ignored) {
         }
 
+        return putAndBuildResponse(file, fileKey);
+    }
+
+    private FileUploadResponse putAndBuildResponse(MultipartFile file, String fileKey) throws IOException {
         PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(fileKey)
@@ -140,14 +105,12 @@ public class S3Service {
 
         s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-        String fileUrl = generateFileUrl(fileKey);
-
-        log.info("User avatar uploaded: userId={}, key={}", userId, fileKey);
+        log.info("File uploaded: key={}, size={}", fileKey, file.getSize());
 
         return FileUploadResponse.builder()
                 .fileKey(fileKey)
                 .fileName(file.getOriginalFilename())
-                .fileUrl(fileUrl)
+                .fileUrl(generateFileUrl(fileKey))
                 .contentType(file.getContentType())
                 .size(file.getSize())
                 .build();
@@ -219,33 +182,25 @@ public class S3Service {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Файл не может быть пустым");
         }
-
         if (file.getSize() > maxSizeMb * 1024 * 1024L) {
             throw new IllegalArgumentException("Размер файла превышает " + maxSizeMb + " MB");
         }
-
-        String extension = getExtension(file.getOriginalFilename());
-        Set<String> allowed = Arrays.stream(allowedExtensions.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
-
-        if (!allowed.contains(extension.toLowerCase())) {
-            throw new IllegalArgumentException("Недопустимый формат файла. Разрешены: " + allowedExtensions);
-        }
+        assertExtensionAllowed(file, allowedExtensions, "Недопустимый формат файла. Разрешены: " + allowedExtensions);
     }
 
     private void validateImageFile(MultipartFile file) {
         validateFile(file);
+        assertExtensionAllowed(file, imageExtensions, "Файл должен быть изображением. Разрешены: " + imageExtensions);
+    }
 
-        String extension = getExtension(file.getOriginalFilename());
-        Set<String> imageExts = Arrays.stream(imageExtensions.split(","))
+    private void assertExtensionAllowed(MultipartFile file, String allowedCsv, String errorMessage) {
+        Set<String> allowed = Arrays.stream(allowedCsv.split(","))
                 .map(String::trim)
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
-
-        if (!imageExts.contains(extension.toLowerCase())) {
-            throw new IllegalArgumentException("Файл должен быть изображением. Разрешены: " + imageExtensions);
+        String extension = getExtension(file.getOriginalFilename()).toLowerCase();
+        if (!allowed.contains(extension)) {
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 
