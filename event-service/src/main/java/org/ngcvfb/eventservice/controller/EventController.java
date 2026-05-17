@@ -31,6 +31,11 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
 
+    @GetMapping("/batch")
+    public ResponseEntity<List<EventDTO>> getEventsByIds(@RequestParam List<Long> ids) {
+        return ResponseEntity.ok(eventService.getEventsByIds(ids));
+    }
+
     @GetMapping("/upcoming")
     public ResponseEntity<Page<EventDTO>> getUpcomingEvents(
             @PageableDefault(size = Pagination.DEFAULT_PAGE_SIZE) Pageable pageable) {
