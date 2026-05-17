@@ -1,6 +1,7 @@
 package org.ngcvfb.eventservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.ngcvfb.eventservice.config.Pagination;
 import org.ngcvfb.eventservice.model.EventRequest;
 import org.ngcvfb.eventservice.model.RequestStatus;
 import org.ngcvfb.eventservice.service.EventRequestService;
@@ -51,7 +52,7 @@ public class EventRequestController {
     @GetMapping("/pending")
     public ResponseEntity<Page<EventRequest>> getPendingRequests(
             @RequestHeader(value = "X-User-Role", defaultValue = "USER") String userRole,
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = Pagination.DEFAULT_PAGE_SIZE) Pageable pageable) {
         assertAdmin(userRole);
         return ResponseEntity.ok(eventRequestService.getPendingRequests(pageable));
     }
@@ -60,7 +61,7 @@ public class EventRequestController {
     public ResponseEntity<Page<EventRequest>> getRequestsByStatus(
             @RequestHeader(value = "X-User-Role", defaultValue = "USER") String userRole,
             @PathVariable RequestStatus status,
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = Pagination.DEFAULT_PAGE_SIZE) Pageable pageable) {
         assertAdmin(userRole);
         return ResponseEntity.ok(eventRequestService.getRequestsByStatus(status, pageable));
     }
