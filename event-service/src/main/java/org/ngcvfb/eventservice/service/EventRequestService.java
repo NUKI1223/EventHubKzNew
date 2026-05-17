@@ -2,6 +2,7 @@ package org.ngcvfb.eventservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.eventservice.model.EventRequest;
 import org.ngcvfb.eventservice.model.RequestStatus;
 import org.ngcvfb.eventservice.repository.EventRequestRepository;
@@ -52,12 +53,7 @@ public class EventRequestService {
 
     @Transactional
     public EventRequest approveRequest(Long requestId, Long adminId) {
-        Optional<EventRequest> optionalRequest = eventRequestRepository.findById(requestId);
-        if (optionalRequest.isEmpty()) {
-            return null;
-        }
-
-        EventRequest request = optionalRequest.get();
+        EventRequest request = findRequestOrThrow(requestId);
         request.setStatus(RequestStatus.APPROVED);
         request.setReviewerId(adminId);
         request.setReviewedAt(LocalDateTime.now());
@@ -70,12 +66,7 @@ public class EventRequestService {
 
     @Transactional
     public EventRequest rejectRequest(Long requestId, Long adminId, String rejectionReason) {
-        Optional<EventRequest> optionalRequest = eventRequestRepository.findById(requestId);
-        if (optionalRequest.isEmpty()) {
-            return null;
-        }
-
-        EventRequest request = optionalRequest.get();
+        EventRequest request = findRequestOrThrow(requestId);
         request.setStatus(RequestStatus.REJECTED);
         request.setReviewerId(adminId);
         request.setReviewedAt(LocalDateTime.now());
@@ -93,12 +84,7 @@ public class EventRequestService {
 
     @Transactional
     public EventRequest updateRequestStatus(Long requestId, RequestStatus status, String adminComment, Long adminId) {
-        Optional<EventRequest> optionalRequest = eventRequestRepository.findById(requestId);
-        if (optionalRequest.isEmpty()) {
-            return null;
-        }
-
-        EventRequest request = optionalRequest.get();
+        EventRequest request = findRequestOrThrow(requestId);
         request.setStatus(status);
         request.setReviewerId(adminId);
         request.setReviewedAt(LocalDateTime.now());
@@ -110,5 +96,10 @@ public class EventRequestService {
         log.info("Updated event request: {} to status {} by admin {}", updated.getId(), status, adminId);
 
         return updated;
+    }
+
+    private EventRequest findRequestOrThrow(Long id) {
+        return eventRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("EventRequest", "id", id));
     }
 }
