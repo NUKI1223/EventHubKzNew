@@ -2,6 +2,7 @@ package org.ngcvfb.eventservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.ngcvfb.eventhubkz.common.dto.EventDTO;
+import org.ngcvfb.eventservice.config.Pagination;
 import org.ngcvfb.eventservice.service.EventService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,20 +33,20 @@ public class EventController {
 
     @GetMapping("/upcoming")
     public ResponseEntity<Page<EventDTO>> getUpcomingEvents(
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = Pagination.DEFAULT_PAGE_SIZE) Pageable pageable) {
         return ResponseEntity.ok(eventService.getUpcomingEvents(pageable));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<EventDTO>> searchEvents(
             @RequestParam String keyword,
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = Pagination.DEFAULT_PAGE_SIZE) Pageable pageable) {
         return ResponseEntity.ok(eventService.searchEvents(keyword, pageable));
     }
 
     @GetMapping("/popular")
     public ResponseEntity<Page<EventDTO>> getMostPopular(
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = Pagination.DEFAULT_PAGE_SIZE) Pageable pageable) {
         return ResponseEntity.ok(eventService.getMostPopular(pageable));
     }
 
