@@ -1,6 +1,7 @@
 package org.ngcvfb.tagservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.tagservice.model.Tag;
 import org.ngcvfb.tagservice.repository.TagRepository;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,12 @@ public class TagService {
 
     public Tag getTagById(Long id) {
         return tagRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tag not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tag", "id", id));
     }
 
     public Tag getTagByName(String name) {
         return tagRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("Tag not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tag", "name", name));
     }
 
     public Set<Tag> getTagsByNames(Set<String> names) {
@@ -33,7 +34,7 @@ public class TagService {
 
     public Tag createTag(String name) {
         if (tagRepository.existsByName(name)) {
-            throw new RuntimeException("Tag already exists");
+            throw new IllegalArgumentException("Tag already exists: " + name);
         }
         return tagRepository.save(Tag.builder().name(name).build());
     }
