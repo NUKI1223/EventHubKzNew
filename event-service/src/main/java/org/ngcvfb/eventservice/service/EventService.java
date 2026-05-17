@@ -91,20 +91,7 @@ public class EventService {
         Event saved = eventRepository.save(event);
         log.info("Created event: {} by organizer {}", saved.getId(), organizerId);
 
-        // Send Kafka event
-        kafkaProducer.sendEventCreated(EventCreatedEvent.create(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getShortDescription(),
-                saved.getFullDescription(),
-                saved.getTags(),
-                saved.getLocation(),
-                saved.isOnline(),
-                saved.getEventDate(),
-                saved.getMainImageUrl(),
-                saved.getOrganizerEmail(),
-                saved.getOrganizerId()
-        ));
+        kafkaProducer.sendEventCreated(toCreatedEvent(saved));
 
         return toDTO(saved);
     }
@@ -126,18 +113,7 @@ public class EventService {
         Event updated = eventRepository.save(event);
         log.info("Updated event: {}", updated.getId());
 
-        // Send Kafka event
-        kafkaProducer.sendEventUpdated(EventUpdatedEvent.create(
-                updated.getId(),
-                updated.getTitle(),
-                updated.getShortDescription(),
-                updated.getFullDescription(),
-                updated.getTags(),
-                updated.getLocation(),
-                updated.isOnline(),
-                updated.getEventDate(),
-                updated.getMainImageUrl()
-        ));
+        kafkaProducer.sendEventUpdated(toUpdatedEvent(updated));
 
         return toDTO(updated);
     }
@@ -163,19 +139,7 @@ public class EventService {
         List<Event> all = eventRepository.findAll();
         log.info("Reindexing {} events", all.size());
         for (Event event : all) {
-            kafkaProducer.sendEventCreated(EventCreatedEvent.create(
-                    event.getId(),
-                    event.getTitle(),
-                    event.getShortDescription(),
-                    event.getFullDescription(),
-                    event.getTags(),
-                    event.getLocation(),
-                    event.isOnline(),
-                    event.getEventDate(),
-                    event.getMainImageUrl(),
-                    event.getOrganizerEmail(),
-                    event.getOrganizerId()
-            ));
+            kafkaProducer.sendEventCreated(toCreatedEvent(event));
         }
         log.info("Reindex complete");
     }
@@ -188,6 +152,36 @@ public class EventService {
                 eventRepository.save(event);
             }
         });
+    }
+
+    private EventCreatedEvent toCreatedEvent(Event event) {
+        return EventCreatedEvent.create(
+                event.getId(),
+                event.getTitle(),
+                event.getShortDescription(),
+                event.getFullDescription(),
+                event.getTags(),
+                event.getLocation(),
+                event.isOnline(),
+                event.getEventDate(),
+                event.getMainImageUrl(),
+                event.getOrganizerEmail(),
+                event.getOrganizerId()
+        );
+    }
+
+    private EventUpdatedEvent toUpdatedEvent(Event event) {
+        return EventUpdatedEvent.create(
+                event.getId(),
+                event.getTitle(),
+                event.getShortDescription(),
+                event.getFullDescription(),
+                event.getTags(),
+                event.getLocation(),
+                event.isOnline(),
+                event.getEventDate(),
+                event.getMainImageUrl()
+        );
     }
 
     private EventDTO toDTO(Event event) {
