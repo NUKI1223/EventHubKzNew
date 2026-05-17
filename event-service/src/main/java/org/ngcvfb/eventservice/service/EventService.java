@@ -38,6 +38,13 @@ public class EventService {
         return toDTO(findEventOrThrow(id));
     }
 
+    public List<EventDTO> getEventsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return eventRepository.findAllById(ids).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     private Event findEventOrThrow(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event", "id", id));
