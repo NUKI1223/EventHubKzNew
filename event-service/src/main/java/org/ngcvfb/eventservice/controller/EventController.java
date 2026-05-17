@@ -27,11 +27,7 @@ public class EventController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EventDTO> getEventById(@PathVariable Long id) {
-        EventDTO event = eventService.getEventById(id);
-        if (event == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(event);
+        return ResponseEntity.ok(eventService.getEventById(id));
     }
 
     @GetMapping("/upcoming")
@@ -76,11 +72,7 @@ public class EventController {
     public ResponseEntity<EventDTO> updateEvent(
             @PathVariable Long id,
             @Valid @RequestBody EventDTO eventDTO) {
-        EventDTO updated = eventService.updateEvent(id, eventDTO);
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(eventService.updateEvent(id, eventDTO));
     }
 
     @DeleteMapping("/{id}")

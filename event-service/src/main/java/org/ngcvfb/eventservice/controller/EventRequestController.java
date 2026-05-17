@@ -97,11 +97,7 @@ public class EventRequestController {
             @PathVariable Long id,
             @RequestHeader("X-User-Id") Long adminId) {
         assertAdmin(userRole);
-        EventRequest approved = eventRequestService.approveRequest(id, adminId);
-        if (approved == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(approved);
+        return ResponseEntity.ok(eventRequestService.approveRequest(id, adminId));
     }
 
     @PostMapping("/{id}/reject")
@@ -111,11 +107,7 @@ public class EventRequestController {
             @RequestHeader("X-User-Id") Long adminId,
             @RequestBody(required = false) String reason) {
         assertAdmin(userRole);
-        EventRequest rejected = eventRequestService.rejectRequest(id, adminId, reason);
-        if (rejected == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(rejected);
+        return ResponseEntity.ok(eventRequestService.rejectRequest(id, adminId, reason));
     }
 
     @PutMapping("/{id}/update")
@@ -129,10 +121,6 @@ public class EventRequestController {
         String adminComment = (String) payload.get("adminComment");
 
         RequestStatus requestStatus = RequestStatus.valueOf(status.toUpperCase());
-        EventRequest updated = eventRequestService.updateRequestStatus(id, requestStatus, adminComment, adminId);
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(eventRequestService.updateRequestStatus(id, requestStatus, adminComment, adminId));
     }
 }

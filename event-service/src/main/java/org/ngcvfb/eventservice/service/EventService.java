@@ -6,6 +6,7 @@ import org.ngcvfb.eventhubkz.common.dto.EventDTO;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
+import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.eventservice.kafka.EventKafkaProducer;
 import org.ngcvfb.eventservice.model.Event;
 import org.ngcvfb.eventservice.repository.EventRepository;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,9 +35,12 @@ public class EventService {
     }
 
     public EventDTO getEventById(Long id) {
+        return toDTO(findEventOrThrow(id));
+    }
+
+    private Event findEventOrThrow(Long id) {
         return eventRepository.findById(id)
-                .map(this::toDTO)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Event", "id", id));
     }
 
     public Page<EventDTO> getUpcomingEvents(Pageable pageable) {
@@ -108,12 +111,7 @@ public class EventService {
 
     @Transactional
     public EventDTO updateEvent(Long id, EventDTO dto) {
-        Optional<Event> optionalEvent = eventRepository.findById(id);
-        if (optionalEvent.isEmpty()) {
-            return null;
-        }
-
-        Event event = optionalEvent.get();
+        Event event = findEventOrThrow(id);
         event.setTitle(dto.getTitle());
         event.setShortDescription(dto.getShortDescription());
         event.setFullDescription(dto.getFullDescription());
