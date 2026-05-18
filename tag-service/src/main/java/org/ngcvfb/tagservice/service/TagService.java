@@ -3,8 +3,10 @@ package org.ngcvfb.tagservice.service;
 import lombok.RequiredArgsConstructor;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.tagservice.model.Tag;
+import org.ngcvfb.tagservice.model.TagType;
 import org.ngcvfb.tagservice.repository.TagRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,8 +16,8 @@ import java.util.stream.Collectors;
 public class TagService {
     private final TagRepository tagRepository;
 
-    public List<Tag> getAllTags() {
-        return tagRepository.findAll();
+    public List<Tag> getTags(TagType type) {
+        return tagRepository.findByType(type);
     }
 
     public Tag getTagById(Long id) {
@@ -23,20 +25,15 @@ public class TagService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tag", "id", id));
     }
 
-    public Tag getTagByName(String name) {
-        return tagRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag", "name", name));
+    public Set<Tag> getTagsByNames(Set<String> names, TagType type) {
+        return tagRepository.findByNameInAndType(names, type);
     }
 
-    public Set<Tag> getTagsByNames(Set<String> names) {
-        return tagRepository.findByNameIn(names);
-    }
-
-    public Tag createTag(String name) {
-        if (tagRepository.existsByName(name)) {
-            throw new IllegalArgumentException("Tag already exists: " + name);
+    public Tag createTag(String name, TagType type) {
+        if (tagRepository.existsByNameAndType(name, type)) {
+            throw new IllegalArgumentException("Tag already exists for " + type + ": " + name);
         }
-        return tagRepository.save(Tag.builder().name(name).build());
+        return tagRepository.save(Tag.builder().name(name).type(type).build());
     }
 
     public Tag updateTag(Long id, String name) {
@@ -49,13 +46,13 @@ public class TagService {
         tagRepository.deleteById(id);
     }
 
-    public Set<String> getOrCreateTags(Set<String> tagNames) {
-        Set<Tag> existingTags = tagRepository.findByNameIn(tagNames);
-        Set<String> existingNames = existingTags.stream().map(Tag::getName).collect(Collectors.toSet());
+    public Set<String> getOrCreateTags(Set<String> tagNames, TagType type) {
+        Set<Tag> existing = tagRepository.findByNameInAndType(tagNames, type);
+        Set<String> existingNames = existing.stream().map(Tag::getName).collect(Collectors.toSet());
 
         tagNames.stream()
                 .filter(name -> !existingNames.contains(name))
-                .forEach(this::createTag);
+                .forEach(name -> createTag(name, type));
 
         return tagNames;
     }

@@ -4,24 +4,51 @@ BEGIN;
 
 TRUNCATE TABLE event_tags, event_request_tags, event_requests, events, tags RESTART IDENTITY CASCADE;
 
-INSERT INTO tags (id, name) VALUES
-  (1, 'backend'),
-  (2, 'frontend'),
-  (3, 'mobile'),
-  (4, 'devops'),
-  (5, 'ai'),
-  (6, 'data'),
-  (7, 'security'),
-  (8, 'gamedev'),
-  (9, 'cloud'),
-  (10,'python'),
-  (11,'react'),
-  (12,'javascript'),
-  (13,'java'),
-  (14,'career'),
-  (15,'hackathon');
+INSERT INTO tags (id, name, type) VALUES
+  -- event topics
+  (1, 'backend', 'EVENT'),
+  (2, 'frontend', 'EVENT'),
+  (3, 'mobile', 'EVENT'),
+  (4, 'devops', 'EVENT'),
+  (5, 'ai', 'EVENT'),
+  (6, 'data', 'EVENT'),
+  (7, 'security', 'EVENT'),
+  (8, 'gamedev', 'EVENT'),
+  (9, 'cloud', 'EVENT'),
+  (10,'python', 'EVENT'),
+  (11,'react', 'EVENT'),
+  (12,'javascript', 'EVENT'),
+  (13,'java', 'EVENT'),
+  (14,'career', 'EVENT'),
+  (15,'hackathon', 'EVENT'),
+  -- user skills / identities
+  (16,'Java',       'USER'),
+  (17,'Python',     'USER'),
+  (18,'JavaScript', 'USER'),
+  (19,'TypeScript', 'USER'),
+  (20,'Go',         'USER'),
+  (21,'Kotlin',     'USER'),
+  (22,'Swift',      'USER'),
+  (23,'React',      'USER'),
+  (24,'Vue',        'USER'),
+  (25,'Spring',     'USER'),
+  (26,'Backend',    'USER'),
+  (27,'Frontend',   'USER'),
+  (28,'Mobile',     'USER'),
+  (29,'DevOps',     'USER'),
+  (30,'Data Science','USER'),
+  (31,'ML / AI',    'USER'),
+  (32,'Security',   'USER'),
+  (33,'Game Dev',   'USER'),
+  (34,'UI/UX',      'USER'),
+  (35,'Product',    'USER'),
+  (36,'Студент',    'USER'),
+  (37,'Mentor',     'USER'),
+  (38,'Open to Work','USER'),
+  (39,'Hiring',     'USER'),
+  (40,'Speaker',    'USER');
 
-SELECT setval(pg_get_serial_sequence('tags', 'id'), 15, true);
+SELECT setval(pg_get_serial_sequence('tags', 'id'), 40, true);
 
 INSERT INTO events (id, title, short_description, full_description, location, online, event_date, registration_deadline, main_image_url, external_link, organizer_id, organizer_email, like_count, created_at, updated_at) VALUES
   (1, 'Almaty Spring Hackathon 2026',
