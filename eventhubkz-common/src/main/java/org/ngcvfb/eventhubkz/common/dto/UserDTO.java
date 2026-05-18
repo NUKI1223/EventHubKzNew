@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @Builder
@@ -20,5 +21,6 @@ public class UserDTO {
     private String description;
     private String avatarUrl;
     private Map<String, String> contacts;
+    private Set<String> tags;
     private boolean enabled;
 }
