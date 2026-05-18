@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,7 +66,7 @@ public class EventRequestService {
         dto.setTitle(approved.getTitle());
         dto.setShortDescription(approved.getShortDescription());
         dto.setFullDescription(approved.getFullDescription());
-        dto.setTags(approved.getTags());
+        dto.setTags(approved.getTags() == null ? null : new HashSet<>(approved.getTags()));
         dto.setLocation(approved.getLocation());
         dto.setOnline(approved.isOnline());
         dto.setEventDate(approved.getEventDate());

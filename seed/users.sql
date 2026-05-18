@@ -3,7 +3,7 @@
 
 BEGIN;
 
-TRUNCATE TABLE user_contacts, users RESTART IDENTITY CASCADE;
+TRUNCATE TABLE user_contacts, user_tags, users RESTART IDENTITY CASCADE;
 
 INSERT INTO users (id, username, email, password, role, description, avatar_url, enabled) VALUES
   (1, 'aidar',     'aidar.kasenov@example.kz',  '$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'USER',  'Backend-разработчик из Алматы. Пишу на Java/Spring, в свободное время — на Go.', NULL, true),
@@ -33,6 +33,18 @@ INSERT INTO user_contacts (user_id, contact_type, contact_value) VALUES
   (8, 'additionalProp1', 'https://t.me/kamila_pm'),
   (9, 'additionalProp2', 'https://github.com/yerzhan-ai'),
   (10,'additionalProp1', 'https://t.me/alina_aitu');
+
+INSERT INTO user_tags (user_id, tag_name) VALUES
+  (1, 'backend'), (1, 'java'),
+  (2, 'frontend'), (2, 'react'), (2, 'javascript'), (2, 'career'),
+  (3, 'devops'), (3, 'cloud'),
+  (4, 'data'), (4, 'ai'), (4, 'python'),
+  (5, 'mobile'),
+  (6, 'frontend'), (6, 'career'),
+  (7, 'security'), (7, 'backend'),
+  (8, 'career'),
+  (9, 'ai'), (9, 'python'), (9, 'data'),
+  (10, 'career'), (10, 'frontend');
 
 SELECT setval(pg_get_serial_sequence('users', 'id'), 10, true);
 
