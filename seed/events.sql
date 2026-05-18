@@ -2,8 +2,7 @@
 
 BEGIN;
 
-TRUNCATE TABLE event_tags, event_likes_unused_placeholder, events, event_requests, tags RESTART IDENTITY CASCADE;
--- Note: event_likes_unused_placeholder doesn't exist; if it does (it won't), it gets truncated. Safe-guard for partial schemas.
+TRUNCATE TABLE event_tags, event_request_tags, event_requests, events, tags RESTART IDENTITY CASCADE;
 
 INSERT INTO tags (id, name) VALUES
   (1, 'backend'),
