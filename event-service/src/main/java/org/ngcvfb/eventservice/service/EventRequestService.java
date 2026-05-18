@@ -2,6 +2,7 @@ package org.ngcvfb.eventservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ngcvfb.eventhubkz.common.dto.EventDTO;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.eventservice.model.EventRequest;
 import org.ngcvfb.eventservice.model.RequestStatus;
@@ -59,7 +60,21 @@ public class EventRequestService {
         request.setReviewedAt(LocalDateTime.now());
 
         EventRequest approved = eventRequestRepository.save(request);
-        log.info("Approved event request: {} by admin {}", approved.getId(), adminId);
+
+        EventDTO dto = new EventDTO();
+        dto.setTitle(approved.getTitle());
+        dto.setShortDescription(approved.getShortDescription());
+        dto.setFullDescription(approved.getFullDescription());
+        dto.setTags(approved.getTags());
+        dto.setLocation(approved.getLocation());
+        dto.setOnline(approved.isOnline());
+        dto.setEventDate(approved.getEventDate());
+        dto.setRegistrationDeadline(approved.getRegistrationDeadline());
+        dto.setMainImageUrl(approved.getMainImageUrl());
+        dto.setExternalLink(approved.getExternalLink());
+        eventService.createEvent(dto, approved.getRequesterId(), approved.getRequesterEmail());
+
+        log.info("Approved event request: {} by admin {}, event created from it", approved.getId(), adminId);
 
         return approved;
     }
