@@ -111,6 +111,14 @@ spring:
             - RewritePath=/api/admin/(?<segment>.*), /api/event-requests/${segment}
             - name: AuthenticationFilter
 
+        # Support Messages (event-service)
+        - id: support-service
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/support/**
+          filters:
+            - name: AuthenticationFilter
+
         # File Service
         - id: file-service
           uri: lb://FILE-SERVICE
