@@ -27,10 +27,7 @@ echo "== users =="
 run_sql postgres-users users_db   seed/users.sql
 
 echo "== events + tags =="
-# events.sql includes a defensive truncate of a non-existent table; drop it on the fly.
-sed '/event_likes_unused_placeholder/d' seed/events.sql | \
-  docker exec -i -e PGPASSWORD="$DB_PASSWORD" postgres-events \
-    psql -U "$DB_USER" -d events_db -v ON_ERROR_STOP=1
+run_sql postgres-events events_db seed/events.sql
 
 echo "== likes =="
 run_sql postgres-likes  likes_db   seed/likes.sql
