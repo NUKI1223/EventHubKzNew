@@ -35,16 +35,16 @@ INSERT INTO user_contacts (user_id, contact_type, contact_value) VALUES
   (10,'additionalProp1', 'https://t.me/alina_aitu');
 
 INSERT INTO user_tags (user_id, tag_name) VALUES
-  (1, 'backend'), (1, 'java'),
-  (2, 'frontend'), (2, 'react'), (2, 'javascript'), (2, 'career'),
-  (3, 'devops'), (3, 'cloud'),
-  (4, 'data'), (4, 'ai'), (4, 'python'),
-  (5, 'mobile'),
-  (6, 'frontend'), (6, 'career'),
-  (7, 'security'), (7, 'backend'),
-  (8, 'career'),
-  (9, 'ai'), (9, 'python'), (9, 'data'),
-  (10, 'career'), (10, 'frontend');
+  (1, 'Backend'), (1, 'Java'), (1, 'Spring'), (1, 'Go'),
+  (2, 'Frontend'), (2, 'React'), (2, 'TypeScript'), (2, 'Speaker'),
+  (3, 'DevOps'), (3, 'Mentor'),
+  (4, 'Data Science'), (4, 'ML / AI'), (4, 'Python'),
+  (5, 'Mobile'), (5, 'Swift'), (5, 'Mentor'),
+  (6, 'UI/UX'), (6, 'Product'),
+  (7, 'Security'), (7, 'Backend'),
+  (8, 'Product'), (8, 'Hiring'),
+  (9, 'ML / AI'), (9, 'Python'),
+  (10, 'Студент'), (10, 'Open to Work'), (10, 'Frontend');
 
 SELECT setval(pg_get_serial_sequence('users', 'id'), 10, true);
 
