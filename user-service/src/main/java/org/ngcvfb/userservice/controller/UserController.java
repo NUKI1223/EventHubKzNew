@@ -6,7 +6,9 @@ import org.ngcvfb.userservice.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,8 +18,19 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserDTO>> getAllUsers(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) List<String> tags) {
+        if ((q == null || q.isBlank()) && (tags == null || tags.isEmpty())) {
+            return ResponseEntity.ok(userService.getAllUsers());
+        }
+        Set<String> tagSet = tags == null ? null : new HashSet<>(tags);
+        return ResponseEntity.ok(userService.searchUsers(q, tagSet));
+    }
+
+    @GetMapping("/batch")
+    public ResponseEntity<List<UserDTO>> getUsersByIds(@RequestParam List<Long> ids) {
+        return ResponseEntity.ok(userService.getUsersByIds(ids));
     }
 
     @GetMapping("/{id}")

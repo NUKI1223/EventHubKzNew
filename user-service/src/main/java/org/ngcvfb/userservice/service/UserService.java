@@ -9,7 +9,9 @@ import org.ngcvfb.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +23,26 @@ public class UserService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDTO> searchUsers(String q, Set<String> tags) {
+        List<User> source = (tags == null || tags.isEmpty())
+                ? userRepository.findAll()
+                : userRepository.findByAnyTag(tags);
+        if (q != null && !q.isBlank()) {
+            String needle = q.toLowerCase();
+            source = source.stream()
+                    .filter(u -> u.getUsername() != null && u.getUsername().toLowerCase().contains(needle))
+                    .collect(Collectors.toList());
+        }
+        return source.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getUsersByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return userRepository.findAllById(ids).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -60,6 +82,9 @@ public class UserService {
         if (userDTO.getContacts() != null) {
             user.setContacts(userDTO.getContacts());
         }
+        if (userDTO.getTags() != null) {
+            user.setTags(new HashSet<>(userDTO.getTags()));
+        }
 
         user = userRepository.save(user);
         log.info("User updated: {}", user.getEmail());
@@ -92,6 +117,7 @@ public class UserService {
                 .description(user.getDescription())
                 .avatarUrl(user.getAvatarUrl())
                 .contacts(user.getContacts())
+                .tags(user.getTags())
                 .enabled(user.isEnabled())
                 .build();
     }

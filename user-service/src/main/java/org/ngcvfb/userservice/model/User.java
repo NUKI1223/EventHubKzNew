@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -42,6 +44,12 @@ public class User {
     @MapKeyColumn(name = "contact_type")
     @Column(name = "contact_value")
     private Map<String, String> contacts = new HashMap<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_tags", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "tag_name")
+    @Builder.Default
+    private Set<String> tags = new HashSet<>();
 
     private boolean enabled = false;
 }
