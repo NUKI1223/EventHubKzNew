@@ -150,6 +150,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     depends_on:
       eureka-server:
         condition: service_healthy
