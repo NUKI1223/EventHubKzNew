@@ -22,8 +22,7 @@ public class NotificationKafkaConsumer {
     public void handleEventCreated(EventCreatedEvent event) {
         log.info("Received event.created: {}", event.getId());
         try {
-            // Notify organizer about successful event creation
-            notificationService.createNotification(
+            notificationService.createIfAbsent(
                     event.getOrganizerId(),
                     event.getOrganizerEmail(),
                     "Событие создано",
@@ -31,7 +30,6 @@ public class NotificationKafkaConsumer {
                     NotificationType.EVENT_CREATED,
                     event.getId()
             );
-            log.info("Created notification for event creation: {}", event.getId());
         } catch (Exception e) {
             log.error("Failed to create notification for event: {}", event.getId(), e);
         }
@@ -81,7 +79,7 @@ public class NotificationKafkaConsumer {
                 }
                 type = NotificationType.EVENT_REQUEST_REJECTED;
             }
-            notificationService.createNotification(
+            notificationService.createIfAbsent(
                     event.getRequesterId(),
                     event.getRequesterEmail(),
                     title,
@@ -89,7 +87,6 @@ public class NotificationKafkaConsumer {
                     type,
                     event.getRequestId()
             );
-            log.info("Created review notification for requester: {}", event.getRequesterId());
         } catch (Exception e) {
             log.error("Failed to create review notification: {}", e.getMessage(), e);
         }
@@ -99,7 +96,7 @@ public class NotificationKafkaConsumer {
     public void handleUserRegistered(UserRegisteredEvent event) {
         log.info("Received user.registered: {}", event.getUserId());
         try {
-            notificationService.createNotification(
+            notificationService.createIfAbsent(
                     event.getUserId(),
                     event.getEmail(),
                     "Добро пожаловать в EventHub!",
@@ -107,7 +104,6 @@ public class NotificationKafkaConsumer {
                     NotificationType.USER_REGISTERED,
                     null
             );
-            log.info("Created welcome notification for user: {}", event.getUserId());
         } catch (Exception e) {
             log.error("Failed to create welcome notification: {}", e.getMessage(), e);
         }

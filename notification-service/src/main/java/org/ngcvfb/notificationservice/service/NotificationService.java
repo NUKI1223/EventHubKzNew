@@ -57,6 +57,25 @@ public class NotificationService {
         return saved;
     }
 
+    /**
+     * Idempotent variant: skips creating a duplicate notification when one with the same
+     * (userId, type, relatedEventId) already exists. Used for deterministic events
+     * (event creation, request review, user registration) so Kafka replays on rebuild
+     * do not stack duplicates on the user.
+     */
+    @Transactional
+    public Notification createIfAbsent(Long userId, String userEmail, String title,
+                                        String message, NotificationType type, Long relatedEventId) {
+        boolean exists = relatedEventId == null
+                ? notificationRepository.existsByUserIdAndType(userId, type)
+                : notificationRepository.existsByUserIdAndTypeAndRelatedEventId(userId, type, relatedEventId);
+        if (exists) {
+            log.info("Skipped duplicate notification: user={}, type={}, relatedEventId={}", userId, type, relatedEventId);
+            return null;
+        }
+        return createNotification(userId, userEmail, title, message, type, relatedEventId);
+    }
+
     @Transactional
     public void markAsRead(Long notificationId) {
         notificationRepository.markAsRead(notificationId);
