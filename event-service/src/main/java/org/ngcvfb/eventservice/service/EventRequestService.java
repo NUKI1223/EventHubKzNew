@@ -3,7 +3,9 @@ package org.ngcvfb.eventservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.dto.EventDTO;
+import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
+import org.ngcvfb.eventservice.kafka.EventKafkaProducer;
 import org.ngcvfb.eventservice.model.EventRequest;
 import org.ngcvfb.eventservice.model.RequestStatus;
 import org.ngcvfb.eventservice.repository.EventRequestRepository;
@@ -24,6 +26,7 @@ public class EventRequestService {
 
     private final EventRequestRepository eventRequestRepository;
     private final EventService eventService;
+    private final EventKafkaProducer kafkaProducer;
 
     public List<EventRequest> getAllRequests() {
         return eventRequestRepository.findAll();
@@ -56,6 +59,12 @@ public class EventRequestService {
     @Transactional
     public EventRequest approveRequest(Long requestId, Long adminId) {
         EventRequest request = findRequestOrThrow(requestId);
+
+        if (request.getStatus() == RequestStatus.APPROVED) {
+            log.info("Event request {} is already approved, skipping", requestId);
+            return request;
+        }
+
         request.setStatus(RequestStatus.APPROVED);
         request.setReviewerId(adminId);
         request.setReviewedAt(LocalDateTime.now());
@@ -75,6 +84,15 @@ public class EventRequestService {
         dto.setExternalLink(approved.getExternalLink());
         eventService.createEvent(dto, approved.getRequesterId(), approved.getRequesterEmail());
 
+        kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
+                approved.getId(),
+                approved.getRequesterId(),
+                approved.getRequesterEmail(),
+                approved.getTitle(),
+                true,
+                approved.getAdminComment()
+        ));
+
         log.info("Approved event request: {} by admin {}, event created from it", approved.getId(), adminId);
 
         return approved;
@@ -89,6 +107,16 @@ public class EventRequestService {
         request.setAdminComment(rejectionReason);
 
         EventRequest rejected = eventRequestRepository.save(request);
+
+        kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
+                rejected.getId(),
+                rejected.getRequesterId(),
+                rejected.getRequesterEmail(),
+                rejected.getTitle(),
+                false,
+                rejected.getAdminComment()
+        ));
+
         log.info("Rejected event request: {} by admin {}", rejected.getId(), adminId);
 
         return rejected;
@@ -100,18 +128,28 @@ public class EventRequestService {
 
     @Transactional
     public EventRequest updateRequestStatus(Long requestId, RequestStatus status, String adminComment, Long adminId) {
-        EventRequest request = findRequestOrThrow(requestId);
-        request.setStatus(status);
-        request.setReviewerId(adminId);
-        request.setReviewedAt(LocalDateTime.now());
+        // Persist the admin comment first so approve/reject pick it up.
         if (adminComment != null && !adminComment.isEmpty()) {
+            EventRequest request = findRequestOrThrow(requestId);
             request.setAdminComment(adminComment);
+            eventRequestRepository.save(request);
         }
 
-        EventRequest updated = eventRequestRepository.save(request);
-        log.info("Updated event request: {} to status {} by admin {}", updated.getId(), status, adminId);
-
-        return updated;
+        // Delegate to the real review flow so APPROVED actually creates the
+        // event and both outcomes notify the requester via Kafka.
+        return switch (status) {
+            case APPROVED -> approveRequest(requestId, adminId);
+            case REJECTED -> rejectRequest(requestId, adminId, adminComment);
+            default -> {
+                EventRequest request = findRequestOrThrow(requestId);
+                request.setStatus(status);
+                request.setReviewerId(adminId);
+                request.setReviewedAt(LocalDateTime.now());
+                EventRequest updated = eventRequestRepository.save(request);
+                log.info("Updated event request: {} to status {} by admin {}", updated.getId(), status, adminId);
+                yield updated;
+            }
+        };
     }
 
     private EventRequest findRequestOrThrow(Long id) {
