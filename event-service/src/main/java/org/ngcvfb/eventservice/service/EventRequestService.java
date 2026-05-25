@@ -10,7 +10,9 @@ import org.ngcvfb.eventservice.model.EventRequest;
 import org.ngcvfb.eventservice.model.RequestStatus;
 import org.ngcvfb.eventservice.repository.EventRequestRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,24 +30,33 @@ public class EventRequestService {
     private final EventService eventService;
     private final EventKafkaProducer kafkaProducer;
 
+    private static final Sort NEWEST_FIRST = Sort.by(Sort.Direction.DESC, "createdAt");
+
+    private Pageable withDefaultSort(Pageable pageable) {
+        if (pageable.getSort().isSorted()) {
+            return pageable;
+        }
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), NEWEST_FIRST);
+    }
+
     public List<EventRequest> getAllRequests() {
-        return eventRequestRepository.findAll();
+        return eventRequestRepository.findAll(NEWEST_FIRST);
     }
 
     public List<EventRequest> getRequestsByRequester(Long requesterId) {
-        return eventRequestRepository.findByRequesterId(requesterId);
+        return eventRequestRepository.findByRequesterIdOrderByCreatedAtDesc(requesterId);
     }
 
     public Page<EventRequest> getRequestsByStatus(RequestStatus status, Pageable pageable) {
-        return eventRequestRepository.findByStatus(status, pageable);
+        return eventRequestRepository.findByStatus(status, withDefaultSort(pageable));
     }
 
     public List<EventRequest> getRequestsByRequesterAndStatus(Long requesterId, RequestStatus status) {
-        return eventRequestRepository.findByRequesterIdAndStatus(requesterId, status);
+        return eventRequestRepository.findByRequesterIdAndStatusOrderByCreatedAtDesc(requesterId, status);
     }
 
     public Page<EventRequest> getPendingRequests(Pageable pageable) {
-        return eventRequestRepository.findByStatus(RequestStatus.PENDING, pageable);
+        return eventRequestRepository.findByStatus(RequestStatus.PENDING, withDefaultSort(pageable));
     }
 
     @Transactional
