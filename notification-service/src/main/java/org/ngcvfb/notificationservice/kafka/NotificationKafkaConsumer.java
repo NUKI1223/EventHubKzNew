@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventLikedEvent;
+import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.UserRegisteredEvent;
 import org.ngcvfb.notificationservice.model.NotificationType;
 import org.ngcvfb.notificationservice.service.NotificationService;
@@ -55,6 +56,42 @@ public class NotificationKafkaConsumer {
             }
         } catch (Exception e) {
             log.error("Failed to create like notification: {}", e.getMessage(), e);
+        }
+    }
+
+    @KafkaListener(topics = "event-request.reviewed", groupId = "notification-service-group")
+    public void handleEventRequestReviewed(EventRequestReviewedEvent event) {
+        log.info("Received event-request.reviewed: request={}, approved={}", event.getRequestId(), event.isApproved());
+        try {
+            String title;
+            String message;
+            NotificationType type;
+            if (event.isApproved()) {
+                title = "Заявка одобрена";
+                message = String.format(
+                        "Ваша заявка на мероприятие \"%s\" одобрена. Событие опубликовано.",
+                        event.getEventTitle());
+                type = NotificationType.EVENT_REQUEST_APPROVED;
+            } else {
+                title = "Заявка отклонена";
+                message = String.format(
+                        "Ваша заявка на мероприятие \"%s\" отклонена.", event.getEventTitle());
+                if (event.getAdminComment() != null && !event.getAdminComment().isBlank()) {
+                    message += " Причина: " + event.getAdminComment();
+                }
+                type = NotificationType.EVENT_REQUEST_REJECTED;
+            }
+            notificationService.createNotification(
+                    event.getRequesterId(),
+                    event.getRequesterEmail(),
+                    title,
+                    message,
+                    type,
+                    event.getRequestId()
+            );
+            log.info("Created review notification for requester: {}", event.getRequesterId());
+        } catch (Exception e) {
+            log.error("Failed to create review notification: {}", e.getMessage(), e);
         }
     }
 

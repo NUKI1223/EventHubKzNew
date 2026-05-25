@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
+import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ public class EventKafkaProducer {
     private static final String TOPIC_EVENT_CREATED = "event.created";
     private static final String TOPIC_EVENT_UPDATED = "event.updated";
     private static final String TOPIC_EVENT_DELETED = "event.deleted";
+    private static final String TOPIC_EVENT_REQUEST_REVIEWED = "event-request.reviewed";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -32,5 +34,10 @@ public class EventKafkaProducer {
     public void sendEventDeleted(EventDeletedEvent event) {
         log.info("Sending event.deleted: {}", event.getId());
         kafkaTemplate.send(TOPIC_EVENT_DELETED, String.valueOf(event.getId()), event);
+    }
+
+    public void sendEventRequestReviewed(EventRequestReviewedEvent event) {
+        log.info("Sending event-request.reviewed: request={}, approved={}", event.getRequestId(), event.isApproved());
+        kafkaTemplate.send(TOPIC_EVENT_REQUEST_REVIEWED, String.valueOf(event.getRequestId()), event);
     }
 }
