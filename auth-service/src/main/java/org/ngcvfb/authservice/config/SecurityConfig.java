@@ -62,6 +62,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // cost factor 12 per OWASP 2024 recommendation
+        return new BCryptPasswordEncoder(12);
     }
 }
