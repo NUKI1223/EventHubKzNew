@@ -1,0 +1,99 @@
+/* ============================
+   TYPOGRAPHY - FONT FACE DEFINITIONS
+   ============================ */
+
+/* Lato Font Family */
+@font-face {
+  font-family: "LatoBold";
+  src: url("../assets/fonts/Lato-Bold.ttf")
+       format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LatoMedium";
+  src: url("../assets/fonts/Lato-Medium.ttf")
+       format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LatoItalic";
+  src: url("../assets/fonts/Lato-Italic.ttf")
+       format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LatoRegular";
+  src: url("../assets/fonts/Lato-Regular.ttf")
+       format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LatoExtraBold";
+  src: url("../assets/fonts/Lato-ExtraBold.ttf")
+       format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LatoLight";
+  src: url("../assets/fonts/Lato-Light.ttf")
+       format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LatoSemiBold";
+  src: url("../assets/fonts/Lato-SemiBold.ttf")
+       format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Rubik Font Family */
+@font-face {
+  font-family: "RubikBold";
+  src: url("../assets/fonts/Rubik-Bold.ttf")
+       format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RubikExtraBold";
+  src: url("../assets/fonts/Rubik-ExtraBold.ttf")
+       format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RubikRegular";
+  src: url("../assets/fonts/Rubik-Regular.ttf")
+       format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Note: These fonts are used throughout the application.
+   The primary design system uses Google Fonts (Inter, Manrope),
+   but these local fonts are available as fallbacks. */

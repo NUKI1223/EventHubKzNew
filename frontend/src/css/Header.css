@@ -1,0 +1,433 @@
+/* ========================================
+   Header — Warm Community Design
+   ======================================== */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 32px;
+  height: 60px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  width: 100%;
+}
+
+/* ——— Logo ——— */
+.header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-right: 20px;
+}
+
+.header__logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--ink-900);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.header__logo-shape {
+  width: 14px;
+  height: 14px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--sky);
+  transform: rotate(-45deg);
+}
+
+.header__logo-dot {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--butter);
+}
+
+.header__logo-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  color: var(--ink-900);
+}
+
+.header__logo-accent {
+  color: var(--sky-ink);
+}
+
+/* ——— Nav ——— */
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.header__nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-500);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.header__nav-item:hover {
+  background: var(--bg-soft);
+  color: var(--ink-900);
+}
+
+.header__nav-item--active {
+  background: var(--bg-soft);
+  color: var(--ink-900);
+  font-weight: 600;
+}
+
+.header__nav-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--sky-soft);
+  color: var(--sky-ink);
+  letter-spacing: 0.02em;
+}
+
+.header__admin-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.header__spacer {
+  flex: 1;
+}
+
+/* ——— Search ——— */
+.header__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-soft);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  padding: 0 12px;
+  height: 36px;
+  width: 260px;
+  transition: border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.header__search:focus-within {
+  border-color: var(--line-strong);
+}
+
+.header__search-icon {
+  color: var(--ink-400);
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+
+.header__search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-900);
+  min-width: 0;
+}
+
+.header__search-input::placeholder {
+  color: var(--ink-400);
+}
+
+.header__search-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-400);
+  padding: 2px 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ——— Notifications ——— */
+.header__notif-wrap {
+  position: relative;
+  margin-left: 4px;
+}
+
+.header__notif-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-500);
+  position: relative;
+  transition: background var(--transition-fast);
+}
+
+.header__notif-btn:hover {
+  background: var(--bg-soft);
+  color: var(--ink-900);
+}
+
+.header__notif-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--sky-ink);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+/* ——— User pill ——— */
+.header__user-wrap {
+  position: relative;
+  margin-left: 4px;
+}
+
+.header__user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--r-pill);
+  background: var(--bg-soft);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.header__user-btn:hover {
+  background: var(--line);
+}
+
+.header__avatar-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.header__avatar-placeholder {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--sky-soft);
+  color: var(--sky-ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.header__user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-900);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ——— Dropdown ——— */
+.header__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md);
+  padding: 6px;
+  min-width: 160px;
+  list-style: none;
+  z-index: var(--z-dropdown);
+}
+
+.header__dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-700);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.header__dropdown-item:hover {
+  background: var(--bg-soft);
+}
+
+.header__dropdown-item--danger {
+  color: var(--color-error);
+}
+
+.header__dropdown-item--danger:hover {
+  background: var(--color-error-light);
+}
+
+/* ——— Auth buttons ——— */
+.header__auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.header__auth-signin {
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-700);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.header__auth-signin:hover {
+  background: var(--bg-soft);
+}
+
+.header__auth-signup {
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--ink-900);
+  color: var(--bg);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.header__auth-signup:hover {
+  opacity: 0.85;
+}
+
+/* ——— Logout modal ——— */
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31,28,22,0.5);
+  display: grid;
+  place-items: center;
+  z-index: var(--z-modal-backdrop);
+}
+
+.logout-dialog {
+  background: var(--bg-card);
+  border-radius: var(--r-xl);
+  padding: 32px;
+  width: 360px;
+  box-shadow: var(--sh-lg);
+}
+
+.logout-dialog__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--ink-900);
+  margin-bottom: 8px;
+}
+
+.logout-dialog__text {
+  font-size: 14px;
+  color: var(--ink-500);
+  margin-bottom: 24px;
+}
+
+.logout-dialog__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.logout-dialog__confirm {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--r-md);
+  background: var(--color-error);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.logout-dialog__confirm:hover { opacity: 0.85; }
+
+.logout-dialog__cancel {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--r-md);
+  background: var(--bg-soft);
+  color: var(--ink-700);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.logout-dialog__cancel:hover { background: var(--line); }
+
+/* ——— Responsive ——— */
+@media (max-width: 900px) {
+  .header { padding: 0 18px; height: 56px; }
+  .header__search { width: 180px; }
+  .header__search-kbd { display: none; }
+}
+
+@media (max-width: 640px) {
+  .header__search { display: none; }
+  .header__logo-text { font-size: 15px; }
+  .header__nav-item { padding: 6px 10px; font-size: 13px; }
+}

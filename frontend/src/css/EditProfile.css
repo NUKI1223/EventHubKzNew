@@ -1,0 +1,225 @@
+/* ========================================
+   EDIT PROFILE — warm cream design
+   ======================================== */
+
+.ep {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.ep__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 28px;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  transition: background 150ms, color 150ms;
+}
+
+.ep__back:hover {
+  background: var(--bg-soft);
+  color: var(--ink-900);
+}
+
+.ep__title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink-900);
+  margin-bottom: 32px;
+  letter-spacing: -0.3px;
+}
+
+.ep__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ep__section {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  box-shadow: var(--sh-sm);
+}
+
+.ep__section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-400);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font-mono);
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ep__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.ep__field:last-child {
+  margin-bottom: 0;
+}
+
+.ep__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.ep__input,
+.ep__textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink-900);
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+  box-sizing: border-box;
+}
+
+.ep__input:focus,
+.ep__textarea:focus {
+  border-color: var(--ink-900);
+  box-shadow: 0 0 0 3px rgba(31,28,22,0.06);
+  background: var(--bg-card);
+}
+
+.ep__input::placeholder,
+.ep__textarea::placeholder {
+  color: var(--ink-300);
+}
+
+.ep__textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.5;
+}
+
+.ep__input-row {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--bg);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.ep__input-row:focus-within {
+  border-color: var(--ink-900);
+  box-shadow: 0 0 0 3px rgba(31,28,22,0.06);
+  background: var(--bg-card);
+}
+
+.ep__prefix {
+  padding: 0 12px;
+  font-size: 12px;
+  color: var(--ink-400);
+  font-family: var(--font-mono);
+  background: var(--bg-soft);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  border-right: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.ep__input-row .ep__input {
+  border: none;
+  border-radius: 0;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+.ep__file-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-soft);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-500);
+  transition: background 150ms, border-color 150ms, color 150ms;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ep__file-label:hover {
+  background: var(--sky-soft);
+  border-color: var(--sky);
+  color: var(--peach-ink);
+}
+
+.ep__file-label input[type="file"] {
+  display: none;
+}
+
+.ep__save-btn {
+  padding: 13px 32px;
+  background: var(--ink-900);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms;
+  align-self: flex-start;
+}
+
+.ep__save-btn:hover {
+  opacity: 0.85;
+}
+
+.ep__save-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ep__error {
+  font-size: 13px;
+  color: var(--color-error);
+  background: var(--color-error-light);
+  border: 1px solid var(--color-error);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+}
+
+.ep__success {
+  font-size: 13px;
+  color: var(--color-success-dark);
+  background: var(--color-success-light);
+  border: 1px solid var(--color-success);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+}
+
+@media (max-width: 480px) {
+  .ep { padding: 24px 16px 48px; }
+  .ep__section { padding: 18px 16px; }
+  .ep__title { font-size: 22px; }
+}
