@@ -1,6 +1,11 @@
 package org.ngcvfb.eventservice.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,12 +23,18 @@ public class EventRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Название обязательно")
+    @Size(min = 3, max = 200, message = "Название от 3 до 200 символов")
     @Column(nullable = false)
     private String title;
 
+    @NotBlank(message = "Краткое описание обязательно")
+    @Size(min = 10, max = 500, message = "Краткое описание от 10 до 500 символов")
     @Column(nullable = false, length = 500)
     private String shortDescription;
 
+    @NotBlank(message = "Полное описание обязательно")
+    @Size(min = 20, max = 20000, message = "Полное описание от 20 до 20000 символов")
     @Column(nullable = false, columnDefinition = "TEXT")
     private String fullDescription;
 
@@ -32,19 +43,29 @@ public class EventRequest {
     @Column(name = "tag_name")
     private Set<String> tags = new HashSet<>();
 
+    @NotBlank(message = "Локация обязательна")
+    @Size(max = 200)
     @Column(nullable = false)
     private String location;
 
     @Column(nullable = false)
     private boolean online;
 
+    @NotNull(message = "Дата события обязательна")
+    @Future(message = "Дата события должна быть в будущем")
     @Column(nullable = false)
     private LocalDateTime eventDate;
 
     private LocalDateTime registrationDeadline;
 
+    @Pattern(
+            regexp = "^$|^https?://.+",
+            message = "URL изображения должен начинаться с http:// или https://")
     private String mainImageUrl;
 
+    @Pattern(
+            regexp = "^$|^https?://.+",
+            message = "Внешняя ссылка должна начинаться с http:// или https://")
     private String externalLink;
 
     @Column(name = "requester_id", nullable = false)
