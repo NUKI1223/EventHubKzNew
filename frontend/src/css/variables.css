@@ -1,0 +1,186 @@
+/* ========================================
+   EventHub.kz Design Tokens v2
+   Warm & Community — Pastel 2026
+   ======================================== */
+
+:root {
+  /* ==================== SURFACES (warm cream) ==================== */
+  --bg:         #faf6ef;
+  --bg-soft:    #f4eee3;
+  --bg-card:    #ffffff;
+  --bg-inset:   #f8f2e6;
+  --line:       #e8dfce;
+  --line-strong:#d4c7ad;
+
+  /* mapped compat */
+  --color-background:   #faf6ef;
+  --color-surface:      #ffffff;
+  --color-surface-alt:  #f4eee3;
+  --color-border:       #e8dfce;
+  --color-border-light: #f4eee3;
+  --color-divider:      #d4c7ad;
+
+  /* ==================== INK (text) ==================== */
+  --ink-900: #1f1c16;
+  --ink-700: #3a342a;
+  --ink-500: #6b6253;
+  --ink-400: #8c8473;
+  --ink-300: #b6ad99;
+
+  /* mapped compat */
+  --color-text-primary:   #1f1c16;
+  --color-text-secondary: #6b6253;
+  --color-text-tertiary:  #8c8473;
+  --color-text-inverse:   #faf6ef;
+
+  /* ==================== PASTELS ==================== */
+  --peach:        #f4b79a;
+  --peach-ink:    #8a3f1f;
+  --peach-soft:   #fce3d3;
+
+  --sage:         #b8cfb0;
+  --sage-ink:     #3a5a3a;
+  --sage-soft:    #e2ecdd;
+
+  --butter:       #f1d691;
+  --butter-ink:   #7a5a1e;
+  --butter-soft:  #faecc6;
+
+  --lavender:     #c9bfe1;
+  --lavender-ink: #4a3e77;
+  --lavender-soft:#ece6f7;
+
+  --sky:          #aecee3;
+  --sky-ink:      #2a5475;
+  --sky-soft:     #dceaf3;
+
+  --rose:         #eeb4b9;
+  --rose-ink:     #80343a;
+  --rose-soft:    #f8dcdf;
+
+  /* brand = sky mapped */
+  --color-primary:        #aecee3;
+  --color-primary-dark:   #2a5475;
+  --color-primary-light:  #dceaf3;
+  --color-primary-subtle: #dceaf3;
+  --color-primary-rgb:    174, 206, 227;
+
+  /* secondary = sage mapped */
+  --color-secondary:       #b8cfb0;
+  --color-secondary-dark:  #3a5a3a;
+  --color-secondary-light: #e2ecdd;
+
+  /* accent = butter mapped */
+  --color-accent:       #f1d691;
+  --color-accent-dark:  #7a5a1e;
+  --color-accent-light: #faecc6;
+
+  /* ==================== FUNCTIONAL ==================== */
+  --color-success:       #10B981;
+  --color-success-dark:  #059669;
+  --color-success-light: #D1FAE5;
+  --color-warning:       #F59E0B;
+  --color-warning-dark:  #D97706;
+  --color-warning-light: #FEF3C7;
+  --color-error:         #EF4444;
+  --color-error-dark:    #DC2626;
+  --color-error-light:   #FEE2E2;
+  --color-info:          #3B82F6;
+  --color-info-dark:     #2563EB;
+  --color-info-light:    #DBEAFE;
+
+  /* ==================== GRADIENTS ==================== */
+  --gradient-hero:    linear-gradient(135deg, #dceaf3 0%, #ece6f7 100%);
+  --gradient-button:  linear-gradient(135deg, #aecee3 0%, #7aaec8 100%);
+  --gradient-card:    linear-gradient(180deg, #faf6ef 0%, #ffffff 100%);
+  --gradient-accent:  linear-gradient(135deg, #f1d691 0%, #e8c55a 100%);
+  --gradient-overlay: linear-gradient(180deg, rgba(31,28,22,0) 0%, rgba(31,28,22,0.8) 100%);
+  --gradient-hover:   linear-gradient(135deg, #7aaec8 0%, #aecee3 100%);
+
+  /* ==================== BORDER RADIUS ==================== */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-xl:   28px;
+  --r-pill: 999px;
+
+  --radius-xs:   6px;
+  --radius-sm:   10px;
+  --radius-md:   14px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-2xl:  28px;
+  --radius-full: 999px;
+
+  /* ==================== SHADOWS (warm) ==================== */
+  --sh-sm: 0 1px 0 rgba(60,45,20,0.04), 0 1px 2px rgba(60,45,20,0.04);
+  --sh-md: 0 2px 0 rgba(60,45,20,0.03), 0 8px 24px rgba(60,45,20,0.06);
+  --sh-lg: 0 12px 40px rgba(60,45,20,0.10);
+
+  --shadow-xs:     0 1px 2px rgba(60,45,20,0.04);
+  --shadow-sm:     0 1px 0 rgba(60,45,20,0.04), 0 1px 2px rgba(60,45,20,0.04);
+  --shadow-md:     0 2px 0 rgba(60,45,20,0.03), 0 8px 24px rgba(60,45,20,0.06);
+  --shadow-lg:     0 12px 40px rgba(60,45,20,0.10);
+  --shadow-xl:     0 20px 60px rgba(60,45,20,0.15);
+  --shadow-hover:  0 6px 20px rgba(244,183,154,0.4);
+  --shadow-active: 0 2px 8px rgba(244,183,154,0.25);
+
+  /* ==================== TYPOGRAPHY ==================== */
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', 'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --font-family-base:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading: 'Manrope', 'Inter', sans-serif;
+
+  --font-size-xs:   0.75rem;
+  --font-size-sm:   0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg:   1.125rem;
+  --font-size-xl:   1.25rem;
+  --font-size-2xl:  1.5rem;
+  --font-size-3xl:  1.875rem;
+  --font-size-4xl:  2.25rem;
+  --font-size-5xl:  3rem;
+
+  --font-weight-normal:    400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+  --font-weight-extrabold: 800;
+
+  --line-height-tight:   1.25;
+  --line-height-normal:  1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ==================== SPACING ==================== */
+  --space-xs:   8px;
+  --space-sm:   16px;
+  --space-md:   24px;
+  --space-lg:   32px;
+  --space-xl:   48px;
+  --space-xxl:  64px;
+  --space-xxxl: 96px;
+
+  /* ==================== TRANSITIONS ==================== */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+
+  /* ==================== Z-INDEX ==================== */
+  --z-dropdown:       1000;
+  --z-sticky:         1020;
+  --z-fixed:          1030;
+  --z-modal-backdrop: 1040;
+  --z-modal:          1050;
+  --z-popover:        1060;
+  --z-tooltip:        1070;
+
+  /* ==================== BREAKPOINTS ==================== */
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  768px;
+  --breakpoint-lg:  1024px;
+  --breakpoint-xl:  1280px;
+  --breakpoint-2xl: 1536px;
+}

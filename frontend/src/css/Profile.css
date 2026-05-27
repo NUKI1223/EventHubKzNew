@@ -1,0 +1,250 @@
+/* ========================================
+   PROFILE PAGE — warm cream design
+   ======================================== */
+
+.pf {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+/* ── Header area ──────────────────────── */
+
+.pf__container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+/* ── Sidebar ──────────────────────────── */
+
+.pf__sidebar {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: var(--sh-sm);
+}
+
+.pf__avatar-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.pf__avatar,
+.pf__avatar-ph {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: block;
+}
+
+.pf__avatar {
+  object-fit: cover;
+  border: 3px solid var(--line);
+}
+
+.pf__avatar-ph {
+  background: var(--sky-soft);
+  color: var(--sky-ink);
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--line);
+}
+
+.pf__avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(31, 28, 22, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 200ms;
+  cursor: pointer;
+  color: var(--bg);
+}
+
+.pf__avatar-wrap:hover .pf__avatar-overlay {
+  opacity: 1;
+}
+
+.pf__avatar-input {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pf__name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin-bottom: 6px;
+}
+
+.pf__bio {
+  font-size: 13px;
+  color: var(--ink-500);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+/* User tags */
+.pf__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.pf__tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ink-100, #f1efe9);
+  color: var(--ink-700, #4a4030);
+  border: 1px solid var(--ink-200, #e6e1d6);
+}
+
+/* Social links */
+.pf__socials {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+
+.pf__social-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-700);
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  transition: background 150ms;
+}
+
+.pf__social-item:hover {
+  background: var(--bg-soft);
+  color: var(--ink-900) !important;
+}
+
+.pf__social-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  filter: grayscale(0.2);
+}
+
+.pf__edit-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--ink-900);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+
+.pf__edit-btn:hover {
+  opacity: 0.85;
+}
+
+.pf__error {
+  font-size: 12px;
+  color: var(--color-error);
+  background: var(--color-error-light);
+  border-radius: var(--r-xs);
+  padding: 8px 10px;
+  margin-bottom: 12px;
+}
+
+/* ── Main info card ───────────────────── */
+
+.pf__main {}
+
+.pf__card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 28px 28px;
+  box-shadow: var(--sh-sm);
+}
+
+.pf__card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pf__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pf__row:last-child {
+  border-bottom: none;
+}
+
+.pf__row-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-400);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-family: var(--font-mono);
+}
+
+.pf__row-value {
+  font-size: 14px;
+  color: var(--ink-700);
+  line-height: 1.5;
+}
+
+/* ── Responsive ──────────────────────── */
+
+@media (max-width: 768px) {
+  .pf {
+    padding: 24px 16px 48px;
+  }
+
+  .pf__container {
+    grid-template-columns: 1fr;
+  }
+
+  .pf__sidebar {
+    max-width: 360px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

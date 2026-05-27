@@ -1,0 +1,174 @@
+/* ============================
+   SKELETON LOADING - PASTEL MINIMALIST
+   ============================ */
+
+@keyframes skeletonPulse {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: var(--color-border-light);
+  background-image: linear-gradient(
+    90deg,
+    rgba(20, 184, 166, 0.08) 0px,
+    rgba(20, 184, 166, 0.15) 40px,
+    rgba(20, 184, 166, 0.08) 80px
+  );
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--radius-md);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeleton--text {
+  height: 14px;
+  width: 100%;
+  margin-bottom: var(--space-xs);
+}
+
+.skeleton--text-short {
+  height: 14px;
+  width: 60%;
+  margin-bottom: var(--space-xs);
+}
+
+.skeleton--title {
+  height: 22px;
+  width: 80%;
+  margin-bottom: var(--space-sm);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton--avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.skeleton--image {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton--tag {
+  display: inline-block;
+  height: 24px;
+  width: 64px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton--button {
+  height: 40px;
+  width: 120px;
+  border-radius: var(--radius-md);
+}
+
+/* ============================
+   SKELETON EVENT CARD
+   ============================ */
+
+.skeleton-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-card__image {
+  width: 100%;
+  height: 200px;
+  background: var(--color-border-light);
+  background-image: linear-gradient(
+    90deg,
+    rgba(20, 184, 166, 0.08) 0px,
+    rgba(20, 184, 166, 0.18) 40px,
+    rgba(20, 184, 166, 0.08) 80px
+  );
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-card__body {
+  padding: var(--space-lg);
+}
+
+.skeleton-card__tags {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.skeleton-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* ============================
+   SKELETON PROFILE
+   ============================ */
+
+.skeleton-profile {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-xxl) var(--space-lg);
+}
+
+.skeleton-profile__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xxl);
+}
+
+.skeleton-profile__info {
+  flex: 1;
+}
+
+.skeleton-profile__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ============================
+   SKELETON LIST
+   ============================ */
+
+.skeleton-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+
+@media (max-width: 768px) {
+  .skeleton-profile {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .skeleton-profile__header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .skeleton-list {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}

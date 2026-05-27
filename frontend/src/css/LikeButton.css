@@ -1,0 +1,101 @@
+/* ============================
+   LIKE BUTTON - PASTEL MINIMALIST
+   ============================ */
+
+.like-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 8px 16px;
+  border: 1.5px solid var(--line-strong, #d4c7ad);
+  background: var(--bg-card, #ffffff);
+  color: var(--ink-900, #1f1c16);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+  outline: none;
+}
+
+.like-button:hover {
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+  background: rgba(251, 146, 60, 0.1);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.like-button:active {
+  transform: scale(0.95);
+}
+
+@keyframes likeBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  50% { transform: scale(0.95); }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.like-button--liked {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.15), rgba(251, 146, 60, 0.25));
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+  box-shadow: var(--shadow-sm);
+  animation: likeBounce 0.5s ease;
+}
+
+.like-button--liked:hover {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.25), rgba(251, 146, 60, 0.35));
+  border-color: var(--color-secondary-dark);
+  color: var(--color-secondary-dark);
+}
+
+/* Icon */
+.like-button__icon {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--transition-base);
+}
+
+.like-button--liked .like-button__icon {
+  transform: scale(1.1);
+}
+
+/* Count */
+.like-button__count {
+  font-weight: var(--font-weight-bold);
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Disabled state */
+.like-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.like-button:disabled:hover {
+  transform: none;
+  border-color: var(--color-border);
+  background: var(--color-background);
+  box-shadow: none;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+
+@media (max-width: 768px) {
+  .like-button {
+    padding: 6px 12px;
+    font-size: var(--font-size-xs);
+  }
+
+  .like-button__icon {
+    width: 14px;
+    height: 14px;
+  }
+}
