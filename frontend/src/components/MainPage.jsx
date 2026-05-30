@@ -189,7 +189,7 @@ function MainPage() {
 
             {/* Floating card */}
             <Link
-              to={next ? `/event/${next.id}` : '/eventlist'}
+              to={next ? `/events/${next.id}` : '/eventlist'}
               className="mp-hero__card"
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
