@@ -99,3 +99,14 @@
     height: 14px;
   }
 }
+
+.like-button--disabled,
+.like-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.like-button--disabled:hover,
+.like-button:disabled:hover {
+  background: inherit;
+  border-color: inherit;
+}

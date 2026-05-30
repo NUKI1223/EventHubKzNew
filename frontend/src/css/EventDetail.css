@@ -336,3 +336,13 @@
     font-size: var(--font-size-xl);
   }
 }
+
+.event-detail__past-banner {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f3eee5;
+  border-left: 3px solid #8a7a5e;
+  color: #5d544a;
+  font-size: 14px;
+}

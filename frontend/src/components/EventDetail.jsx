@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import toast from 'react-hot-toast';
 import { useAuthUser } from '../hooks/useAuthUser';
-import { formatDate } from '../utils/dateUtils';
+import { formatDate, isPastEvent } from '../utils/dateUtils';
 import '../css/EventDetail.css';
 import LikeButton from './LikeButton';
 import EventLikes from './EventLikes';
@@ -110,12 +110,18 @@ const EventDetail = () => {
               </a>
             </p>
           )}
+          {isPastEvent(event) && (
+            <p className="event-detail__past-banner">
+              Мероприятие уже прошло — лайкнуть нельзя, но можно посмотреть, кто отметил его раньше.
+            </p>
+          )}
           <div className="event-actions">
             <LikeButton
               eventId={event.id}
               currentUserId={currentUserId}
               onLikeChange={setLikeCount}
               onLikedChange={setLiked}
+              disabled={isPastEvent(event)}
             />
             <EventLikes eventId={event.id} likeCount={likeCount} liked={liked} />
             {isAdmin && (

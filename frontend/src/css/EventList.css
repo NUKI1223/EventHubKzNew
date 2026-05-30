@@ -615,3 +615,44 @@
   .event-card__image-wrap { height: 170px; }
   .event-card__body { padding: 14px; }
 }
+
+/* Past events */
+.event-card--past {
+  opacity: 0.68;
+  filter: grayscale(0.25);
+}
+.event-card--past:hover {
+  opacity: 0.9;
+}
+.event-card__badge--past {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(60, 60, 60, 0.85);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+.filter-toggle__btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #d8cfc1;
+  background: #fff;
+  color: #5d544a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filter-toggle__btn:hover {
+  border-color: #b6a890;
+  color: #1f1c16;
+}
+.filter-toggle__btn--active {
+  background: #1f1c16;
+  color: #faf7f2;
+  border-color: #1f1c16;
+}
