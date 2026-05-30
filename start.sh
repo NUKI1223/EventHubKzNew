@@ -2,7 +2,8 @@
 # Usage:
 #   ./start.sh              — поднять backend (docker) + frontend (vite)
 #   ./start.sh --build      — пересобрать jar-ы и docker-образы перед стартом
-#   ./start.sh --seed       — после старта прогнать seed (test users + events)
+#   ./start.sh --seed       — прогнать seed только на пустых таблицах (идемпотентно)
+#   ./start.sh --seed-force — TRUNCATE + полный reseed (уничтожает данные!)
 #   ./start.sh --no-front   — поднять только backend
 #   ./start.sh stop         — остановить всё
 #   ./start.sh logs <svc>   — показать логи сервиса (eureka, api-gateway, ...)
@@ -109,12 +110,21 @@ wait_for_gateway() {
 
 # ── seed ──────────────────────────────────────────────────────────
 seed_data() {
-  log "Прогоняю seed (test users + events + likes)..."
+  local force="${1:-0}"
+  if [ "$force" = 1 ]; then
+    log "Прогоняю seed --force (TRUNCATE + перезалив)..."
+  else
+    log "Прогоняю seed (идемпотентно — пропустит непустые таблицы)..."
+  fi
   cd "$BACKEND_DIR"
   if [ ! -x seed/seed.sh ]; then
     chmod +x seed/seed.sh
   fi
-  bash seed/seed.sh
+  if [ "$force" = 1 ]; then
+    bash seed/seed.sh --force
+  else
+    bash seed/seed.sh
+  fi
   ok "seed применён"
 }
 
@@ -194,15 +204,17 @@ esac
 
 DO_BUILD=0
 DO_SEED=0
+DO_SEED_FORCE=0
 DO_FRONT=1
 
 for arg in "$@"; do
   case "$arg" in
-    --build)    DO_BUILD=1 ;;
-    --seed)     DO_SEED=1 ;;
-    --no-front) DO_FRONT=0 ;;
+    --build)      DO_BUILD=1 ;;
+    --seed)       DO_SEED=1 ;;
+    --seed-force) DO_SEED=1; DO_SEED_FORCE=1 ;;
+    --no-front)   DO_FRONT=0 ;;
     -h|--help)
-      sed -n '2,16p' "$0"; exit 0 ;;
+      sed -n '2,17p' "$0"; exit 0 ;;
     *) err "Неизвестный флаг: $arg"; exit 1 ;;
   esac
 done
@@ -213,7 +225,7 @@ check_prereqs
 start_backend
 wait_for_gateway
 
-[ "$DO_SEED" = 1 ] && seed_data
+[ "$DO_SEED" = 1 ] && seed_data "$DO_SEED_FORCE"
 [ "$DO_FRONT" = 1 ] && start_frontend
 
 print_summary
