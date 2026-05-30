@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../api';
 import '../css/EventList.css';
 import { SkeletonCard } from './Skeleton';
@@ -8,6 +8,7 @@ import EventCard from './EventCard';
 import Pagination from './Pagination';
 import { EVENTS_PER_PAGE } from '../constants';
 import { useEventFiltering } from '../hooks/useEventFiltering';
+import { isPastEvent } from '../utils/dateUtils';
 
 const EventList = () => {
   const [events, setEvents] = useState([]);
@@ -20,11 +21,21 @@ const EventList = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [sortOption, setSortOption] = useState('');
+  const [showPast, setShowPast] = useState(false);
 
   const [availableTags, setAvailableTags] = useState([]);
   const [showAllTags, setShowAllTags] = useState(false);
 
-  const filteredEvents = useEventFiltering(events, {
+  const { activeEvents, pastCount } = useMemo(() => {
+    const past = events.filter(isPastEvent);
+    const active = events.filter(e => !isPastEvent(e));
+    return {
+      activeEvents: showPast ? events : active,
+      pastCount: past.length,
+    };
+  }, [events, showPast]);
+
+  const filteredEvents = useEventFiltering(activeEvents, {
     selectedTags, selectedCity, onlineOnly, sortOption,
   });
 
@@ -103,6 +114,15 @@ const EventList = () => {
             <option value="date">Дата</option>
             <option value="likes">Популярность</option>
           </select>
+          {pastCount > 0 && (
+            <button
+              type="button"
+              className={`filter-toggle__btn ${showPast ? 'filter-toggle__btn--active' : ''}`}
+              onClick={() => setShowPast(p => !p)}
+            >
+              {showPast ? `Скрыть прошедшие (${pastCount})` : `Показать скрытые (${pastCount})`}
+            </button>
+          )}
         </div>
 
         <div className="tag-filter">

@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatDate } from '../utils/dateUtils';
+import { formatDate, isPastEvent } from '../utils/dateUtils';
 import LikeButton from './LikeButton';
 
 const EventCard = ({ event, currentUserId }) => {
   const isOnline = event.online === true || event.online === 'true';
+  const isPast = isPastEvent(event);
   return (
-    <Link to={`/events/${event.id}`} className="event-card">
+    <Link to={`/events/${event.id}`} className={`event-card ${isPast ? 'event-card--past' : ''}`}>
       <div className="event-card__image-wrap">
         {event.mainImageUrl ? (
           <img src={event.mainImageUrl} alt={event.title} className="event-card__image" />
@@ -19,6 +20,9 @@ const EventCard = ({ event, currentUserId }) => {
         {isOnline && (
           <span className="event-card__badge event-card__badge--online">Онлайн</span>
         )}
+        {isPast && (
+          <span className="event-card__badge event-card__badge--past">Завершено</span>
+        )}
       </div>
       <div className="event-card__body">
         <h3 className="event-card__title">{event.title || 'Без названия'}</h3>
@@ -30,7 +34,7 @@ const EventCard = ({ event, currentUserId }) => {
         </div>
         <div className="event-card__footer">
           <span className="event-card__location">{event.location || 'Не указан'}</span>
-          <LikeButton eventId={event.id} currentUserId={currentUserId} />
+          <LikeButton eventId={event.id} currentUserId={currentUserId} disabled={isPast} />
         </div>
       </div>
     </Link>

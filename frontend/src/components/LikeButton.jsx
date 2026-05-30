@@ -3,7 +3,7 @@ import api from '../api';
 import toast from 'react-hot-toast';
 import '../css/LikeButton.css';
 
-const LikeButton = ({ eventId, currentUserId, onLikeChange, onLikedChange }) => {
+const LikeButton = ({ eventId, currentUserId, onLikeChange, onLikedChange, disabled = false }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const onLikedChangeRef = useRef(onLikedChange);
@@ -43,6 +43,7 @@ const LikeButton = ({ eventId, currentUserId, onLikeChange, onLikedChange }) => 
   }, [eventId]);
 
   const toggleLike = async () => {
+    if (disabled) return;
     if (!currentUserId) {
       toast.error('Вы должны быть авторизованы для лайка');
       return;
@@ -74,7 +75,9 @@ const LikeButton = ({ eventId, currentUserId, onLikeChange, onLikedChange }) => 
 
   return (
     <button
-      className={`like-button ${liked ? 'like-button--liked' : ''}`}
+      className={`like-button ${liked ? 'like-button--liked' : ''} ${disabled ? 'like-button--disabled' : ''}`}
+      disabled={disabled}
+      title={disabled ? 'Мероприятие уже прошло' : undefined}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleLike(); }}
     >
       {liked ? '❤ Нравится' : '♡ Нравится'} ({likeCount})
