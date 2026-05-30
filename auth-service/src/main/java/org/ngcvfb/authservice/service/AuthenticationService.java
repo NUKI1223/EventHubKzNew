@@ -16,9 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Random;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,6 +27,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final VerificationCodeStore codeStore;
 
     @Transactional
     public AuthUser signup(SignupRequest request) {
@@ -47,15 +45,14 @@ public class AuthenticationService {
                 .description(request.getDescription())
                 .avatarUrl(request.getAvatarUrl())
                 .role(Role.USER)
-                .verificationCode(generateVerificationCode())
-                .verificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15))
                 .enabled(false)
                 .build();
 
         user = userRepository.save(user);
-        sendVerificationEmail(user);
 
-        // Publish user registered event to Kafka
+        String code = codeStore.issue(user.getEmail());
+        sendVerificationEmail(user.getEmail(), code);
+
         publishUserRegisteredEvent(user);
 
         log.info("User registered: {}", user.getEmail());
@@ -96,18 +93,13 @@ public class AuthenticationService {
         AuthUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Verification code has expired");
-        }
-
-        if (!user.getVerificationCode().equals(code)) {
-            throw new RuntimeException("Invalid verification code");
+        if (!codeStore.matches(email, code)) {
+            throw new RuntimeException("Invalid or expired verification code");
         }
 
         user.setEnabled(true);
-        user.setVerificationCode(null);
-        user.setVerificationCodeExpiresAt(null);
         userRepository.save(user);
+        codeStore.clear(email);
 
         log.info("User verified: {}", email);
     }
@@ -121,11 +113,8 @@ public class AuthenticationService {
             throw new RuntimeException("Account is already verified");
         }
 
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-        userRepository.save(user);
-
-        sendVerificationEmail(user);
+        String code = codeStore.issue(email);
+        sendVerificationEmail(email, code);
         log.info("Verification code resent to: {}", email);
     }
 
@@ -133,14 +122,14 @@ public class AuthenticationService {
         return userRepository.existsByEmail(email);
     }
 
-    private void sendVerificationEmail(AuthUser user) {
+    private void sendVerificationEmail(String email, String code) {
         String subject = "EventHubKz - Account Verification";
-        String htmlMessage = buildVerificationEmailHtml(user.getVerificationCode());
+        String htmlMessage = buildVerificationEmailHtml(code);
 
         try {
-            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+            emailService.sendVerificationEmail(email, subject, htmlMessage);
         } catch (Exception e) {
-            log.error("Failed to send verification email to: {}", user.getEmail(), e);
+            log.error("Failed to send verification email to: {}", email, e);
         }
     }
 
@@ -154,16 +143,10 @@ public class AuthenticationService {
                 + "<h3 style=\"color: #333;\">Verification Code:</h3>"
                 + "<p style=\"font-size: 24px; font-weight: bold; color: #007bff; letter-spacing: 3px;\">" + code + "</p>"
                 + "</div>"
-                + "<p style=\"font-size: 14px; color: #666; margin-top: 20px;\">This code will expire in 15 minutes.</p>"
+                + "<p style=\"font-size: 14px; color: #666; margin-top: 20px;\">This code will expire in 10 minutes.</p>"
                 + "</div>"
                 + "</body>"
                 + "</html>";
-    }
-
-    private String generateVerificationCode() {
-        Random random = new Random();
-        int code = random.nextInt(900000) + 100000;
-        return String.valueOf(code);
     }
 
     private void publishUserRegisteredEvent(AuthUser user) {
