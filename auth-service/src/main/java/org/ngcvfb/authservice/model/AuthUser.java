@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,12 +39,6 @@ public class AuthUser implements UserDetails {
 
     private String description;
     private String avatarUrl;
-
-    @Column(name = "verification_code")
-    private String verificationCode;
-
-    @Column(name = "verification_code_expires_at")
-    private LocalDateTime verificationCodeExpiresAt;
 
     @Column(nullable = false)
     private boolean enabled = false;

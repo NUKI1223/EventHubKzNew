@@ -10,6 +10,10 @@ import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.eventservice.kafka.EventKafkaProducer;
 import org.ngcvfb.eventservice.model.Event;
 import org.ngcvfb.eventservice.repository.EventRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,7 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "events", key = "#id")
     public EventDTO getEventById(Long id) {
         return toDTO(findEventOrThrow(id));
     }
@@ -71,6 +76,7 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "eventsByTag", key = "#tag")
     public List<EventDTO> getEventsByTag(String tag) {
         return eventRepository.findByTag(tag).stream()
                 .map(this::toDTO)
@@ -78,6 +84,7 @@ public class EventService {
     }
 
     @Transactional
+    @CacheEvict(value = "eventsByTag", allEntries = true)
     public EventDTO createEvent(EventDTO dto, Long organizerId, String organizerEmail) {
         Event event = Event.builder()
                 .title(dto.getTitle())
@@ -104,6 +111,10 @@ public class EventService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "events", key = "#id"),
+            @CacheEvict(value = "eventsByTag", allEntries = true)
+    })
     public EventDTO updateEvent(Long id, EventDTO dto) {
         Event event = findEventOrThrow(id);
         event.setTitle(dto.getTitle());
@@ -126,6 +137,10 @@ public class EventService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "events", key = "#id"),
+            @CacheEvict(value = "eventsByTag", allEntries = true)
+    })
     public void deleteEvent(Long id) {
         eventRepository.deleteById(id);
         log.info("Deleted event: {}", id);
@@ -135,6 +150,7 @@ public class EventService {
     }
 
     @Transactional
+    @CacheEvict(value = "events", key = "#eventId")
     public void incrementLikeCount(Long eventId) {
         eventRepository.findById(eventId).ifPresent(event -> {
             event.setLikeCount(event.getLikeCount() + 1);
@@ -152,6 +168,7 @@ public class EventService {
     }
 
     @Transactional
+    @CacheEvict(value = "events", key = "#eventId")
     public void decrementLikeCount(Long eventId) {
         eventRepository.findById(eventId).ifPresent(event -> {
             if (event.getLikeCount() > 0) {
@@ -197,7 +214,7 @@ public class EventService {
         dto.setTitle(event.getTitle());
         dto.setShortDescription(event.getShortDescription());
         dto.setFullDescription(event.getFullDescription());
-        dto.setTags(event.getTags());
+        dto.setTags(event.getTags() == null ? null : new HashSet<>(event.getTags()));
         dto.setLocation(event.getLocation());
         dto.setOnline(event.isOnline());
         dto.setEventDate(event.getEventDate());
