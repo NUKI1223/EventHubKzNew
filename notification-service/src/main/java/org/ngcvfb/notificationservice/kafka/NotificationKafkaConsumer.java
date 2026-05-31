@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventLikedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
+import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
 import org.ngcvfb.eventhubkz.common.events.UserRegisteredEvent;
 import org.ngcvfb.notificationservice.model.NotificationType;
 import org.ngcvfb.notificationservice.service.NotificationService;
@@ -89,6 +90,31 @@ public class NotificationKafkaConsumer {
             );
         } catch (Exception e) {
             log.error("Failed to create review notification: {}", e.getMessage(), e);
+        }
+    }
+
+    @KafkaListener(topics = "support.resolved", groupId = "notification-service-group")
+    public void handleSupportResolved(SupportMessageResolvedEvent event) {
+        log.info("Received support.resolved: messageId={}, userId={}", event.getMessageId(), event.getUserId());
+        if (event.getUserId() == null) {
+            log.warn("support.resolved event has no userId; skipping notification");
+            return;
+        }
+        try {
+            String reply = event.getAdminReply() == null || event.getAdminReply().isBlank()
+                    ? "(без комментария)"
+                    : event.getAdminReply();
+            String message = "Поддержка ответила на ваш вопрос: " + reply;
+            notificationService.createIfAbsent(
+                    event.getUserId(),
+                    event.getUserEmail(),
+                    "Ответ службы поддержки",
+                    message,
+                    NotificationType.SUPPORT_RESOLVED,
+                    event.getMessageId()
+            );
+        } catch (Exception e) {
+            log.error("Failed to create support notification: {}", e.getMessage(), e);
         }
     }
 

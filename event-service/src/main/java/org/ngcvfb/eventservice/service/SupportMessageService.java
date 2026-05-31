@@ -2,7 +2,9 @@ package org.ngcvfb.eventservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
+import org.ngcvfb.eventservice.kafka.EventKafkaProducer;
 import org.ngcvfb.eventservice.model.SupportMessage;
 import org.ngcvfb.eventservice.repository.SupportMessageRepository;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.List;
 public class SupportMessageService {
 
     private final SupportMessageRepository repository;
+    private final EventKafkaProducer kafkaProducer;
 
     public List<SupportMessage> getAll(Boolean resolved) {
         return resolved == null
@@ -38,7 +41,20 @@ public class SupportMessageService {
         message.setResolved(true);
         message.setAdminReply(adminReply);
         message.setResolvedAt(LocalDateTime.now());
-        return repository.save(message);
+        SupportMessage saved = repository.save(message);
+
+        if (saved.getUserId() != null) {
+            kafkaProducer.sendSupportResolved(SupportMessageResolvedEvent.create(
+                    saved.getId(),
+                    saved.getUserId(),
+                    saved.getEmail(),
+                    saved.getMessage(),
+                    saved.getAdminReply()
+            ));
+        } else {
+            log.warn("Support message {} has no userId, skipping notification", saved.getId());
+        }
+        return saved;
     }
 
     @Transactional
