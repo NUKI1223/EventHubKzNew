@@ -17,6 +17,15 @@ const AdminEventRequests = () => {
   const [currentAction, setCurrentAction] = useState({ id: null, status: '', adminComment: '' });
   const [reindexing, setReindexing] = useState(false);
   const [submittingId, setSubmittingId] = useState(null);
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
+
+  const toggleExpanded = (id) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -113,6 +122,21 @@ const AdminEventRequests = () => {
               <div className="adm__card-body">
                 {request.shortDescription && (
                   <p className="adm__desc-short">{request.shortDescription}</p>
+                )}
+
+                {request.fullDescription && (
+                  <div className="adm__desc-full-wrap">
+                    {expandedIds.has(request.id) && (
+                      <p className="adm__desc-full">{request.fullDescription}</p>
+                    )}
+                    <button
+                      type="button"
+                      className="adm__expand-btn"
+                      onClick={() => toggleExpanded(request.id)}
+                    >
+                      {expandedIds.has(request.id) ? 'Скрыть' : 'Открыть полностью'}
+                    </button>
+                  </div>
                 )}
 
                 <div className="adm__meta-grid">

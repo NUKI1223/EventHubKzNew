@@ -9,6 +9,7 @@ import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
 import org.ngcvfb.eventhubkz.common.events.UserRegisteredEvent;
 import org.ngcvfb.notificationservice.model.NotificationType;
 import org.ngcvfb.notificationservice.service.NotificationService;
+import org.ngcvfb.notificationservice.service.SupportEmailService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 public class NotificationKafkaConsumer {
 
     private final NotificationService notificationService;
+    private final SupportEmailService supportEmailService;
 
     @KafkaListener(topics = "event.created", groupId = "notification-service-group")
     public void handleEventCreated(EventCreatedEvent event) {
@@ -76,7 +78,7 @@ public class NotificationKafkaConsumer {
                 message = String.format(
                         "Ваша заявка на мероприятие \"%s\" отклонена.", event.getEventTitle());
                 if (event.getAdminComment() != null && !event.getAdminComment().isBlank()) {
-                    message += " Причина: " + event.getAdminComment();
+                    message += " Причина: " + truncate(event.getAdminComment(), 120);
                 }
                 type = NotificationType.EVENT_REQUEST_REJECTED;
             }
@@ -88,9 +90,21 @@ public class NotificationKafkaConsumer {
                     type,
                     event.getRequestId()
             );
+            if (!event.isApproved()) {
+                supportEmailService.sendRequestRejected(
+                        event.getRequesterEmail(),
+                        event.getEventTitle(),
+                        event.getAdminComment()
+                );
+            }
         } catch (Exception e) {
             log.error("Failed to create review notification: {}", e.getMessage(), e);
         }
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null) return null;
+        return s.length() <= max ? s : s.substring(0, max - 1).trim() + "…";
     }
 
     @KafkaListener(topics = "support.resolved", groupId = "notification-service-group")
@@ -112,6 +126,11 @@ public class NotificationKafkaConsumer {
                     message,
                     NotificationType.SUPPORT_RESOLVED,
                     event.getMessageId()
+            );
+            supportEmailService.sendSupportReply(
+                    event.getUserEmail(),
+                    event.getOriginalMessage(),
+                    event.getAdminReply()
             );
         } catch (Exception e) {
             log.error("Failed to create support notification: {}", e.getMessage(), e);

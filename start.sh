@@ -179,8 +179,9 @@ print_summary() {
   echo "    aidar.kasenov@example.kz       — обычный"
   echo "    dinara.zhumabaeva@example.kz   — ADMIN"
   echo
-  echo "  Остановить: $0 stop"
-  echo "  Лог фронта: tail -f $FRONT_LOG"
+  echo "  Остановить:  $0 stop"
+  echo "  Лог фронта:  tail -f $FRONT_LOG"
+  echo "  Лог бэка:    $0 logs <service>   (например: $0 logs notification-service)"
   echo "══════════════════════════════════════════════════════"
 }
 
