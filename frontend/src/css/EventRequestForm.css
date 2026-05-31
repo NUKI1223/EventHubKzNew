@@ -263,3 +263,9 @@
   .erf__title { font-size: 22px; }
   .erf__section { padding: 18px 16px; }
 }
+
+.erf__required {
+  color: var(--color-error, #ef4444);
+  font-weight: 700;
+  margin-left: 2px;
+}
