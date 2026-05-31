@@ -6,6 +6,7 @@ import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
+import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ public class EventKafkaProducer {
     private static final String TOPIC_EVENT_UPDATED = "event.updated";
     private static final String TOPIC_EVENT_DELETED = "event.deleted";
     private static final String TOPIC_EVENT_REQUEST_REVIEWED = "event-request.reviewed";
+    private static final String TOPIC_SUPPORT_RESOLVED = "support.resolved";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -39,5 +41,10 @@ public class EventKafkaProducer {
     public void sendEventRequestReviewed(EventRequestReviewedEvent event) {
         log.info("Sending event-request.reviewed: request={}, approved={}", event.getRequestId(), event.isApproved());
         kafkaTemplate.send(TOPIC_EVENT_REQUEST_REVIEWED, String.valueOf(event.getRequestId()), event);
+    }
+
+    public void sendSupportResolved(SupportMessageResolvedEvent event) {
+        log.info("Sending support.resolved: messageId={}, userId={}", event.getMessageId(), event.getUserId());
+        kafkaTemplate.send(TOPIC_SUPPORT_RESOLVED, String.valueOf(event.getMessageId()), event);
     }
 }

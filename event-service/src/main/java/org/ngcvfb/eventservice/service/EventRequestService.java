@@ -119,6 +119,10 @@ public class EventRequestService {
 
         EventRequest rejected = eventRequestRepository.save(request);
 
+        if (rejected.getRequesterId() == null) {
+            log.warn("Rejected request {} has no requesterId, organizer will not receive a notification",
+                    rejected.getId());
+        }
         kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
                 rejected.getId(),
                 rejected.getRequesterId(),
@@ -128,7 +132,8 @@ public class EventRequestService {
                 rejected.getAdminComment()
         ));
 
-        log.info("Rejected event request: {} by admin {}", rejected.getId(), adminId);
+        log.info("Rejected event request: {} by admin {}, notify={}",
+                rejected.getId(), adminId, rejected.getRequesterId());
 
         return rejected;
     }
