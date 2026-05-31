@@ -75,6 +75,9 @@ public class EventRequest {
     @Column(name = "requester_email")
     private String requesterEmail;
 
+    @Column(name = "contact_email")
+    private String contactEmail;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RequestStatus status;

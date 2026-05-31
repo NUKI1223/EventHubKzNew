@@ -161,8 +161,14 @@ const AdminEventRequests = () => {
                     </span>
                   </div>
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Email заявителя</span>
-                    <span className="adm__meta-value">{request.requesterEmail}</span>
+                    <span className="adm__meta-label">Аккаунт заявителя</span>
+                    <span className="adm__meta-value">{request.requesterEmail || '—'}</span>
+                  </div>
+                  <div className="adm__meta-row">
+                    <span className="adm__meta-label">Email из заявки</span>
+                    <span className="adm__meta-value">
+                      {request.contactEmail || <span style={{ color: 'var(--text-muted, #888)' }}>не указан</span>}
+                    </span>
                   </div>
                   {request.externalLink && (
                     <div className="adm__meta-row">

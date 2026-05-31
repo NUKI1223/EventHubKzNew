@@ -18,7 +18,7 @@ const EventRequestForm = () => {
     eventDate: '',
     registrationDeadline: '',
     externalLink: '',
-    requesterEmail: '',
+    contactEmail: '',
   });
   const [selectedTags, setSelectedTags] = useState([]);
   const [file, setFile] = useState(null);
@@ -113,7 +113,7 @@ const EventRequestForm = () => {
         eventDate: formData.eventDate,
         registrationDeadline: formData.registrationDeadline,
         externalLink,
-        requesterEmail: formData.requesterEmail,
+        contactEmail: formData.contactEmail,
         mainImageUrl,
       });
 
@@ -128,7 +128,7 @@ const EventRequestForm = () => {
         eventDate: '',
         registrationDeadline: '',
         externalLink: '',
-        requesterEmail: '',
+        contactEmail: '',
       });
       setSelectedTags([]);
       setFile(null);
@@ -296,12 +296,15 @@ const EventRequestForm = () => {
           </div>
 
           <div className="erf__field">
-            <label className="erf__label">Ваш email для связи</label>
+            <label className="erf__label">
+              Email для связи <span className="erf__required">*</span>
+              <span className="erf__hint"> — будет показан как контакт организатора на странице события</span>
+            </label>
             <input
               className="erf__input"
               type="email"
-              name="requesterEmail"
-              value={formData.requesterEmail}
+              name="contactEmail"
+              value={formData.contactEmail}
               onChange={handleChange}
               placeholder="organizer@email.com"
               required
