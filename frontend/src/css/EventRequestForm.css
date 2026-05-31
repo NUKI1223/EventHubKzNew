@@ -269,3 +269,10 @@
   font-weight: 700;
   margin-left: 2px;
 }
+
+.erf__hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted, #8c8473);
+  margin-left: 6px;
+}

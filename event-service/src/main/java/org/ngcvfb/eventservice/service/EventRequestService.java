@@ -97,7 +97,10 @@ public class EventRequestService {
         dto.setRegistrationDeadline(approved.getRegistrationDeadline());
         dto.setMainImageUrl(approved.getMainImageUrl());
         dto.setExternalLink(approved.getExternalLink());
-        eventService.createEvent(dto, approved.getRequesterId(), approved.getRequesterEmail());
+        String organizerEmail = approved.getContactEmail() != null && !approved.getContactEmail().isBlank()
+                ? approved.getContactEmail()
+                : approved.getRequesterEmail();
+        eventService.createEvent(dto, approved.getRequesterId(), organizerEmail);
 
         kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
                 approved.getId(),
