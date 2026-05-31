@@ -78,8 +78,19 @@ const EventRequestForm = () => {
     setError(null);
     try {
       let externalLink = formData.externalLink ? formData.externalLink.trim() : '';
-      if (externalLink && !/^https?:\/\//i.test(externalLink)) {
+      if (!externalLink) {
+        setError('Укажите ссылку на сайт мероприятия');
+        setLoading(false);
+        return;
+      }
+      if (!/^https?:\/\//i.test(externalLink)) {
         externalLink = 'https://' + externalLink;
+      }
+      const URL_RE = /^https?:\/\/[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#][^\s]*)?$/;
+      if (!URL_RE.test(externalLink)) {
+        setError('Введите корректный URL вида https://example.com');
+        setLoading(false);
+        return;
       }
 
       let mainImageUrl = null;
@@ -268,14 +279,19 @@ const EventRequestForm = () => {
           <div className="erf__section-title">Дополнительно</div>
 
           <div className="erf__field">
-            <label className="erf__label">Внешняя ссылка (сайт, регистрация)</label>
+            <label className="erf__label">
+              Ссылка на сайт мероприятия <span className="erf__required">*</span>
+            </label>
             <input
               className="erf__input"
-              type="text"
+              type="url"
               name="externalLink"
               value={formData.externalLink}
               onChange={handleChange}
-              placeholder="example.com или https://example.com"
+              placeholder="https://example.com/event"
+              required
+              pattern="^https?://[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#].*)?$"
+              title="Введите корректный URL вида https://example.com"
             />
           </div>
 
