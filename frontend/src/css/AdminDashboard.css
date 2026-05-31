@@ -375,3 +375,23 @@
   .adm__actions { flex-wrap: wrap; }
   .adm__approve, .adm__reject { flex: 1; }
 }
+
+.adm__approve:disabled,
+.adm__reject:disabled,
+.adm__confirm:disabled,
+.adm__cancel:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.adm__final-state {
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface-alt, #f4eee3);
+  color: var(--color-text-tertiary, #8c8473);
+  font-size: 13px;
+  font-style: italic;
+  border: 1px dashed var(--color-border, #e8dfce);
+}

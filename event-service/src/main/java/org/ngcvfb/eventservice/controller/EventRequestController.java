@@ -29,6 +29,12 @@ public class EventRequestController {
         }
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<java.util.Map<String, String>> handleConflict(IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(java.util.Map.of("error", e.getMessage()));
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<EventRequest>> getAllRequests(
             @RequestHeader(value = "X-User-Role", defaultValue = "USER") String userRole) {
