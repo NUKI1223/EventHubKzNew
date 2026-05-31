@@ -16,6 +16,7 @@ const AdminEventRequests = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentAction, setCurrentAction] = useState({ id: null, status: '', adminComment: '' });
   const [reindexing, setReindexing] = useState(false);
+  const [submittingId, setSubmittingId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -45,12 +46,19 @@ const AdminEventRequests = () => {
 
   const updateRequest = async () => {
     const { id, status, adminComment } = currentAction;
+    if (submittingId != null) return;
+    setSubmittingId(id);
     try {
       await api.put(`/api/admin/${id}/update`, { status, adminComment });
       setEventRequests(prev => prev.map(req => req.id === id ? { ...req, status, adminComment } : req));
       setShowModal(false);
-    } catch {
-      toast.error('Ошибка при обновлении заявки');
+      toast.success(status === 'APPROVED' ? 'Заявка одобрена' : 'Заявка отклонена');
+    } catch (err) {
+      const msg = err?.response?.data?.error
+        || (err?.response?.status === 409 ? 'Заявка уже обработана' : 'Ошибка при обновлении заявки');
+      toast.error(msg);
+    } finally {
+      setSubmittingId(null);
     }
   };
 
@@ -170,18 +178,30 @@ const AdminEventRequests = () => {
               </div>
 
               <div className="adm__actions">
-                <button
-                  className="adm__approve"
-                  onClick={() => openModal(request.id, 'APPROVED', request.adminComment)}
-                >
-                  Одобрить
-                </button>
-                <button
-                  className="adm__reject"
-                  onClick={() => openModal(request.id, 'REJECTED', request.adminComment)}
-                >
-                  Отклонить
-                </button>
+                {request.status === 'PENDING' ? (
+                  <>
+                    <button
+                      className="adm__approve"
+                      disabled={submittingId === request.id}
+                      onClick={() => openModal(request.id, 'APPROVED', request.adminComment)}
+                    >
+                      {submittingId === request.id ? 'Сохраняем…' : 'Одобрить'}
+                    </button>
+                    <button
+                      className="adm__reject"
+                      disabled={submittingId === request.id}
+                      onClick={() => openModal(request.id, 'REJECTED', request.adminComment)}
+                    >
+                      {submittingId === request.id ? 'Сохраняем…' : 'Отклонить'}
+                    </button>
+                  </>
+                ) : (
+                  <span className="adm__final-state">
+                    {request.status === 'APPROVED'
+                      ? 'Заявка одобрена — изменить нельзя'
+                      : 'Заявка отклонена — изменить нельзя'}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -202,8 +222,16 @@ const AdminEventRequests = () => {
               <strong>{currentAction.status === 'APPROVED' ? 'одобрить' : 'отклонить'}</strong> эту заявку?
             </p>
             <div className="adm__modal-btns">
-              <button className="adm__cancel" onClick={closeModal}>Отмена</button>
-              <button className="adm__confirm" onClick={updateRequest}>Подтвердить</button>
+              <button className="adm__cancel" onClick={closeModal} disabled={submittingId != null}>
+                Отмена
+              </button>
+              <button
+                className="adm__confirm"
+                onClick={updateRequest}
+                disabled={submittingId != null}
+              >
+                {submittingId != null ? 'Сохраняем…' : 'Подтвердить'}
+              </button>
             </div>
           </div>
         </div>

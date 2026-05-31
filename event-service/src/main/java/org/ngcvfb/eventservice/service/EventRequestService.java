@@ -75,6 +75,10 @@ public class EventRequestService {
             log.info("Event request {} is already approved, skipping", requestId);
             return request;
         }
+        if (request.getStatus() == RequestStatus.REJECTED) {
+            throw new IllegalStateException(
+                    "Заявка уже отклонена и не может быть одобрена");
+        }
 
         request.setStatus(RequestStatus.APPROVED);
         request.setReviewerId(adminId);
@@ -112,6 +116,16 @@ public class EventRequestService {
     @Transactional
     public EventRequest rejectRequest(Long requestId, Long adminId, String rejectionReason) {
         EventRequest request = findRequestOrThrow(requestId);
+
+        if (request.getStatus() == RequestStatus.REJECTED) {
+            log.info("Event request {} is already rejected, skipping", requestId);
+            return request;
+        }
+        if (request.getStatus() == RequestStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Заявка уже одобрена, событие опубликовано — отклонить нельзя");
+        }
+
         request.setStatus(RequestStatus.REJECTED);
         request.setReviewerId(adminId);
         request.setReviewedAt(LocalDateTime.now());
