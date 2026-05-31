@@ -33,6 +33,10 @@ public class AiTagSuggestionService {
     @Value("${ai.gemini.api-key:}")
     private String apiKey;
 
+    private volatile List<String> cachedVocabulary = List.of();
+    private volatile long cachedAt = 0L;
+    private static final long VOCAB_TTL_MS = 5 * 60_000L;
+
     public List<String> suggestTags(String title, String shortDescription, String fullDescription) {
         if (apiKey == null || apiKey.isBlank()) {
             log.warn("Gemini API key not configured — returning empty tag suggestions");
@@ -98,18 +102,35 @@ public class AiTagSuggestionService {
     }
 
     private List<String> loadEventVocabulary() {
-        try {
-            List<Map<String, Object>> tags = tagClient.getTags("EVENT");
-            List<String> names = new ArrayList<>();
-            for (Map<String, Object> tag : tags) {
-                Object name = tag.get("name");
-                if (name != null) names.add(name.toString());
-            }
-            return names;
-        } catch (Exception e) {
-            log.error("Failed to load tag vocabulary from tag-service: {}", e.getMessage());
-            return List.of();
+        long now = System.currentTimeMillis();
+        if (!cachedVocabulary.isEmpty() && (now - cachedAt) < VOCAB_TTL_MS) {
+            return cachedVocabulary;
         }
+        // up to 3 attempts to survive Eureka/Feign cold start
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                List<Map<String, Object>> tags = tagClient.getTags("EVENT");
+                List<String> names = new ArrayList<>();
+                for (Map<String, Object> tag : tags) {
+                    Object name = tag.get("name");
+                    if (name != null) names.add(name.toString());
+                }
+                if (!names.isEmpty()) {
+                    cachedVocabulary = List.copyOf(names);
+                    cachedAt = now;
+                    return cachedVocabulary;
+                }
+                log.warn("tag-service returned empty vocabulary (attempt {}/3)", attempt);
+            } catch (Exception e) {
+                log.warn("Failed to load tag vocabulary (attempt {}/3): {}", attempt, e.getMessage());
+            }
+            try { Thread.sleep(250L * attempt); } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        // last resort: stale cache is better than empty
+        return cachedVocabulary;
     }
 
     private List<String> parseTagsFromResponse(String response, List<String> vocabulary) {

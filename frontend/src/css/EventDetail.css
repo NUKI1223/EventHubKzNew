@@ -113,6 +113,7 @@
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--space-md);
   color: var(--color-text-secondary);
+  white-space: pre-wrap;
 }
 
 .event-detail-description a {
