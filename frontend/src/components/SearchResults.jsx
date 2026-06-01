@@ -16,7 +16,8 @@ function useQuery() {
 }
 
 const SearchResults = () => {
-  const query = useQuery().get('query') || useQuery().get('q') || '';
+  const params = useQuery();
+  const query = params.get('query') || params.get('q') || '';
   const [tab, setTab] = useState('events');
   const [eventResults, setEventResults] = useState([]);
   const [userResults, setUserResults] = useState([]);

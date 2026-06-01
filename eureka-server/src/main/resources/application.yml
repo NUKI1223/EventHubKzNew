@@ -25,6 +25,14 @@ management:
   endpoint:
     health:
       show-details: always
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+      slo:
+        all: 50ms, 100ms, 250ms, 500ms, 1s, 2s
+    tags:
+      application: ${spring.application.name}
 
 logging:
   level:
