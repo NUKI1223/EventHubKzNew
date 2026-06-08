@@ -58,6 +58,11 @@ public class Event {
     @Column(name = "like_count")
     private int likeCount = 0;
 
+    // Integer (не примитив): колонка добавлена через ddl-auto к существующим
+    // строкам, у которых view_count = NULL — примитив int падает при гидрации.
+    @Column(name = "view_count", columnDefinition = "integer default 0")
+    private Integer viewCount = 0;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -1,0 +1,315 @@
+/* ========================================
+   Organizer Dashboard — Кабинет организатора
+   ======================================== */
+
+.orgd {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md) var(--space-xxl);
+}
+
+.orgd__hdr {
+  margin-bottom: var(--space-lg);
+}
+
+.orgd__title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--ink-900);
+  margin: 0 0 var(--space-xs);
+}
+
+.orgd__sub {
+  font-size: var(--font-size-base);
+  color: var(--ink-500);
+  margin: 0;
+}
+
+/* ==================== Сводка ==================== */
+.orgd__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.orgd__stat {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.orgd__stat-val {
+  font-family: var(--font-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--sky-ink);
+  line-height: 1;
+}
+
+.orgd__stat-lbl {
+  font-size: var(--font-size-sm);
+  color: var(--ink-500);
+}
+
+/* ==================== Вкладки ==================== */
+.orgd__tabs {
+  display: flex;
+  gap: var(--space-xs);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--space-lg);
+}
+
+.orgd__tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 4px;
+  margin-bottom: -1px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--ink-400);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  margin-right: var(--space-md);
+}
+
+.orgd__tab:hover {
+  color: var(--ink-700);
+}
+
+.orgd__tab--active {
+  color: var(--sky-ink);
+  border-bottom-color: var(--sky-ink);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ==================== Сетка событий ==================== */
+.orgd__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-md);
+}
+
+.orgd-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.orgd-card:hover {
+  box-shadow: var(--sh-md);
+  transform: translateY(-2px);
+}
+
+.orgd-card__img-wrap {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: var(--bg-soft);
+}
+
+.orgd-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orgd-card__ph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-300);
+}
+
+.orgd-card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+}
+
+.orgd-card__badge--past {
+  background: var(--ink-700);
+  color: var(--bg);
+}
+
+.orgd-card__body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.orgd-card__title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ink-900);
+  text-decoration: none;
+  line-height: var(--line-height-tight);
+}
+
+.orgd-card__title:hover {
+  color: var(--sky-ink);
+}
+
+.orgd-card__date {
+  font-size: var(--font-size-sm);
+  color: var(--ink-500);
+}
+
+.orgd-card__metrics {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.orgd-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ink-700);
+}
+
+.orgd-metric svg {
+  color: var(--sky-ink);
+}
+
+.orgd-card__likers {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--sky-ink);
+  text-decoration: none;
+}
+
+.orgd-card__likers:hover {
+  text-decoration: underline;
+}
+
+.orgd-card__deadline {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--sage-ink);
+  background: var(--sage-soft);
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  align-self: flex-start;
+}
+
+.orgd-card__deadline--closed {
+  color: var(--ink-500);
+  background: var(--bg-soft);
+}
+
+/* ==================== Заявки ==================== */
+.orgd__reqs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.orgd-req {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  padding: var(--space-md);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.orgd-req__main {
+  min-width: 0;
+}
+
+.orgd-req__title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ink-900);
+  margin-bottom: 4px;
+}
+
+.orgd-req__meta {
+  font-size: var(--font-size-sm);
+  color: var(--ink-500);
+}
+
+.orgd-req__comment {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--rose-ink);
+  background: var(--rose-soft);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+}
+
+.orgd-status {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+
+.orgd-status--pending {
+  color: var(--butter-ink);
+  background: var(--butter-soft);
+}
+
+.orgd-status--approved {
+  color: var(--sage-ink);
+  background: var(--sage-soft);
+}
+
+.orgd-status--rejected {
+  color: var(--rose-ink);
+  background: var(--rose-soft);
+}
+
+/* ==================== Адаптив ==================== */
+@media (max-width: 768px) {
+  .orgd__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .orgd__stats {
+    grid-template-columns: 1fr;
+  }
+  .orgd-req {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .orgd-status {
+    align-self: flex-start;
+  }
+}

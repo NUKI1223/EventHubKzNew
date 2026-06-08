@@ -158,6 +158,16 @@ public class EventService {
         });
     }
 
+    @Transactional
+    @CacheEvict(value = "events", key = "#eventId")
+    public void incrementViewCount(Long eventId) {
+        eventRepository.findById(eventId).ifPresent(event -> {
+            int current = event.getViewCount() == null ? 0 : event.getViewCount();
+            event.setViewCount(current + 1);
+            eventRepository.save(event);
+        });
+    }
+
     public void reindexAll() {
         List<Event> all = eventRepository.findAll();
         log.info("Reindexing {} events", all.size());
@@ -224,6 +234,7 @@ public class EventService {
         dto.setOrganizerEmail(event.getOrganizerEmail());
         dto.setOrganizerId(event.getOrganizerId());
         dto.setLikesCount(event.getLikeCount());
+        dto.setViewsCount(event.getViewCount() == null ? 0 : event.getViewCount());
         return dto;
     }
 }

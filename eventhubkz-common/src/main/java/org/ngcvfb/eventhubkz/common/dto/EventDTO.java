@@ -28,4 +28,5 @@ public class EventDTO {
     private String organizerUsername;
     private String organizerEmail;
     private int likesCount;
+    private int viewsCount;
 }

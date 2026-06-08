@@ -38,6 +38,8 @@ const EventDetail = () => {
       }
     };
     fetchEvent();
+    // Регистрируем просмотр (best-effort, не блокирует загрузку)
+    api.post(`/api/events/${id}/view`).catch(() => {});
     return () => { document.title = 'EventHub.kz'; };
   }, [id]);
 
@@ -99,6 +101,7 @@ const EventDetail = () => {
             <p><strong>Тэги:</strong> {event.tags.join(', ')}</p>
           )}
           <p><strong>Организатор:</strong> {event.organizerEmail}</p>
+          <p><strong>Просмотров:</strong> {event.viewsCount ?? 0}</p>
         </div>
         <div className="event-detail-description">
           <h3>Описание мероприятия</h3>
