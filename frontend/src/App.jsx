@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import EventList from './components/EventList';
 import EventDetail from './components/EventDetail';
 import EventRequestForm from './components/EventRequestForm';
+import OrganizerDashboard from './components/OrganizerDashboard';
 import SearchResults from './components/SearchResults';
 import UserProfile from './components/Profile';
 import LikedEvents from './components/LikedEvents';
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events/:id/likers" element={<EventLikers />} />
         <Route path="/request-event" element={<EventRequestForm />} />
+        <Route path="/my-events" element={<OrganizerDashboard />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/profile/:username?" element={<UserProfile />} />
         <Route path="/profile/:username/liked-events" element={<LikedEvents />} />

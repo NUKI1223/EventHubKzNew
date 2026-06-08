@@ -93,6 +93,12 @@ public class EventController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{id}/view")
+    public ResponseEntity<Void> incrementView(@PathVariable Long id) {
+        eventService.incrementViewCount(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> incrementLike(@PathVariable Long id) {
         eventService.incrementLikeCount(id);
