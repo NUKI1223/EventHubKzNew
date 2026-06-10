@@ -34,11 +34,6 @@ const OrganizerDashboard = () => {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    document.title = 'Мои мероприятия — EventHub.kz';
-    return () => { document.title = 'EventHub.kz'; };
-  }, []);
-
-  useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);

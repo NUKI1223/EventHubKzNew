@@ -6,6 +6,7 @@ import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { SOCIALS } from '../config/socials';
 import '../css/Profile.css';
 import LikedEvents from './LikedEvents';
+import OrganizerDashboard from './OrganizerDashboard';
 import { SkeletonProfile } from './Skeleton';
 import PageError from './PageError';
 
@@ -136,6 +137,7 @@ const UserProfile = () => {
         </div>
       </div>
 
+      {isOwnProfile && <OrganizerDashboard />}
       {isOwnProfile && <LikedEvents />}
     </div>
   );
