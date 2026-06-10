@@ -16,6 +16,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByOrganizerId(Long organizerId);
 
+    List<Event> findByEventDateBetween(LocalDateTime start, LocalDateTime end);
+
     Page<Event> findByEventDateAfter(LocalDateTime date, Pageable pageable);
 
     Page<Event> findByOnline(boolean online, Pageable pageable);

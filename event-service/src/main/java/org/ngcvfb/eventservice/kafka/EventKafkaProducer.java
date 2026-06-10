@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
+import org.ngcvfb.eventhubkz.common.events.EventReminderEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
 import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
@@ -20,6 +21,7 @@ public class EventKafkaProducer {
     private static final String TOPIC_EVENT_DELETED = "event.deleted";
     private static final String TOPIC_EVENT_REQUEST_REVIEWED = "event-request.reviewed";
     private static final String TOPIC_SUPPORT_RESOLVED = "support.resolved";
+    private static final String TOPIC_EVENT_REMINDER = "event.reminder";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -46,5 +48,10 @@ public class EventKafkaProducer {
     public void sendSupportResolved(SupportMessageResolvedEvent event) {
         log.info("Sending support.resolved: messageId={}, userId={}", event.getMessageId(), event.getUserId());
         kafkaTemplate.send(TOPIC_SUPPORT_RESOLVED, String.valueOf(event.getMessageId()), event);
+    }
+
+    public void sendEventReminder(EventReminderEvent event) {
+        log.info("Sending event.reminder: eventId={}, userId={}", event.getRelatedEventId(), event.getUserId());
+        kafkaTemplate.send(TOPIC_EVENT_REMINDER, String.valueOf(event.getRelatedEventId()), event);
     }
 }

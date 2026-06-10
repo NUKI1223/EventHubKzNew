@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventLikedEvent;
+import org.ngcvfb.eventhubkz.common.events.EventReminderEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
 import org.ngcvfb.eventhubkz.common.events.UserRegisteredEvent;
@@ -134,6 +135,36 @@ public class NotificationKafkaConsumer {
             );
         } catch (Exception e) {
             log.error("Failed to create support notification: {}", e.getMessage(), e);
+        }
+    }
+
+    @KafkaListener(topics = "event.reminder", groupId = "notification-service-group")
+    public void handleEventReminder(EventReminderEvent event) {
+        log.info("Received event.reminder: eventId={}, userId={}", event.getRelatedEventId(), event.getUserId());
+        if (event.getUserId() == null) {
+            log.warn("event.reminder has no userId; skipping");
+            return;
+        }
+        try {
+            // createIfAbsent дедуплицирует по (userId, type, eventId): письмо отправляем
+            // только при первом создании, чтобы повторные прогоны планировщика не спамили.
+            var created = notificationService.createIfAbsent(
+                    event.getUserId(),
+                    event.getUserEmail(),
+                    "Скоро мероприятие",
+                    String.format("Напоминаем: мероприятие \"%s\" уже скоро. Не пропустите!", event.getEventTitle()),
+                    NotificationType.EVENT_REMINDER,
+                    event.getRelatedEventId()
+            );
+            if (created != null) {
+                supportEmailService.sendEventReminder(
+                        event.getUserEmail(),
+                        event.getEventTitle(),
+                        event.getEventDate()
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to create reminder notification: {}", e.getMessage(), e);
         }
     }
 

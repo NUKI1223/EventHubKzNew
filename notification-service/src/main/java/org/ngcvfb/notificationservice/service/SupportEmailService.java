@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +31,11 @@ public class SupportEmailService {
     public void sendRequestRejected(String toEmail, String eventTitle, String reason) {
         send(toEmail, "EventHub.kz — заявка на мероприятие отклонена",
                 buildRejectionHtml(eventTitle, reason), "request rejection");
+    }
+
+    public void sendEventReminder(String toEmail, String eventTitle, LocalDateTime eventDate) {
+        send(toEmail, "EventHub.kz — напоминание о мероприятии",
+                buildReminderHtml(eventTitle, eventDate), "event reminder");
     }
 
     private void send(String toEmail, String subject, String html, String label) {
@@ -88,6 +96,26 @@ public class SupportEmailService {
                 + "    <div style=\"white-space:pre-wrap;\">" + r + "</div>"
                 + "  </div>"
                 + "  <p style=\"color:#8c8473;font-size:12px;margin-top:24px;\">Вы можете доработать заявку с учётом комментария и подать её снова через раздел «Создать событие».</p>"
+                + "</div>";
+    }
+
+    private String buildReminderHtml(String eventTitle, LocalDateTime eventDate) {
+        String t = escape(eventTitle == null ? "(без названия)" : eventTitle);
+        String d = eventDate == null ? "(дата уточняется)"
+                : eventDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        return ""
+                + "<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#1f1c16;\">"
+                + "  <h2 style=\"color:#2a5475;margin:0 0 12px;\">Скоро мероприятие на EventHub.kz</h2>"
+                + "  <p style=\"color:#6b6253;margin:0 0 18px;\">Напоминаем о мероприятии, которое вы отметили. Не пропустите!</p>"
+                + "  <div style=\"background:#f4eee3;border-left:3px solid #aecee3;padding:12px 14px;border-radius:6px;margin-bottom:14px;\">"
+                + "    <div style=\"font-size:12px;color:#6b6253;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;\">Мероприятие</div>"
+                + "    <div style=\"font-weight:600;\">" + t + "</div>"
+                + "  </div>"
+                + "  <div style=\"background:#dceaf3;border-left:3px solid #2a5475;padding:12px 14px;border-radius:6px;\">"
+                + "    <div style=\"font-size:12px;color:#2a5475;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;\">Когда</div>"
+                + "    <div style=\"font-weight:600;\">" + d + "</div>"
+                + "  </div>"
+                + "  <p style=\"color:#8c8473;font-size:12px;margin-top:24px;\">Это автоматическое письмо — отвечать на него не нужно. Подробности мероприятия доступны в вашем разделе сохранённых событий на сайте.</p>"
                 + "</div>";
     }
 
