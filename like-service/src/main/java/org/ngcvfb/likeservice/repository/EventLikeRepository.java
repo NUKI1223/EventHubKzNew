@@ -29,4 +29,7 @@ public interface EventLikeRepository extends JpaRepository<EventLike, Long> {
 
     @Query("SELECT l.eventId FROM EventLike l WHERE l.userId = :userId")
     List<Long> findEventIdsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT l.eventId, COUNT(l) FROM EventLike l WHERE l.eventId IN :ids GROUP BY l.eventId")
+    List<Object[]> countsByEventIds(@Param("ids") List<Long> ids);
 }

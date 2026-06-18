@@ -21,6 +21,7 @@
         <module>event-service</module>
         <module>search-service</module>
         <module>like-service</module>
+        <module>registration-service</module>
         <module>notification-service</module>
         <module>file-service</module>
     </modules>

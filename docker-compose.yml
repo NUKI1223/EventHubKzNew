@@ -220,6 +220,33 @@ services:
       - eventhub-network
     logging: *default-logging
 
+  # Registration Service
+  registration-service:
+    build:
+      context: ./registration-service
+      dockerfile: Dockerfile
+    container_name: registration-service
+    ports:
+      - "8089:8089"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - DB_URL=jdbc:postgresql://postgres-registrations:5432/registrations_db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres-registrations:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - eventhub-network
+    logging: *default-logging
+
   # Notification Service
   notification-service:
     build:
@@ -375,6 +402,22 @@ services:
       - likes-data:/var/lib/postgresql/data
     ports:
       - "5435:5432"
+    networks:
+      - eventhub-network
+    logging: *default-logging
+
+  # PostgreSQL - Registrations Database
+  postgres-registrations:
+    image: postgres:14
+    container_name: postgres-registrations
+    environment:
+      POSTGRES_DB: registrations_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - registrations-data:/var/lib/postgresql/data
+    ports:
+      - "5439:5432"
     networks:
       - eventhub-network
     logging: *default-logging
@@ -552,6 +595,7 @@ volumes:
   users-data:
   events-data:
   likes-data:
+  registrations-data:
   notifications-data:
   es-data:
   redis-data:

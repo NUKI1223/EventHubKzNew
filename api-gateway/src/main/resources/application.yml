@@ -48,6 +48,15 @@ spring:
                 name: eventServiceCircuitBreaker
                 fallbackUri: forward:/fallback/events
 
+        # Event Service - attendees (organizer-only, must be authenticated to inject headers)
+        - id: event-attendees
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/events/*/attendees
+            - Method=GET
+          filters:
+            - name: AuthenticationFilter
+
         # Event Service - GET (public)
         - id: event-service-read
           uri: lb://EVENT-SERVICE
@@ -68,17 +77,31 @@ spring:
           filters:
             - name: AuthenticationFilter
 
-        # Like Service (public endpoints - count, check)
+        # Like Service (public endpoints - count, counts, check)
         - id: like-service-public
           uri: lb://LIKE-SERVICE
           predicates:
-            - Path=/api/likes/event/*/count,/api/likes/check
+            - Path=/api/likes/event/*/count,/api/likes/counts,/api/likes/check
 
         # Like Service (authenticated endpoints)
         - id: like-service-auth
           uri: lb://LIKE-SERVICE
           predicates:
             - Path=/api/likes/**
+          filters:
+            - name: AuthenticationFilter
+
+        # Registration Service (public endpoints - count, counts, check)
+        - id: registration-service-public
+          uri: lb://REGISTRATION-SERVICE
+          predicates:
+            - Path=/api/registrations/event/*/count,/api/registrations/counts,/api/registrations/check
+
+        # Registration Service (authenticated endpoints)
+        - id: registration-service-auth
+          uri: lb://REGISTRATION-SERVICE
+          predicates:
+            - Path=/api/registrations/**
           filters:
             - name: AuthenticationFilter
 

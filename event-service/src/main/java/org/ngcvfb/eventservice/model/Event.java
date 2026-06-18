@@ -49,6 +49,13 @@ public class Event {
 
     private String externalLink;
 
+    // Способ регистрации. Колонка добавляется ddl-auto к существующим строкам как
+    // NULL — в EventService NULL трактуется как производное значение (EXTERNAL при
+    // наличии внешней ссылки, иначе NATIVE).
+    @Enumerated(EnumType.STRING)
+    @Column(name = "registration_type", length = 20)
+    private RegistrationType registrationType;
+
     @Column(name = "organizer_id", nullable = false)
     private Long organizerId;
 

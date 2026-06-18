@@ -22,6 +22,11 @@ public class LikeController {
         return ResponseEntity.ok(eventLikeService.getLikeCount(eventId));
     }
 
+    @GetMapping("/counts")
+    public ResponseEntity<Map<Long, Long>> getCounts(@RequestParam List<Long> eventIds) {
+        return ResponseEntity.ok(eventLikeService.getCounts(eventIds));
+    }
+
     @GetMapping("/event/{eventId}")
     public ResponseEntity<List<EventLike>> getLikesByEvent(@PathVariable Long eventId) {
         return ResponseEntity.ok(eventLikeService.getLikesByEvent(eventId));

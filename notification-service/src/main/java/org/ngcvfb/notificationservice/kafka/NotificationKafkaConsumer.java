@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventLikedEvent;
+import org.ngcvfb.eventhubkz.common.events.EventRegisteredEvent;
 import org.ngcvfb.eventhubkz.common.events.EventReminderEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
@@ -165,6 +166,42 @@ public class NotificationKafkaConsumer {
             }
         } catch (Exception e) {
             log.error("Failed to create reminder notification: {}", e.getMessage(), e);
+        }
+    }
+
+    @KafkaListener(topics = "event.registered", groupId = "notification-service-group")
+    public void handleEventRegistered(EventRegisteredEvent event) {
+        log.info("Received event.registered: eventId={}, userId={}", event.getRegisteredEventId(), event.getUserId());
+        if (event.getUserId() == null) {
+            log.warn("event.registered has no userId; skipping");
+            return;
+        }
+        try {
+            // createIfAbsent дедуплицирует по (userId, type, eventId): письмо-подтверждение
+            // уходит только при первом создании, чтобы переотправки/реплеи не спамили.
+            var created = notificationService.createIfAbsent(
+                    event.getUserId(),
+                    event.getUserEmail(),
+                    "Вы записаны на мероприятие",
+                    String.format("Вы успешно записались на мероприятие \"%s\". Ждём вас!", event.getEventTitle()),
+                    NotificationType.REGISTRATION_CONFIRMED,
+                    event.getRegisteredEventId()
+            );
+            if (created != null) {
+                supportEmailService.sendRegistrationConfirmed(
+                        event.getUserEmail(),
+                        event.getUsername(),
+                        event.getEventTitle(),
+                        event.getEventDate(),
+                        event.getRegisteredAt(),
+                        event.getCode(),
+                        event.getRegisteredEventId(),
+                        event.getEventLocation(),
+                        event.isEventOnline()
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to create registration notification: {}", e.getMessage(), e);
         }
     }
 

@@ -7,8 +7,12 @@ import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
+import org.ngcvfb.eventservice.client.RegistrationClient;
+import org.ngcvfb.eventservice.client.UserClient;
+import org.ngcvfb.eventservice.dto.AttendeeDTO;
 import org.ngcvfb.eventservice.kafka.EventKafkaProducer;
 import org.ngcvfb.eventservice.model.Event;
+import org.ngcvfb.eventservice.model.RegistrationType;
 import org.ngcvfb.eventservice.repository.EventRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -16,12 +20,16 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +39,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final EventKafkaProducer kafkaProducer;
+    private final RegistrationClient registrationClient;
+    private final UserClient userClient;
 
     public List<EventDTO> getAllEvents() {
         return eventRepository.findAll().stream()
@@ -97,6 +107,7 @@ public class EventService {
                 .registrationDeadline(dto.getRegistrationDeadline())
                 .mainImageUrl(dto.getMainImageUrl())
                 .externalLink(dto.getExternalLink())
+                .registrationType(resolveRegistrationType(dto.getRegistrationType(), dto.getExternalLink()))
                 .organizerId(organizerId)
                 .organizerEmail(organizerEmail)
                 .likeCount(0)
@@ -127,6 +138,9 @@ public class EventService {
         event.setRegistrationDeadline(dto.getRegistrationDeadline());
         event.setMainImageUrl(dto.getMainImageUrl());
         event.setExternalLink(dto.getExternalLink());
+        if (dto.getRegistrationType() != null) {
+            event.setRegistrationType(resolveRegistrationType(dto.getRegistrationType(), dto.getExternalLink()));
+        }
 
         Event updated = eventRepository.save(event);
         log.info("Updated event: {}", updated.getId());
@@ -188,6 +202,66 @@ public class EventService {
         });
     }
 
+    /**
+     * Список участников мероприятия для организатора (или администратора): id, имя, email.
+     * Агрегирует записи из registration-service и контакты из user-service.
+     * Доступ строго ограничен владельцем события — иначе 403.
+     */
+    public List<AttendeeDTO> getAttendees(Long eventId, Long requesterId, String role) {
+        Event event = findEventOrThrow(eventId);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Список участников доступен только организатору мероприятия");
+        }
+
+        List<Map<String, Object>> registrations;
+        try {
+            registrations = registrationClient.getRegistrationsByEvent(eventId);
+        } catch (Exception e) {
+            log.error("Failed to fetch registrations for event {}: {}", eventId, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "Сервис записей временно недоступен, попробуйте позже");
+        }
+        Map<Long, String> statusByUser = registrations.stream()
+                .filter(r -> r.get("userId") != null)
+                .collect(Collectors.toMap(
+                        r -> Long.valueOf(r.get("userId").toString()),
+                        r -> r.get("status") == null ? "REGISTERED" : r.get("status").toString(),
+                        (a, b) -> a));
+        List<Long> userIds = statusByUser.keySet().stream().distinct().collect(Collectors.toList());
+        if (userIds.isEmpty()) {
+            return List.of();
+        }
+
+        return userClient.getUsersByIds(userIds).stream()
+                .map(u -> new AttendeeDTO(u.getId(), u.getUsername(), u.getEmail(),
+                        statusByUser.getOrDefault(u.getId(), "REGISTERED")))
+                .sorted((a, b) -> {
+                    String an = a.username() == null ? "" : a.username();
+                    String bn = b.username() == null ? "" : b.username();
+                    return an.compareToIgnoreCase(bn);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Определяет способ регистрации: явный, если передан корректный, иначе производный —
+     * EXTERNAL при наличии внешней ссылки, иначе NATIVE. Гарантирует, что старые события
+     * (с registration_type = NULL) и заявки без явного выбора получают разумное значение.
+     */
+    private RegistrationType resolveRegistrationType(String requested, String externalLink) {
+        if (requested != null && !requested.isBlank()) {
+            try {
+                return RegistrationType.valueOf(requested.trim().toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+                log.warn("Unknown registrationType '{}', falling back to derived value", requested);
+            }
+        }
+        boolean hasExternal = externalLink != null && !externalLink.isBlank();
+        return hasExternal ? RegistrationType.EXTERNAL : RegistrationType.NATIVE;
+    }
+
     private EventCreatedEvent toCreatedEvent(Event event) {
         return EventCreatedEvent.create(
                 event.getId(),
@@ -231,6 +305,10 @@ public class EventService {
         dto.setRegistrationDeadline(event.getRegistrationDeadline());
         dto.setMainImageUrl(event.getMainImageUrl());
         dto.setExternalLink(event.getExternalLink());
+        dto.setRegistrationType(
+                resolveRegistrationType(
+                        event.getRegistrationType() == null ? null : event.getRegistrationType().name(),
+                        event.getExternalLink()).name());
         dto.setOrganizerEmail(event.getOrganizerEmail());
         dto.setOrganizerId(event.getOrganizerId());
         dto.setLikesCount(event.getLikeCount());

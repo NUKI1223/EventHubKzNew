@@ -23,6 +23,7 @@ public class EventDTO {
     private LocalDateTime registrationDeadline;
     private String mainImageUrl;
     private String externalLink;
+    private String registrationType;
     private Set<String> tags;
     private Long organizerId;
     private String organizerUsername;

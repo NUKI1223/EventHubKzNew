@@ -3,6 +3,7 @@ package org.ngcvfb.eventservice.controller;
 import lombok.RequiredArgsConstructor;
 import org.ngcvfb.eventhubkz.common.dto.EventDTO;
 import org.ngcvfb.eventservice.config.Pagination;
+import org.ngcvfb.eventservice.dto.AttendeeDTO;
 import org.ngcvfb.eventservice.service.EventService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +59,14 @@ public class EventController {
     @GetMapping("/organizer/{organizerId}")
     public ResponseEntity<List<EventDTO>> getEventsByOrganizer(@PathVariable Long organizerId) {
         return ResponseEntity.ok(eventService.getEventsByOrganizer(organizerId));
+    }
+
+    @GetMapping("/{id}/attendees")
+    public ResponseEntity<List<AttendeeDTO>> getAttendees(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        return ResponseEntity.ok(eventService.getAttendees(id, userId, role));
     }
 
     @GetMapping("/tag/{tag}")

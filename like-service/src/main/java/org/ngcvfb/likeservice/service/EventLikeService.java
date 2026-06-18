@@ -27,6 +27,16 @@ public class EventLikeService {
         return eventLikeRepository.countByEventId(eventId);
     }
 
+    /** Счётчики лайков для набора событий одним запросом (для списка): eventId -> count. */
+    public java.util.Map<Long, Long> getCounts(List<Long> eventIds) {
+        java.util.Map<Long, Long> result = new java.util.HashMap<>();
+        if (eventIds == null || eventIds.isEmpty()) return result;
+        for (Object[] row : eventLikeRepository.countsByEventIds(eventIds)) {
+            result.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+        }
+        return result;
+    }
+
     public List<Long> getLikedEventIdsByUser(Long userId) {
         return eventLikeRepository.findEventIdsByUserId(userId);
     }
