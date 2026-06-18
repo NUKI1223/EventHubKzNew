@@ -27,6 +27,18 @@ body {
   font-size: var(--font-size-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* ==================== Accessibility: visible keyboard focus ==================== */
+:focus-visible {
+  outline: 2px solid var(--color-primary-dark, #2a5475);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* мышиный фокус не подсвечиваем, только клавиатурный */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* ==================== Typography ==================== */

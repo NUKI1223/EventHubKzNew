@@ -1,0 +1,261 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import api from '../api';
+import { useAuthUser } from '../hooks/useAuthUser';
+import { SkeletonCard } from './Skeleton';
+import EmptyState from './EmptyState';
+import PageError from './PageError';
+import TagSelector from './TagSelector';
+import '../css/EventLikers.css';
+
+const EventRegistrants = () => {
+  const { id: eventId } = useParams();
+  const authUser = useAuthUser();
+  const role = authUser?.role;
+  const myId = authUser?.userId;
+  const [event, setEvent] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [attendees, setAttendees] = useState([]);
+  const [isManager, setIsManager] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterTags, setFilterTags] = useState([]);
+  const [checkinCode, setCheckinCode] = useState('');
+  const [checkinBusy, setCheckinBusy] = useState(false);
+
+  const fetchAttendees = useCallback(async () => {
+    try {
+      const att = await api.get(`/api/events/${eventId}/attendees`);
+      setAttendees(Array.isArray(att.data) ? att.data : []);
+    } catch {
+      /* не критично — список карточек всё равно покажем */
+    }
+  }, [eventId]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const [evRes, regRes] = await Promise.all([
+          api.get(`/api/events/${eventId}`),
+          api.get(`/api/registrations/event/${eventId}`),
+        ]);
+        setEvent(evRes.data);
+        document.title = `Идут на «${evRes.data.title}» — EventHub.kz`;
+
+        // Организатор события или администратор видит таблицу с email, отметку и выгрузку.
+        const manager = role === 'ADMIN' || (myId != null && String(evRes.data.organizerId) === String(myId));
+        setIsManager(manager);
+        if (manager) {
+          await fetchAttendees();
+        }
+
+        const regs = Array.isArray(regRes.data) ? regRes.data : [];
+        const userIds = [...new Set(regs.map(r => r.userId))];
+        if (userIds.length === 0) { setUsers([]); return; }
+
+        const usersRes = await api.get('/api/users/batch', { params: { ids: userIds.join(',') } });
+        setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
+      } catch {
+        setError('Не удалось загрузить список');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [eventId, role, myId, fetchAttendees]);
+
+  const handleCheckIn = async (e) => {
+    if (e) e.preventDefault();
+    const code = checkinCode.trim();
+    if (!code) return;
+    setCheckinBusy(true);
+    try {
+      const res = await api.post('/api/registrations/checkin', { code });
+      const uid = res.data?.userId;
+      const who = attendees.find(a => a.userId === uid);
+      toast.success(`Отмечен: ${who?.username || who?.email || ('пользователь ' + uid)}`);
+      setCheckinCode('');
+      await fetchAttendees();
+    } catch (err) {
+      const status = err?.response?.status;
+      const serverMsg = err?.response?.data?.message;
+      let msg;
+      if (status === 404) msg = 'Код не найден';
+      else if (status === 403) msg = 'Отмечать можно только участников своего мероприятия';
+      else msg = (serverMsg && serverMsg.trim()) || 'Не удалось отметить участника';
+      toast.error(msg);
+    } finally {
+      setCheckinBusy(false);
+    }
+  };
+
+  const statusLabel = (s) => (s === 'ATTENDED' ? 'Пришёл' : 'Записан');
+
+  const exportExcel = async () => {
+    if (!attendees.length) {
+      toast.error('Нет участников для выгрузки');
+      return;
+    }
+    const XLSX = await import('xlsx');
+    const rows = attendees.map((a, i) => ({
+      '№': i + 1,
+      'ID': a.userId,
+      'Имя': a.username || '',
+      'Email': a.email || '',
+      'Статус': statusLabel(a.status),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 5 }, { wch: 8 }, { wch: 24 }, { wch: 30 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Участники');
+    const safe = (event?.title || `event-${eventId}`).replace(/[^\wа-яА-Я0-9-]+/gi, '_').slice(0, 40);
+    XLSX.writeFile(wb, `participants-${safe}.xlsx`);
+  };
+
+  const filtered = useMemo(() => {
+    return users.filter(u => {
+      if (search) {
+        const q = search.toLowerCase();
+        if (!u.username?.toLowerCase().includes(q)
+            && !u.description?.toLowerCase().includes(q)) return false;
+      }
+      if (filterTags.length > 0) {
+        const userTags = Array.isArray(u.tags) ? u.tags : [];
+        if (!filterTags.every(t => userTags.includes(t))) return false;
+      }
+      return true;
+    });
+  }, [users, search, filterTags]);
+
+  if (loading) return (
+    <div className="liker-page">
+      <div className="liker-page__hdr"><span className="liker-page__title">Загрузка...</span></div>
+      <div className="liker-page__grid">
+        {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+      </div>
+    </div>
+  );
+
+  if (error) return <div className="liker-page"><PageError message={error} /></div>;
+
+  return (
+    <div className="liker-page">
+      <div className="liker-page__hdr">
+        <Link to={`/events/${eventId}`} className="liker-page__back">← к событию</Link>
+        <h1 className="liker-page__title">
+          Идут на «{event?.title}»
+        </h1>
+        <p className="liker-page__sub">{users.length} {users.length === 1 ? 'участник' : 'участников'}</p>
+      </div>
+
+      {isManager && (
+        <div className="att-panel">
+          <div className="att-panel__hdr">
+            <div>
+              <div className="att-panel__title">Список участников</div>
+              <div className="att-panel__sub">Виден только вам как организатору</div>
+            </div>
+            <button type="button" className="att-panel__export" onClick={exportExcel} disabled={!attendees.length}>
+              Выгрузить в Excel
+            </button>
+          </div>
+
+          <form className="att-checkin" onSubmit={handleCheckIn}>
+            <input
+              className="att-checkin__input"
+              type="text"
+              placeholder="Код участника с QR-билета"
+              value={checkinCode}
+              onChange={e => setCheckinCode(e.target.value.toUpperCase())}
+              maxLength={16}
+            />
+            <button type="submit" className="att-checkin__btn" disabled={checkinBusy || !checkinCode.trim()}>
+              Отметить приход
+            </button>
+          </form>
+
+          {attendees.length === 0 ? (
+            <p className="att-panel__empty">Пока никто не записался.</p>
+          ) : (
+            <div className="att-table-wrap">
+              <table className="att-table">
+                <thead>
+                  <tr><th>№</th><th>ID</th><th>Имя</th><th>Email</th><th>Статус</th></tr>
+                </thead>
+                <tbody>
+                  {attendees.map((a, i) => (
+                    <tr key={a.userId}>
+                      <td>{i + 1}</td>
+                      <td>{a.userId}</td>
+                      <td>{a.username || '—'}</td>
+                      <td>{a.email || '—'}</td>
+                      <td>
+                        <span className={`att-status ${a.status === 'ATTENDED' ? 'att-status--in' : ''}`}>
+                          {statusLabel(a.status)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="liker-page__filters">
+        <input
+          className="liker-page__search"
+          type="text"
+          placeholder="Поиск по имени или описанию..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <div className="liker-page__tag-filter">
+          <TagSelector selectedTags={filterTags} onChange={setFilterTags} type="USER" />
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon="search"
+          title="Пока никто не записался"
+          subtitle="Будьте первым, кто запишется на это мероприятие"
+        />
+      ) : (
+        <div className="liker-page__grid">
+          {filtered.map(u => (
+            <Link to={`/profile/${u.username}`} key={u.id} className="liker-card">
+              {u.avatarUrl ? (
+                <img src={u.avatarUrl} alt={u.username} className="liker-card__avatar" />
+              ) : (
+                <div className="liker-card__avatar-ph">{u.username?.[0]?.toUpperCase() || '?'}</div>
+              )}
+              <div className="liker-card__body">
+                <div className="liker-card__name">{u.username || 'Без имени'}</div>
+                {u.description && (
+                  <div className="liker-card__desc">{u.description}</div>
+                )}
+                {Array.isArray(u.tags) && u.tags.length > 0 && (
+                  <div className="liker-card__tags">
+                    {u.tags.slice(0, 4).map(t => (
+                      <span key={t} className="liker-card__tag">{t}</span>
+                    ))}
+                    {u.tags.length > 4 && (
+                      <span className="liker-card__tag liker-card__tag--more">+{u.tags.length - 4}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default EventRegistrants;

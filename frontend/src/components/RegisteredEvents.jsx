@@ -8,36 +8,36 @@ import { SkeletonCard } from './Skeleton';
 import EmptyState from './EmptyState';
 import PageError from './PageError';
 
-const LikedEvents = ({ hideHeader = false }) => {
+const RegisteredEvents = ({ hideHeader = false }) => {
   const { username: routeUsername } = useParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchLikedEvents = async () => {
+    const fetchRegistered = async () => {
       try {
         const { id: userId } = await fetchUserByRoute(routeUsername);
-        const idsRes = await api.get(`/api/likes/user/${userId}/events`);
+        const idsRes = await api.get(`/api/registrations/user/${userId}/events`);
         const ids = Array.isArray(idsRes.data) ? idsRes.data : [];
         if (ids.length === 0) { setEvents([]); return; }
         const eventsRes = await api.get('/api/events/batch', { params: { ids: ids.join(',') } });
         setEvents(Array.isArray(eventsRes.data) ? eventsRes.data : []);
       } catch (err) {
         console.error(err);
-        setError('Ошибка при загрузке сохранённых мероприятий');
+        setError('Ошибка при загрузке ваших регистраций');
       } finally {
         setLoading(false);
       }
     };
-    fetchLikedEvents();
+    fetchRegistered();
   }, [routeUsername]);
 
   if (loading) return (
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Сохранённые события</span>
+          <span className="lev__title">Мои регистрации</span>
         </div>
       )}
       <div className="lev__grid">
@@ -52,14 +52,14 @@ const LikedEvents = ({ hideHeader = false }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Сохранённые события</span>
+          <span className="lev__title">Мои регистрации</span>
           <span className="lev__count">0</span>
         </div>
       )}
       <EmptyState
-        icon="heart"
-        title="Нет сохранённых событий"
-        subtitle="Ставьте лайки мероприятиям, которые вам нравятся, и они появятся здесь"
+        icon="search"
+        title="Вы ещё никуда не записались"
+        subtitle="Запишитесь на мероприятие — оно появится здесь вместе с вашим билетом"
         actionText="Смотреть события"
         actionLink="/eventlist"
       />
@@ -70,9 +70,7 @@ const LikedEvents = ({ hideHeader = false }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">
-            {routeUsername ? `Сохранённые — ${routeUsername}` : 'Сохранённые события'}
-          </span>
+          <span className="lev__title">Мои регистрации</span>
           <span className="lev__count">{events.length}</span>
         </div>
       )}
@@ -107,4 +105,4 @@ const LikedEvents = ({ hideHeader = false }) => {
   );
 };
 
-export default LikedEvents;
+export default RegisteredEvents;

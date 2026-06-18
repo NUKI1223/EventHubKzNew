@@ -270,10 +270,19 @@
   border: 1px solid rgba(250,246,239,0.2);
 }
 
-.event-card__badge {
+/* Статус-бейджи (онлайн / завершено / через N дней) — слева, чтобы их не закрывало сердечко лайка справа. */
+.event-card__badges {
   position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  z-index: 2;
+}
+
+.event-card__badge {
   padding: 4px 10px;
   border-radius: var(--r-pill);
   font-size: 10px;
@@ -625,16 +634,8 @@
   opacity: 0.9;
 }
 .event-card__badge--past {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: rgba(60, 60, 60, 0.85);
   color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 999px;
-  letter-spacing: 0.3px;
 }
 .filter-toggle__btn {
   padding: 8px 14px;
@@ -655,4 +656,98 @@
   background: #1f1c16;
   color: #faf7f2;
   border-color: #1f1c16;
+}
+
+/* ===== EventCard: relative-time badge + RSVP surface ===== */
+.event-card__badge--when {
+  background: rgba(42, 84, 117, 0.92);
+  color: #fff;
+}
+
+.event-card__rsvp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.event-card__going {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-secondary, #6b6253);
+}
+
+.event-card__going svg { color: var(--sky-ink, #2a5475); }
+
+.event-card__reg {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+}
+
+.event-card__reg--open {
+  color: #1e7d52;
+  background: #e3f5ec;
+  border-color: #2fa873;
+}
+
+.event-card__reg--closed {
+  color: var(--color-text-tertiary, #8c8473);
+  background: var(--color-surface-alt, #f4eee3);
+  border-color: var(--color-border, #e8dfce);
+}
+
+/* ===== time-bucket group headers ===== */
+.events-group-header {
+  grid-column: 1 / -1;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary, #1f1c16);
+  margin: 8px 0 2px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border, #e8dfce);
+}
+.events-group-header:first-child { margin-top: 0; }
+
+/* ===== active category chip ===== */
+.active-category { margin: 4px 0 10px; }
+.active-category__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-light, #dceaf3);
+  color: var(--color-primary-dark, #2a5475);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+}
+.active-category__x {
+  border: none;
+  background: rgba(42, 84, 117, 0.15);
+  color: var(--color-primary-dark, #2a5475);
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.active-category__x:hover { background: rgba(42, 84, 117, 0.3); }
+
+/* ===== like heart corner + compact rsvp ===== */
+.event-card__like-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
 }

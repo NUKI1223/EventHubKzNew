@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthUser } from '../hooks/useAuthUser';
 import { useProfileData } from '../hooks/useProfileData';
@@ -6,6 +6,7 @@ import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { SOCIALS } from '../config/socials';
 import '../css/Profile.css';
 import LikedEvents from './LikedEvents';
+import RegisteredEvents from './RegisteredEvents';
 import OrganizerDashboard from './OrganizerDashboard';
 import { SkeletonProfile } from './Skeleton';
 import PageError from './PageError';
@@ -15,6 +16,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = useAuthUser();
+  const [eventsTab, setEventsTab] = useState('liked');
 
   const { user, setUser, loading, error } = useProfileData(routeUsername, location.pathname);
   const { setAvatarFile, avatarLoading, avatarError } = useAvatarUpload(user, setUser);
@@ -138,7 +140,28 @@ const UserProfile = () => {
       </div>
 
       {isOwnProfile && <OrganizerDashboard />}
-      {isOwnProfile && <LikedEvents />}
+
+      {isOwnProfile && (
+        <div className="pf-events">
+          <div className="pf-tabs">
+            <button
+              className={`pf-tab ${eventsTab === 'liked' ? 'pf-tab--active' : ''}`}
+              onClick={() => setEventsTab('liked')}
+            >
+              Лайкнутые
+            </button>
+            <button
+              className={`pf-tab ${eventsTab === 'registered' ? 'pf-tab--active' : ''}`}
+              onClick={() => setEventsTab('registered')}
+            >
+              Зарегистрирован
+            </button>
+          </div>
+          {eventsTab === 'liked'
+            ? <LikedEvents hideHeader />
+            : <RegisteredEvents hideHeader />}
+        </div>
+      )}
     </div>
   );
 };

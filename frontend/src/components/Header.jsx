@@ -16,6 +16,7 @@ function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [q, setQ] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const notificationRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -146,6 +147,7 @@ function Header() {
           <div className="header__notif-wrap" ref={notificationRef}>
             <button
               className="header__notif-btn"
+              aria-label="Уведомления"
               onClick={() => {
                 setShowNotifications((v) => !v);
                 if (unreadCount > 0) setUnreadCount(0);
@@ -173,7 +175,7 @@ function Header() {
         {/* User */}
         {token ? (
           <div className="header__user-wrap" ref={dropdownRef}>
-            <button className="header__user-btn" onClick={() => setShowDropdown((v) => !v)}>
+            <button className="header__user-btn" aria-label="Меню профиля" onClick={() => setShowDropdown((v) => !v)}>
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt={username} className="header__avatar-img" />
               ) : (
@@ -211,7 +213,51 @@ function Header() {
             <Link to="/signupnew" className="header__auth-signup">Регистрация</Link>
           </div>
         )}
+
+        {/* Burger (mobile) */}
+        <button
+          className="header__burger"
+          aria-label="Меню"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="22" height="22">
+            {mobileOpen ? <path d="M6 6l12 12M18 6L6 18"/> : <path d="M3 6h18M3 12h18M3 18h18"/>}
+          </svg>
+        </button>
       </header>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="header__mobile">
+          <form className="header__mobile-search" onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }}>
+            <input
+              className="header__mobile-input"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Поиск событий, тегов..."
+              aria-label="Поиск"
+            />
+          </form>
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`header__mobile-item ${isActive(item.path) ? "header__mobile-item--active" : ""}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              {item.label}
+              {item.badge && <span className="header__nav-badge">{item.badge}</span>}
+            </Link>
+          ))}
+          {!token && (
+            <div className="header__mobile-auth">
+              <Link to="/signin" className="header__auth-signin" onClick={() => setMobileOpen(false)}>Войти</Link>
+              <Link to="/signupnew" className="header__auth-signup" onClick={() => setMobileOpen(false)}>Регистрация</Link>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Logout modal */}
       {showLogoutConfirm && (

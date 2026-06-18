@@ -8,6 +8,7 @@ import SearchResults from './components/SearchResults';
 import UserProfile from './components/Profile';
 import LikedEvents from './components/LikedEvents';
 import EventLikers from './components/EventLikers';
+import EventRegistrants from './components/EventRegistrants';
 import EditProfile from './components/EditProfile';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './components/AdminDashboard';
@@ -35,6 +36,7 @@ function AppContent() {
         <Route path="/eventlist" element={<EventList />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events/:id/likers" element={<EventLikers />} />
+        <Route path="/events/:id/registrants" element={<EventRegistrants />} />
         <Route path="/request-event" element={<EventRequestForm />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/profile/:username?" element={<UserProfile />} />

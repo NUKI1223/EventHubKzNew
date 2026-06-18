@@ -210,6 +210,18 @@
   text-decoration: underline;
 }
 
+.orgd-card__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  padding-top: var(--space-xs);
+}
+
+.orgd-card__links .orgd-card__likers {
+  margin-left: 0;
+}
+
 .orgd-card__deadline {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);

@@ -115,3 +115,29 @@
     height: 14px;
   }
 }
+
+/* ===== icon variant: heart in card corner ===== */
+.like-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px 5px 8px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-500, #6b6253);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 150ms ease, color 150ms ease;
+}
+.like-icon:hover { transform: translateY(-1px); color: var(--rose-ink, #80343a); }
+.like-icon:active { transform: scale(0.94); }
+.like-icon--on { color: var(--rose-ink, #80343a); }
+.like-icon:disabled { opacity: 0.6; cursor: not-allowed; }
+.like-icon__count { font-variant-numeric: tabular-nums; }
+.like-icon .like-button__icon,
+.like-button .like-button__icon { transition: transform 150ms ease; }
+.like-icon--on .like-button__icon { animation: likeBounce 0.45s ease; }

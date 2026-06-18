@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api';
 import '../css/EventList.css';
 import { SkeletonCard } from './Skeleton';
@@ -8,32 +9,43 @@ import EventCard from './EventCard';
 import Pagination from './Pagination';
 import { EVENTS_PER_PAGE } from '../constants';
 import { useEventFiltering } from '../hooks/useEventFiltering';
-import { isPastEvent } from '../utils/dateUtils';
+import { isPastEvent, timeBucket, BUCKET_LABELS } from '../utils/dateUtils';
+import { findCategory } from '../config/categories';
 
 const EventList = () => {
+  const [searchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const currentUserId = localStorage.getItem('userId');
 
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [selectedCity, setSelectedCity] = useState('');
-  const [onlineOnly, setOnlineOnly] = useState(false);
-  const [sortOption, setSortOption] = useState('');
+  // Начальные фильтры из query-параметров (переходы с лендинга: ?type / ?tag / ?city / ?online).
+  const [selectedTags, setSelectedTags] = useState(
+    () => (searchParams.get('tag') ? [searchParams.get('tag')] : []));
+  const [selectedCity, setSelectedCity] = useState(() => searchParams.get('city') || '');
+  const [onlineOnly, setOnlineOnly] = useState(() => searchParams.get('online') === 'true');
+  const [sortOption, setSortOption] = useState('nameAsc');
   const [showPast, setShowPast] = useState(false);
+  const [category, setCategory] = useState(() => findCategory(searchParams.get('type')));
 
   const [availableTags, setAvailableTags] = useState([]);
   const [showAllTags, setShowAllTags] = useState(false);
 
+  // Один батч-запрос на страницу вместо N запросов с карточек (лайки/записи).
+  const [likeCounts, setLikeCounts] = useState({});
+  const [regCounts, setRegCounts] = useState({});
+  const [likedIds, setLikedIds] = useState(() => new Set());
+  const [registeredIds, setRegisteredIds] = useState(() => new Set());
+
   const { activeEvents, pastCount } = useMemo(() => {
     const past = events.filter(isPastEvent);
     const active = events.filter(e => !isPastEvent(e));
-    return {
-      activeEvents: showPast ? events : active,
-      pastCount: past.length,
-    };
-  }, [events, showPast]);
+    const base = showPast ? events : active;
+    // Категория с лендинга (Хакатоны/Митапы/Онлайн/…) фильтрует по своему матчеру.
+    const byCategory = category ? base.filter(category.match) : base;
+    return { activeEvents: byCategory, pastCount: past.length };
+  }, [events, showPast, category]);
 
   const filteredEvents = useEventFiltering(activeEvents, {
     selectedTags, selectedCity, onlineOnly, sortOption,
@@ -48,11 +60,28 @@ const EventList = () => {
     setError(null);
     try {
       const res = await api.get('/api/events');
-      setEvents(res.data);
+      const list = Array.isArray(res.data) ? res.data : [];
+      setEvents(list);
+      loadEngagement(list.map(e => e.id));
     } catch (err) {
       setError('Ошибка при загрузке мероприятий');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Батч-загрузка вовлечённости: счётчики лайков/записей + что лайкнул/куда записан текущий юзер.
+  const loadEngagement = (ids) => {
+    if (ids.length) {
+      const params = { eventIds: ids.join(',') };
+      api.get('/api/likes/counts', { params }).then(r => setLikeCounts(r.data || {})).catch(() => {});
+      api.get('/api/registrations/counts', { params }).then(r => setRegCounts(r.data || {})).catch(() => {});
+    }
+    if (currentUserId) {
+      api.get(`/api/likes/user/${currentUserId}/events`)
+        .then(r => setLikedIds(new Set(Array.isArray(r.data) ? r.data : []))).catch(() => {});
+      api.get(`/api/registrations/user/${currentUserId}/events`)
+        .then(r => setRegisteredIds(new Set(Array.isArray(r.data) ? r.data : []))).catch(() => {});
     }
   };
 
@@ -125,6 +154,20 @@ const EventList = () => {
           )}
         </div>
 
+        {category && (
+          <div className="active-category">
+            <span className="active-category__chip">
+              {category.label}
+              <button
+                type="button"
+                className="active-category__x"
+                onClick={() => setCategory(null)}
+                aria-label="Сбросить категорию"
+              >×</button>
+            </span>
+          </div>
+        )}
+
         <div className="tag-filter">
           <div className="tag-list">
             {tagsToShow.map(tag => (
@@ -154,16 +197,50 @@ const EventList = () => {
 
       <div className="events-grid">
         {paginated.length > 0 ? (
-          paginated.map(event => (
-            <EventCard key={event.id} event={event} currentUserId={currentUserId} />
-          ))
+          (() => {
+            // При сортировке по дате показываем заголовки-«вёдра»: Сегодня / На этой неделе / …
+            if (sortOption !== 'date') {
+              return paginated.map(event => (
+                <EventCard
+                key={event.id}
+                event={event}
+                currentUserId={currentUserId}
+                liked={likedIds.has(event.id)}
+                likeCount={likeCounts[event.id] ?? event.likesCount ?? 0}
+                registered={registeredIds.has(event.id)}
+                regCount={regCounts[event.id] ?? 0}
+              />
+              ));
+            }
+            const nodes = [];
+            let last = null;
+            for (const event of paginated) {
+              const b = timeBucket(event);
+              if (b !== last) {
+                nodes.push(
+                  <div key={`grp-${b}`} className="events-group-header">{BUCKET_LABELS[b] || ''}</div>
+                );
+                last = b;
+              }
+              nodes.push(<EventCard
+                key={event.id}
+                event={event}
+                currentUserId={currentUserId}
+                liked={likedIds.has(event.id)}
+                likeCount={likeCounts[event.id] ?? event.likesCount ?? 0}
+                registered={registeredIds.has(event.id)}
+                regCount={regCounts[event.id] ?? 0}
+              />);
+            }
+            return nodes;
+          })()
         ) : (
           <EmptyState
             icon="search"
             title="Ничего не найдено"
             subtitle="Попробуйте изменить фильтры или сбросить параметры поиска"
             actionText="Сбросить фильтры"
-            onAction={() => { setSelectedTags([]); setSelectedCity(''); setOnlineOnly(false); setSortOption(''); }}
+            onAction={() => { setSelectedTags([]); setSelectedCity(''); setOnlineOnly(false); setSortOption('nameAsc'); setCategory(null); }}
           />
         )}
       </div>

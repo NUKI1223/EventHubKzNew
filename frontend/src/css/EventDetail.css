@@ -347,3 +347,32 @@
   color: #5d544a;
   font-size: 14px;
 }
+
+/* ===== quick actions: calendar + share ===== */
+.event-detail__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.event-detail__quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--color-border, #e8dfce);
+  background: var(--color-surface, #fff);
+  color: var(--color-text-secondary, #6b6253);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+.event-detail__quick-btn:hover {
+  border-color: var(--color-primary, #aecee3);
+  color: var(--color-primary-dark, #2a5475);
+  transform: translateY(-1px);
+}

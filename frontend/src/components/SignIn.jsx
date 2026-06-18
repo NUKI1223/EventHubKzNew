@@ -34,7 +34,9 @@ function SignIn() {
       if (res.data.userId) {
         localStorage.setItem("userId", String(res.data.userId));
       }
-      navigate("/");
+      // Возврат на страницу, с которой гостя отправили на вход (?redirect=...).
+      const redirect = new URLSearchParams(location.search).get("redirect");
+      navigate(redirect || "/");
     } catch (err) {
       const msg = err.response?.data?.message || "Неверный email или пароль";
       setError(msg);

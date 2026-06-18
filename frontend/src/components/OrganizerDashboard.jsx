@@ -45,12 +45,15 @@ const OrganizerDashboard = () => {
         // Реальный счётчик лайков живёт в like-service (поле Event.likeCount
         // денормализовано и не обновляется фронтом), поэтому берём его оттуда.
         const withLikes = await Promise.all(evList.map(async (ev) => {
-          try {
-            const { data } = await api.get(`/api/likes/event/${ev.id}/count`);
-            return { ...ev, likesCount: typeof data === 'number' ? data : (ev.likesCount || 0) };
-          } catch {
-            return { ...ev, likesCount: ev.likesCount || 0 };
-          }
+          const [likesData, regsData] = await Promise.all([
+            api.get(`/api/likes/event/${ev.id}/count`).then(r => r.data).catch(() => null),
+            api.get(`/api/registrations/event/${ev.id}/count`).then(r => r.data).catch(() => null),
+          ]);
+          return {
+            ...ev,
+            likesCount: typeof likesData === 'number' ? likesData : (ev.likesCount || 0),
+            registrationsCount: typeof regsData === 'number' ? regsData : 0,
+          };
         }));
         setEvents(withLikes);
         const reqs = Array.isArray(reqRes.data) ? reqRes.data : [];
@@ -69,6 +72,7 @@ const OrganizerDashboard = () => {
 
   const stats = useMemo(() => ({
     events: events.length,
+    registrations: events.reduce((s, e) => s + (e.registrationsCount || 0), 0),
     likes: events.reduce((s, e) => s + (e.likesCount || 0), 0),
     views: events.reduce((s, e) => s + (e.viewsCount || 0), 0),
     pending: requests.filter(r => r.status === 'PENDING').length,
@@ -97,6 +101,10 @@ const OrganizerDashboard = () => {
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.events}</span>
           <span className="orgd__stat-lbl">Опубликовано</span>
+        </div>
+        <div className="orgd__stat">
+          <span className="orgd__stat-val">{stats.registrations}</span>
+          <span className="orgd__stat-lbl">Записалось всего</span>
         </div>
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.likes}</span>
@@ -164,6 +172,15 @@ const OrganizerDashboard = () => {
                     <div className="orgd-card__date">{formatDate(ev.eventDate)}</div>
 
                     <div className="orgd-card__metrics">
+                      <span className="orgd-metric" title="Записалось">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        {ev.registrationsCount || 0}
+                      </span>
                       <span className="orgd-metric" title="Лайки">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
                           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>
@@ -177,6 +194,13 @@ const OrganizerDashboard = () => {
                         </svg>
                         {ev.viewsCount || 0}
                       </span>
+                    </div>
+                    <div className="orgd-card__links">
+                      {ev.registrationType === 'NATIVE' && (
+                        <Link to={`/events/${ev.id}/registrants`} className="orgd-card__likers">
+                          Кто идёт →
+                        </Link>
+                      )}
                       <Link to={`/events/${ev.id}/likers`} className="orgd-card__likers">
                         Кто лайкнул →
                       </Link>

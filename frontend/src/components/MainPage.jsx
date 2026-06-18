@@ -1,20 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
+import { CATEGORIES } from "../config/categories";
 import "../css/MainPage.css";
 
 const MONTHS_ABBR = ["ЯНВ", "ФЕВ", "МАР", "АПР", "МАЙ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК"];
 const MONTHS_IN = ["январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре"];
 const SEASONS = ["Зимний", "Зимний", "Весенний", "Весенний", "Весенний", "Летний", "Летний", "Летний", "Осенний", "Осенний", "Осенний", "Зимний"];
-
-const CATEGORIES = [
-  { label: "Хакатоны",    color: "peach",    icon: "⚡", match: (e) => /hack|хакатон/i.test(e.title) || (e.tags || []).includes("hackathon") },
-  { label: "Митапы",      color: "sage",     icon: "●",  match: (e) => /meetup|митап/i.test(e.title) || (e.tags || []).includes("meetup") },
-  { label: "Конференции", color: "butter",   icon: "◆",  match: (e) => /\bconf|summit|forum|конференц/i.test(e.title) || (e.tags || []).includes("conference") },
-  { label: "Воркшопы",    color: "lavender", icon: "✦",  match: (e) => /workshop|воркшоп|weekend|days?\b/i.test(e.title) || (e.tags || []).includes("workshop") },
-  { label: "Онлайн",      color: "sky",      icon: "◯",  match: (e) => e.online },
-  { label: "Студентам",   color: "rose",     icon: "✿",  match: (e) => (e.tags || []).some(t => ["career", "student"].includes(t)) || /student|студент/i.test(e.title) },
-];
 
 const FEATURES = [
   "Поиск по тегам и городам",
@@ -325,8 +317,22 @@ function MainPage() {
               Платформа IT-событий Казахстана. Хакатоны, митапы, конференции и воркшопы — в одном месте.
             </p>
             <div className="mp-footer__social">
-              {["TG","IG","YT","LI"].map((s) => (
-                <div key={s} className="mp-footer__social-btn mp-mono">{s}</div>
+              {[
+                { s: "TG", label: "Telegram",  href: "https://t.me/eventhubkz" },
+                { s: "IG", label: "Instagram", href: "https://instagram.com/eventhubkz" },
+                { s: "YT", label: "YouTube",   href: "https://youtube.com/@eventhubkz" },
+                { s: "LI", label: "LinkedIn",  href: "https://linkedin.com/company/eventhubkz" },
+              ].map(({ s, label, href }) => (
+                <a
+                  key={s}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="mp-footer__social-btn mp-mono"
+                >
+                  {s}
+                </a>
               ))}
             </div>
           </div>

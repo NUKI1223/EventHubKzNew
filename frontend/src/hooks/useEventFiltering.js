@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { isPastEvent } from '../utils/dateUtils';
 
 export function useEventFiltering(events, { selectedTags, selectedCity, onlineOnly, sortOption }) {
   return useMemo(() => {
@@ -14,13 +15,19 @@ export function useEventFiltering(events, { selectedTags, selectedCity, onlineOn
       filtered = filtered.filter(e => e.online === true || e.online === 'true');
     }
 
-    if (sortOption === 'nameAsc') {
-      filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    } else if (sortOption === 'date') {
-      filtered.sort((a, b) => Date.parse(a.eventDate) - Date.parse(b.eventDate));
-    } else if (sortOption === 'likes') {
-      filtered.sort((a, b) => (Number(b.likeCount) || 0) - (Number(a.likeCount) || 0));
-    }
+    const byOption = (a, b) => {
+      if (sortOption === 'nameAsc') return (a.title || '').localeCompare(b.title || '');
+      if (sortOption === 'date') return Date.parse(a.eventDate) - Date.parse(b.eventDate);
+      if (sortOption === 'likes') return (Number(b.likeCount) || 0) - (Number(a.likeCount) || 0);
+      return 0;
+    };
+
+    // Прошедшие всегда уходят вниз, независимо от выбранной сортировки.
+    filtered.sort((a, b) => {
+      const pa = isPastEvent(a), pb = isPastEvent(b);
+      if (pa !== pb) return pa ? 1 : -1;
+      return byOption(a, b);
+    });
 
     return filtered;
   }, [events, selectedTags, selectedCity, onlineOnly, sortOption]);
