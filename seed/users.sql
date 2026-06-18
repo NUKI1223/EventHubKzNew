@@ -15,7 +15,8 @@ INSERT INTO users (id, username, email, password, role, description, avatar_url,
   (7, 'bauyrzhan', 'bauyrzhan.mukashev@example.kz','$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'USER',  'Security engineer, AppSec & CTF. Веду блог про безопасность.', NULL, true),
   (8, 'kamila',    'kamila.nurlanova@example.kz',  '$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'USER',  'PM в EdTech. Слежу за рынком IT-образования в Казахстане.', NULL, true),
   (9, 'yerzhan',   'yerzhan.serikbaev@example.kz', '$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'USER',  'AI Research, NLP. Делаю pet-проекты с LLM.', NULL, true),
-  (10,'alina',     'alina.romanova@example.kz',    '$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'USER',  'Студентка AITU, второй курс. Учусь, хожу на хакатоны.', NULL, true);
+  (10,'alina',     'alina.romanova@example.kz',    '$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'USER',  'Студентка AITU, второй курс. Учусь, хожу на хакатоны.', NULL, true),
+  (11,'admin',     'admin@eventhub.kz',            '$2b$10$qJ9o8sTfLhMJJgcfXFqBquTG73k0uLPn80xgV1NlICluqNZTPayj2', 'ADMIN', 'Администратор платформы EventHub.kz. Модерация заявок и поддержка пользователей.', NULL, true);
 
 -- contacts: additionalProp1=telegram, 2=github, 3=instagram, 4=facebook
 INSERT INTO user_contacts (user_id, contact_type, contact_value) VALUES
@@ -46,6 +47,6 @@ INSERT INTO user_tags (user_id, tag_name) VALUES
   (9, 'ML / AI'), (9, 'Python'),
   (10, 'Студент'), (10, 'Open to Work'), (10, 'Frontend');
 
-SELECT setval(pg_get_serial_sequence('users', 'id'), 10, true);
+SELECT setval(pg_get_serial_sequence('users', 'id'), 11, true);
 
 COMMIT;

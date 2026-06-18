@@ -61,9 +61,10 @@ step() {
   fi
 }
 
-step postgres-users  users_db  users  seed/users.sql  "users"
-step postgres-events events_db events seed/events.sql "events + tags"
-step postgres-likes  likes_db  likes  seed/likes.sql  "likes"
+step postgres-users  users_db  users          seed/users.sql    "users"
+step postgres-events events_db events         seed/events.sql   "events + tags"
+step postgres-events events_db event_requests seed/requests.sql "event-requests + support"
+step postgres-likes  likes_db  likes          seed/likes.sql    "likes"
 
 # Денормализованный like_count: имеет смысл только когда реально стоят
 # наши тестовые события (id 1..15). Запускаем при --force ИЛИ когда в users
