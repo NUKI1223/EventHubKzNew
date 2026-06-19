@@ -86,9 +86,13 @@ public class RegistrationController {
             @RequestHeader("X-User-Email") String userEmail,
             @RequestHeader(value = "X-Username", required = false) String username,
             @RequestBody(required = false) Map<String, Object> body) {
-        @SuppressWarnings("unchecked")
-        Map<String, String> answers = body == null ? null
-                : (Map<String, String>) (Map<?, ?>) body.getOrDefault("answers", null);
+        Map<String, String> answers = null;
+        if (body != null && body.get("answers") instanceof Map<?, ?> raw) {
+            answers = new java.util.HashMap<>();
+            for (Map.Entry<?, ?> e : raw.entrySet()) {
+                answers.put(String.valueOf(e.getKey()), e.getValue() == null ? null : String.valueOf(e.getValue()));
+            }
+        }
         EventRegistration registration = registrationService.register(userId, eventId, userEmail, username, answers);
         return ResponseEntity.status(HttpStatus.CREATED).body(registration);
     }

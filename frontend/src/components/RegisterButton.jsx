@@ -59,7 +59,7 @@ const RegisterButton = ({
   const handleClick = (e) => { e.preventDefault(); e.stopPropagation(); if (!disabled) toggle(); };
 
   const common = {
-    disabled: disabled || busy,
+    disabled: disabled || busy || modalOpen,
     'aria-pressed': registered,
     'aria-busy': busy,
     'aria-label': registered ? 'Отменить запись на мероприятие' : 'Записаться на мероприятие',
