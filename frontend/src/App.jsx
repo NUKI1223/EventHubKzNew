@@ -11,6 +11,8 @@ import EventLikers from './components/EventLikers';
 import EventRegistrants from './components/EventRegistrants';
 import EditProfile from './components/EditProfile';
 import AdminRoute from './components/AdminRoute';
+import CheckinPage from './components/CheckinPage';
+import PrivateRoute from './components/PrivateRoute';
 import AdminDashboard from './components/AdminDashboard';
 import SignUpNew from './components/SignUpNew';
 import SignIn from './components/SignIn';
@@ -37,6 +39,7 @@ function AppContent() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events/:id/likers" element={<EventLikers />} />
         <Route path="/events/:id/registrants" element={<EventRegistrants />} />
+        <Route path="/checkin/:code" element={<PrivateRoute><CheckinPage /></PrivateRoute>} />
         <Route path="/request-event" element={<EventRequestForm />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/profile/:username?" element={<UserProfile />} />
