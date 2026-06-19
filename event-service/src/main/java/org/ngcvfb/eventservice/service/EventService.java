@@ -203,6 +203,44 @@ public class EventService {
         });
     }
 
+    private void requireOrganizerOrAdmin(Event event, Long requesterId, String role) {
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Управлять сотрудниками может только организатор мероприятия");
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = "events", key = "#eventId")
+    public void addStaff(Long eventId, Long userId, Long requesterId, String role) {
+        Event event = findEventOrThrow(eventId);
+        requireOrganizerOrAdmin(event, requesterId, role);
+        if (event.getStaffIds() == null) {
+            event.setStaffIds(new HashSet<>());
+        }
+        event.getStaffIds().add(userId);
+        eventRepository.save(event);
+        log.info("Added staff {} to event {} by {}", userId, eventId, requesterId);
+    }
+
+    @Transactional
+    @CacheEvict(value = "events", key = "#eventId")
+    public void removeStaff(Long eventId, Long userId, Long requesterId, String role) {
+        Event event = findEventOrThrow(eventId);
+        requireOrganizerOrAdmin(event, requesterId, role);
+        if (event.getStaffIds() != null) {
+            event.getStaffIds().remove(userId);
+            eventRepository.save(event);
+        }
+        log.info("Removed staff {} from event {} by {}", userId, eventId, requesterId);
+    }
+
+    public List<EventDTO> getStaffedBy(Long userId) {
+        return eventRepository.findUpcomingStaffedBy(userId, LocalDateTime.now())
+                .stream().map(this::toDTO).toList();
+    }
+
     /**
      * Список участников мероприятия для организатора (или администратора): id, имя, email.
      * Агрегирует записи из registration-service и контакты из user-service.

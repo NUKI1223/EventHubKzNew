@@ -74,6 +74,31 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventsByTag(tag));
     }
 
+    @PostMapping("/{id}/staff")
+    public ResponseEntity<Void> addStaff(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Long> body,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        eventService.addStaff(id, body.get("userId"), userId, role);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/staff/{staffUserId}")
+    public ResponseEntity<Void> removeStaff(
+            @PathVariable Long id,
+            @PathVariable Long staffUserId,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        eventService.removeStaff(id, staffUserId, userId, role);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/staffed-by/{userId}")
+    public ResponseEntity<List<EventDTO>> getStaffedBy(@PathVariable Long userId) {
+        return ResponseEntity.ok(eventService.getStaffedBy(userId));
+    }
+
     @PostMapping
     public ResponseEntity<EventDTO> createEvent(
             @Valid @RequestBody EventDTO eventDTO,
