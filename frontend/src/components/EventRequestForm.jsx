@@ -18,6 +18,7 @@ const EventRequestForm = () => {
     online: false,
     eventDate: '',
     registrationDeadline: '',
+    registrationType: 'NATIVE',
     externalLink: '',
     contactEmail: '',
   });
@@ -79,20 +80,25 @@ const EventRequestForm = () => {
     setLoading(true);
     setError(null);
     try {
+      const isExternal = formData.registrationType === 'EXTERNAL';
       let externalLink = formData.externalLink ? formData.externalLink.trim() : '';
-      if (!externalLink) {
-        setError('Укажите ссылку на сайт мероприятия');
-        setLoading(false);
-        return;
-      }
-      if (!/^https?:\/\//i.test(externalLink)) {
-        externalLink = 'https://' + externalLink;
-      }
-      const URL_RE = /^https?:\/\/[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#][^\s]*)?$/;
-      if (!URL_RE.test(externalLink)) {
-        setError('Введите корректный URL вида https://example.com');
-        setLoading(false);
-        return;
+      if (isExternal) {
+        if (!externalLink) {
+          setError('Укажите ссылку на сайт мероприятия');
+          setLoading(false);
+          return;
+        }
+        if (!/^https?:\/\//i.test(externalLink)) {
+          externalLink = 'https://' + externalLink;
+        }
+        const URL_RE = /^https?:\/\/[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#][^\s]*)?$/;
+        if (!URL_RE.test(externalLink)) {
+          setError('Введите корректный URL вида https://example.com');
+          setLoading(false);
+          return;
+        }
+      } else {
+        externalLink = '';
       }
 
       let mainImageUrl = null;
@@ -105,7 +111,7 @@ const EventRequestForm = () => {
         mainImageUrl = uploadRes.data.fileUrl;
       }
 
-      const cleanQuestions = questions
+      const cleanQuestions = isExternal ? [] : questions
         .map(q => ({ ...q, label: q.label.trim(), options: (q.options || []).map(o => o.trim()).filter(Boolean) }))
         .filter(q => q.label && (q.type !== 'SINGLE' || q.options.length >= 2));
 
@@ -118,6 +124,7 @@ const EventRequestForm = () => {
         online: formData.online,
         eventDate: formData.eventDate,
         registrationDeadline: formData.registrationDeadline,
+        registrationType: formData.registrationType,
         externalLink,
         contactEmail: formData.contactEmail,
         mainImageUrl,
@@ -134,6 +141,7 @@ const EventRequestForm = () => {
         online: false,
         eventDate: '',
         registrationDeadline: '',
+        registrationType: 'NATIVE',
         externalLink: '',
         contactEmail: '',
       });
@@ -282,26 +290,60 @@ const EventRequestForm = () => {
           <TagSelector selectedTags={selectedTags} onChange={setSelectedTags} />
         </div>
 
+        {/* Регистрация */}
+        <div className="erf__section">
+          <div className="erf__section-title">Регистрация</div>
+
+          <div className="erf__field">
+            <div className="erf__regtype">
+              <label className={`erf__regtype-opt ${formData.registrationType === 'NATIVE' ? 'erf__regtype-opt--on' : ''}`}>
+                <input
+                  type="radio"
+                  name="registrationType"
+                  value="NATIVE"
+                  checked={formData.registrationType === 'NATIVE'}
+                  onChange={handleChange}
+                />
+                <span className="erf__regtype-title">На нашем сайте</span>
+                <span className="erf__regtype-desc">Участники записываются здесь — вы получаете список, QR-билеты и ответы на вопросы.</span>
+              </label>
+              <label className={`erf__regtype-opt ${formData.registrationType === 'EXTERNAL' ? 'erf__regtype-opt--on' : ''}`}>
+                <input
+                  type="radio"
+                  name="registrationType"
+                  value="EXTERNAL"
+                  checked={formData.registrationType === 'EXTERNAL'}
+                  onChange={handleChange}
+                />
+                <span className="erf__regtype-title">По внешней ссылке</span>
+                <span className="erf__regtype-desc">Регистрация на вашем сайте — мы просто покажем кнопку-ссылку.</span>
+              </label>
+            </div>
+          </div>
+
+          {formData.registrationType === 'EXTERNAL' && (
+            <div className="erf__field">
+              <label className="erf__label">
+                Ссылка на сайт мероприятия <span className="erf__required">*</span>
+              </label>
+              <input
+                className="erf__input"
+                type="url"
+                name="externalLink"
+                value={formData.externalLink}
+                onChange={handleChange}
+                placeholder="https://example.com/event"
+                required
+                pattern="^https?://[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#].*)?$"
+                title="Введите корректный URL вида https://example.com"
+              />
+            </div>
+          )}
+        </div>
+
         {/* Дополнительно */}
         <div className="erf__section">
           <div className="erf__section-title">Дополнительно</div>
-
-          <div className="erf__field">
-            <label className="erf__label">
-              Ссылка на сайт мероприятия <span className="erf__required">*</span>
-            </label>
-            <input
-              className="erf__input"
-              type="url"
-              name="externalLink"
-              value={formData.externalLink}
-              onChange={handleChange}
-              placeholder="https://example.com/event"
-              required
-              pattern="^https?://[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#].*)?$"
-              title="Введите корректный URL вида https://example.com"
-            />
-          </div>
 
           <div className="erf__field">
             <label className="erf__label">
@@ -334,13 +376,15 @@ const EventRequestForm = () => {
           </div>
         </div>
 
-        <div className="erf__section">
-          <div className="erf__section-title">Вопросы к участникам (необязательно)</div>
-          <p className="erf__sub" style={{ margin: '0 0 10px' }}>
-            Участник ответит на них при регистрации (только для регистрации на нашем сайте).
-          </p>
-          <QuestionEditor questions={questions} onChange={setQuestions} />
-        </div>
+        {formData.registrationType === 'NATIVE' && (
+          <div className="erf__section">
+            <div className="erf__section-title">Вопросы к участникам (необязательно)</div>
+            <p className="erf__sub" style={{ margin: '0 0 10px' }}>
+              Участник ответит на них при регистрации на нашем сайте.
+            </p>
+            <QuestionEditor questions={questions} onChange={setQuestions} />
+          </div>
+        )}
 
         {error && <div className="erf__error">{error}</div>}
 

@@ -13,8 +13,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -61,6 +63,15 @@ public class EventRequestService {
 
     @Transactional
     public EventRequest createRequest(EventRequest request) {
+        boolean external = !"NATIVE".equalsIgnoreCase(request.getRegistrationType());
+        if (external && (request.getExternalLink() == null || request.getExternalLink().isBlank())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Для внешней регистрации нужна ссылка на сайт мероприятия");
+        }
+        // Вопросы имеют смысл только для записи на платформе.
+        if (external) {
+            request.setQuestions(null);
+        }
         request.setStatus(RequestStatus.PENDING);
         EventRequest saved = eventRequestRepository.save(request);
         log.info("Created event request: {} by user {}", saved.getId(), saved.getRequesterId());
@@ -97,6 +108,7 @@ public class EventRequestService {
         dto.setRegistrationDeadline(approved.getRegistrationDeadline());
         dto.setMainImageUrl(approved.getMainImageUrl());
         dto.setExternalLink(approved.getExternalLink());
+        dto.setRegistrationType(approved.getRegistrationType());
         dto.setQuestions(approved.getQuestions());
         String organizerEmail = approved.getContactEmail() != null && !approved.getContactEmail().isBlank()
                 ? approved.getContactEmail()

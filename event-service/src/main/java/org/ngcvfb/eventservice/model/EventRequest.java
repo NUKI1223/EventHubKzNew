@@ -72,11 +72,14 @@ public class EventRequest {
             message = "URL изображения должен начинаться с http:// или https://")
     private String mainImageUrl;
 
-    @NotBlank(message = "Ссылка на сайт мероприятия обязательна")
     @Pattern(
-            regexp = "^https?://[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}(?:[:/?#][^\\s]*)?$",
+            regexp = "^$|^https?://[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}(?:[:/?#][^\\s]*)?$",
             message = "Введите корректный URL вида https://example.com")
     private String externalLink;
+
+    // NATIVE — запись внутри платформы (с вопросами); EXTERNAL — переход по ссылке.
+    @Column(name = "registration_type")
+    private String registrationType;
 
     @Column(name = "requester_id", nullable = false)
     private Long requesterId;

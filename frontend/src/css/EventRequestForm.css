@@ -194,6 +194,60 @@
   cursor: pointer;
 }
 
+/* Registration type selector */
+.erf__regtype {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.erf__regtype-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  padding-left: 38px;
+  position: relative;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+}
+
+.erf__regtype-opt input {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sky-ink);
+  cursor: pointer;
+}
+
+.erf__regtype-opt--on {
+  border-color: var(--sky);
+  background: var(--sky-soft);
+}
+
+.erf__regtype-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.erf__regtype-desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-500);
+}
+
+@media (max-width: 560px) {
+  .erf__regtype {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* File upload */
 .erf__file-label {
   display: flex;
