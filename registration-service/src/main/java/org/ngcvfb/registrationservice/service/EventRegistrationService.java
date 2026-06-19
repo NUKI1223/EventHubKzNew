@@ -71,6 +71,20 @@ public class EventRegistrationService {
         return registrationRepository.findByUserIdAndEventId(userId, eventId).orElse(null);
     }
 
+    /** Участники события с ответами — только организатор события или админ. */
+    public List<org.ngcvfb.registrationservice.dto.AttendeeAnswerView> getAttendeeAnswers(
+            Long eventId, Long requesterId, String role) {
+        EventDTO event = fetchEvent(eventId);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Ответы участников доступны только организатору мероприятия");
+        }
+        return registrationRepository.findByEventId(eventId).stream()
+                .map(org.ngcvfb.registrationservice.dto.AttendeeAnswerView::from)
+                .toList();
+    }
+
     // Намеренно НЕ @Transactional: при гонке вставка падает на unique-constraint,
     // и повторное чтение должно идти в свежей транзакции, а не в помеченной rollback-only.
     public EventRegistration register(Long userId, Long eventId, String userEmail, String username,

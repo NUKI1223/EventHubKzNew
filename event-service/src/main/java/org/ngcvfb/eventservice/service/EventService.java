@@ -218,26 +218,34 @@ public class EventService {
 
         List<Map<String, Object>> registrations;
         try {
-            registrations = registrationClient.getRegistrationsByEvent(eventId);
+            registrations = registrationClient.getEventAttendees(eventId, requesterId, role);
         } catch (Exception e) {
             log.error("Failed to fetch registrations for event {}: {}", eventId, e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Сервис записей временно недоступен, попробуйте позже");
         }
-        Map<Long, String> statusByUser = registrations.stream()
-                .filter(r -> r.get("userId") != null)
-                .collect(Collectors.toMap(
-                        r -> Long.valueOf(r.get("userId").toString()),
-                        r -> r.get("status") == null ? "REGISTERED" : r.get("status").toString(),
-                        (a, b) -> a));
-        List<Long> userIds = statusByUser.keySet().stream().distinct().collect(Collectors.toList());
+        Map<Long, String> statusByUser = new java.util.HashMap<>();
+        Map<Long, Map<String, String>> answersByUser = new java.util.HashMap<>();
+        for (Map<String, Object> r : registrations) {
+            if (r.get("userId") == null) continue;
+            Long uid = Long.valueOf(r.get("userId").toString());
+            statusByUser.put(uid, r.get("status") == null ? "REGISTERED" : r.get("status").toString());
+            Object ans = r.get("answers");
+            if (ans instanceof Map<?, ?> m) {
+                Map<String, String> a = new java.util.HashMap<>();
+                m.forEach((k, v) -> a.put(String.valueOf(k), v == null ? "" : String.valueOf(v)));
+                answersByUser.put(uid, a);
+            }
+        }
+        List<Long> userIds = new java.util.ArrayList<>(statusByUser.keySet());
         if (userIds.isEmpty()) {
             return List.of();
         }
 
         return userClient.getUsersByIds(userIds).stream()
                 .map(u -> new AttendeeDTO(u.getId(), u.getUsername(), u.getEmail(),
-                        statusByUser.getOrDefault(u.getId(), "REGISTERED")))
+                        statusByUser.getOrDefault(u.getId(), "REGISTERED"),
+                        answersByUser.getOrDefault(u.getId(), Map.of())))
                 .sorted((a, b) -> {
                     String an = a.username() == null ? "" : a.username();
                     String bn = b.username() == null ? "" : b.username();

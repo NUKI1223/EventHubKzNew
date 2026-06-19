@@ -37,6 +37,15 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationService.getRegistrationsByEvent(eventId));
     }
 
+    /** Участники с ответами — только организатор/админ (проверка в сервисе через EventClient). */
+    @GetMapping("/event/{eventId}/attendees")
+    public ResponseEntity<List<org.ngcvfb.registrationservice.dto.AttendeeAnswerView>> attendeeAnswers(
+            @PathVariable Long eventId,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        return ResponseEntity.ok(registrationService.getAttendeeAnswers(eventId, userId, role));
+    }
+
     // История записей конкретного пользователя — только сам пользователь или админ.
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<RegistrationView>> getRegistrationsByUser(
