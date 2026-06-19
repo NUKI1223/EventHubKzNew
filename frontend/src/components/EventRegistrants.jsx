@@ -22,6 +22,10 @@ const EventRegistrants = () => {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [filterTags, setFilterTags] = useState([]);
+  const [isOwner, setIsOwner] = useState(false);
+  const [staff, setStaff] = useState([]);
+  const [staffInput, setStaffInput] = useState('');
+  const [staffBusy, setStaffBusy] = useState(false);
   const [checkinCode, setCheckinCode] = useState('');
   const [checkinBusy, setCheckinBusy] = useState(false);
   const [expanded, setExpanded] = useState(() => new Set());
@@ -38,6 +42,42 @@ const EventRegistrants = () => {
     }
   }, [eventId]);
 
+  const loadStaff = useCallback(async (ev) => {
+    const ids = Array.isArray(ev?.staffIds) ? ev.staffIds : [];
+    if (ids.length === 0) { setStaff([]); return; }
+    try {
+      const res = await api.get('/api/users/batch', { params: { ids: ids.join(',') } });
+      setStaff(Array.isArray(res.data) ? res.data : []);
+    } catch { setStaff([]); }
+  }, []);
+
+  const addStaff = async (e) => {
+    e.preventDefault();
+    const name = staffInput.trim();
+    if (!name) return;
+    setStaffBusy(true);
+    try {
+      const u = await api.get(`/api/users/username/${encodeURIComponent(name)}`);
+      const userId = u.data?.id;
+      if (!userId) { toast.error('Пользователь не найден'); return; }
+      await api.post(`/api/events/${eventId}/staff`, { userId });
+      setStaffInput('');
+      setStaff(prev => prev.some(s => s.id === userId) ? prev : [...prev, u.data]);
+      toast.success(`${u.data.username} добавлен в сотрудники`);
+    } catch (err) {
+      toast.error(err?.response?.status === 404 ? 'Пользователь не найден' : 'Не удалось добавить');
+    } finally {
+      setStaffBusy(false);
+    }
+  };
+
+  const removeStaff = async (userId) => {
+    try {
+      await api.delete(`/api/events/${eventId}/staff/${userId}`);
+      setStaff(prev => prev.filter(s => s.id !== userId));
+    } catch { toast.error('Не удалось убрать сотрудника'); }
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -50,10 +90,17 @@ const EventRegistrants = () => {
         document.title = `Идут на «${evRes.data.title}» — EventHub.kz`;
 
         // Организатор события или администратор видит таблицу с email, отметку и выгрузку.
-        const manager = role === 'ADMIN' || (myId != null && String(evRes.data.organizerId) === String(myId));
+        const staffIds = Array.isArray(evRes.data.staffIds) ? evRes.data.staffIds : [];
+        const isOrganizer = myId != null && String(evRes.data.organizerId) === String(myId);
+        const isStaff = myId != null && staffIds.map(String).includes(String(myId));
+        const manager = role === 'ADMIN' || isOrganizer || isStaff;
         setIsManager(manager);
+        setIsOwner(role === 'ADMIN' || isOrganizer);
         if (manager) {
           await fetchAttendees();
+        }
+        if (role === 'ADMIN' || isOrganizer) {
+          await loadStaff(evRes.data);
         }
 
         const regs = Array.isArray(regRes.data) ? regRes.data : [];
@@ -69,7 +116,7 @@ const EventRegistrants = () => {
       }
     };
     load();
-  }, [eventId, role, myId, fetchAttendees]);
+  }, [eventId, role, myId, fetchAttendees, loadStaff]);
 
   const handleCheckIn = async (e) => {
     if (e) e.preventDefault();
@@ -187,6 +234,35 @@ const EventRegistrants = () => {
               Отметить приход
             </button>
           </form>
+
+          {isOwner && (
+            <div className="att-staff">
+              <div className="att-staff__title">Сотрудники мероприятия</div>
+              <div className="att-staff__sub">Могут отмечать приход и видеть ответы. Не редактируют событие.</div>
+              <form className="att-staff__add" onSubmit={addStaff}>
+                <input
+                  className="att-staff__input"
+                  type="text"
+                  placeholder="username сотрудника"
+                  value={staffInput}
+                  onChange={e => setStaffInput(e.target.value)}
+                />
+                <button type="submit" className="att-staff__btn" disabled={staffBusy || !staffInput.trim()}>
+                  Добавить
+                </button>
+              </form>
+              {staff.length > 0 && (
+                <ul className="att-staff__list">
+                  {staff.map(s => (
+                    <li key={s.id} className="att-staff__item">
+                      <span>{s.username}</span>
+                      <button type="button" className="att-staff__remove" onClick={() => removeStaff(s.id)}>×</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {attendees.length === 0 ? (
             <p className="att-panel__empty">Пока никто не записался.</p>

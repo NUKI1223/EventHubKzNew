@@ -291,3 +291,14 @@
 .att-answers__item { display: flex; gap: 8px; }
 .att-answers__item dt { font-weight: 700; min-width: 160px; color: var(--color-text-secondary, #6b6253); }
 .att-answers__item dd { margin: 0; }
+
+.att-staff { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line, #e5e7eb); }
+.att-staff__title { font-weight: 700; font-size: 14px; color: var(--ink-900, #111827); }
+.att-staff__sub { font-size: 12px; color: var(--ink-500, #6b7280); margin: 2px 0 10px; }
+.att-staff__add { display: flex; gap: 8px; }
+.att-staff__input { flex: 1; padding: 8px 10px; border: 1.5px solid var(--line, #e5e7eb); border-radius: 8px; font-size: 13px; }
+.att-staff__btn { padding: 8px 14px; border: none; border-radius: 8px; background: var(--ink-900, #111827); color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; }
+.att-staff__btn:disabled { opacity: .5; cursor: default; }
+.att-staff__list { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.att-staff__item { display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 12px; background: var(--sky-soft, #eef2ff); border-radius: 999px; font-size: 13px; }
+.att-staff__remove { border: none; background: transparent; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-500, #6b7280); }
