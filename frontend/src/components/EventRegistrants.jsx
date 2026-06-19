@@ -24,6 +24,10 @@ const EventRegistrants = () => {
   const [filterTags, setFilterTags] = useState([]);
   const [checkinCode, setCheckinCode] = useState('');
   const [checkinBusy, setCheckinBusy] = useState(false);
+  const [expanded, setExpanded] = useState(() => new Set());
+  const toggleRow = (id) => setExpanded(prev => {
+    const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n;
+  });
 
   const fetchAttendees = useCallback(async () => {
     try {
@@ -100,13 +104,17 @@ const EventRegistrants = () => {
       return;
     }
     const XLSX = await import('xlsx');
-    const rows = attendees.map((a, i) => ({
-      '№': i + 1,
-      'ID': a.userId,
-      'Имя': a.username || '',
-      'Email': a.email || '',
-      'Статус': statusLabel(a.status),
-    }));
+    const rows = attendees.map((a, i) => {
+      const base = {
+        '№': i + 1,
+        'ID': a.userId,
+        'Имя': a.username || '',
+        'Email': a.email || '',
+        'Статус': statusLabel(a.status),
+      };
+      questions.forEach(q => { base[q.label] = a.answers?.[q.id] || ''; });
+      return base;
+    });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws['!cols'] = [{ wch: 5 }, { wch: 8 }, { wch: 24 }, { wch: 30 }, { wch: 12 }];
     const wb = XLSX.utils.book_new();
@@ -114,6 +122,9 @@ const EventRegistrants = () => {
     const safe = (event?.title || `event-${eventId}`).replace(/[^\wа-яА-Я0-9-]+/gi, '_').slice(0, 40);
     XLSX.writeFile(wb, `participants-${safe}.xlsx`);
   };
+
+  const questions = Array.isArray(event?.questions) ? event.questions : [];
+  const labelById = useMemo(() => Object.fromEntries(questions.map(q => [q.id, q.label])), [questions]);
 
   const filtered = useMemo(() => {
     return users.filter(u => {
@@ -183,21 +194,44 @@ const EventRegistrants = () => {
             <div className="att-table-wrap">
               <table className="att-table">
                 <thead>
-                  <tr><th>№</th><th>ID</th><th>Имя</th><th>Email</th><th>Статус</th></tr>
+                  <tr><th>№</th><th>ID</th><th>Имя</th><th>Email</th><th>Статус</th><th></th></tr>
                 </thead>
                 <tbody>
                   {attendees.map((a, i) => (
-                    <tr key={a.userId}>
-                      <td>{i + 1}</td>
-                      <td>{a.userId}</td>
-                      <td>{a.username || '—'}</td>
-                      <td>{a.email || '—'}</td>
-                      <td>
-                        <span className={`att-status ${a.status === 'ATTENDED' ? 'att-status--in' : ''}`}>
-                          {statusLabel(a.status)}
-                        </span>
-                      </td>
-                    </tr>
+                    <React.Fragment key={a.userId}>
+                      <tr>
+                        <td>{i + 1}</td>
+                        <td>{a.userId}</td>
+                        <td>{a.username || '—'}</td>
+                        <td>{a.email || '—'}</td>
+                        <td>
+                          <span className={`att-status ${a.status === 'ATTENDED' ? 'att-status--in' : ''}`}>
+                            {statusLabel(a.status)}
+                          </span>
+                        </td>
+                        <td>
+                          {a.answers && Object.keys(a.answers).length > 0 && (
+                            <button type="button" className="att-answers__toggle" onClick={() => toggleRow(a.userId)}>
+                              {expanded.has(a.userId) ? 'Скрыть' : 'Ответы'}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                      {expanded.has(a.userId) && a.answers && (
+                        <tr className="att-answers__row">
+                          <td colSpan={6}>
+                            <dl className="att-answers">
+                              {Object.entries(a.answers).map(([qid, val]) => (
+                                <div key={qid} className="att-answers__item">
+                                  <dt>{labelById[qid] || qid}</dt>
+                                  <dd>{val}</dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
