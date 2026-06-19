@@ -190,6 +190,20 @@ const AdminEventRequests = () => {
                   </div>
                 )}
 
+                {Array.isArray(request.questions) && request.questions.length > 0 && (
+                  <div className="adm__questions">
+                    <div className="adm__meta-label">ВОПРОСЫ УЧАСТНИКАМ</div>
+                    <ol className="adm__questions-list">
+                      {request.questions.map(q => (
+                        <li key={q.id}>
+                          {q.label}{q.required ? ' *' : ''}
+                          {q.type === 'SINGLE' && q.options?.length ? ` — (${q.options.join(', ')})` : ''}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
                 {request.mainImageUrl && (
                   <img className="adm__img" src={request.mainImageUrl} alt="Обложка" />
                 )}
