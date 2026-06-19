@@ -308,6 +308,7 @@ public class EventService {
         dto.setShortDescription(event.getShortDescription());
         dto.setFullDescription(event.getFullDescription());
         dto.setTags(event.getTags() == null ? null : new HashSet<>(event.getTags()));
+        dto.setStaffIds(event.getStaffIds() == null ? java.util.Set.of() : new HashSet<>(event.getStaffIds()));
         dto.setLocation(event.getLocation());
         dto.setOnline(event.isOnline());
         dto.setEventDate(event.getEventDate());

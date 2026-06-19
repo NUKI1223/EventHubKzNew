@@ -28,6 +28,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE :tag MEMBER OF e.tags")
     List<Event> findByTag(@Param("tag") String tag);
 
+    @Query("SELECT e FROM Event e WHERE :userId MEMBER OF e.staffIds AND e.eventDate > :now ORDER BY e.eventDate ASC")
+    List<Event> findUpcomingStaffedBy(@Param("userId") Long userId, @Param("now") LocalDateTime now);
+
     @Query("SELECT e FROM Event e WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR LOWER(e.shortDescription) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Event> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);

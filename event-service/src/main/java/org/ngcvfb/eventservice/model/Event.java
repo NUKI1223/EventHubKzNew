@@ -37,6 +37,14 @@ public class Event {
     @Column(name = "tag_name")
     private Set<String> tags = new HashSet<>();
 
+    // Сотрудники мероприятия ("доверенные лица"): могут отмечать приход и видеть
+    // ответы участников, но не редактируют событие. EAGER — как tags, чтобы
+    // подгружались для toDTO и проверки прав.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "event_staff", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "user_id")
+    private Set<Long> staffIds = new HashSet<>();
+
     @Column(nullable = false)
     private String location;
 

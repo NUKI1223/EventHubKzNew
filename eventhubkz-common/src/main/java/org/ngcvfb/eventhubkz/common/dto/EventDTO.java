@@ -26,6 +26,7 @@ public class EventDTO {
     private String externalLink;
     private String registrationType;
     private Set<String> tags;
+    private Set<Long> staffIds;
     private List<QuestionDef> questions;
     private Long organizerId;
     private String organizerUsername;
