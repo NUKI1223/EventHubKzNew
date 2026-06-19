@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
 import TagSelector from './TagSelector';
+import QuestionEditor from './QuestionEditor';
 import '../css/EventRequestForm.css';
 
 const EventRequestForm = () => {
@@ -21,6 +22,7 @@ const EventRequestForm = () => {
     contactEmail: '',
   });
   const [selectedTags, setSelectedTags] = useState([]);
+  const [questions, setQuestions] = useState([]);
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -103,6 +105,10 @@ const EventRequestForm = () => {
         mainImageUrl = uploadRes.data.fileUrl;
       }
 
+      const cleanQuestions = questions
+        .map(q => ({ ...q, label: q.label.trim(), options: (q.options || []).map(o => o.trim()).filter(Boolean) }))
+        .filter(q => q.label && (q.type !== 'SINGLE' || q.options.length >= 2));
+
       await api.post('/api/event-requests', {
         title: formData.title,
         shortDescription: formData.shortDescription,
@@ -115,6 +121,7 @@ const EventRequestForm = () => {
         externalLink,
         contactEmail: formData.contactEmail,
         mainImageUrl,
+        questions: cleanQuestions,
       });
 
       toast.success('Заявка успешно отправлена!');
@@ -131,6 +138,7 @@ const EventRequestForm = () => {
         contactEmail: '',
       });
       setSelectedTags([]);
+      setQuestions([]);
       setFile(null);
       setFileName('');
     } catch (err) {
@@ -324,6 +332,14 @@ const EventRequestForm = () => {
               <input type="file" onChange={handleFileChange} accept="image/*" />
             </label>
           </div>
+        </div>
+
+        <div className="erf__section">
+          <div className="erf__section-title">Вопросы к участникам (необязательно)</div>
+          <p className="erf__sub" style={{ margin: '0 0 10px' }}>
+            Участник ответит на них при регистрации (только для регистрации на нашем сайте).
+          </p>
+          <QuestionEditor questions={questions} onChange={setQuestions} />
         </div>
 
         {error && <div className="erf__error">{error}</div>}

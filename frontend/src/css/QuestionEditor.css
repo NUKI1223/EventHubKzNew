@@ -1,0 +1,12 @@
+.qed { display: flex; flex-direction: column; gap: 10px; }
+.qed__item { border: 1px solid var(--color-border, #e8dfce); border-radius: 10px; padding: 12px; background: var(--color-surface-alt, #f9f5ee); }
+.qed__row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.qed__label { flex: 1 1 220px; padding: 8px 10px; border: 1px solid var(--color-border, #e8dfce); border-radius: 8px; }
+.qed__type { padding: 8px 10px; border: 1px solid var(--color-border, #e8dfce); border-radius: 8px; }
+.qed__req { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
+.qed__del { width: 28px; height: 28px; border: none; border-radius: 50%; background: #f3d6d6; color: #a33; cursor: pointer; font-size: 16px; }
+.qed__opts { margin-top: 10px; padding-left: 10px; display: flex; flex-direction: column; gap: 6px; }
+.qed__opt { display: flex; gap: 6px; }
+.qed__opt input { flex: 1; padding: 6px 8px; border: 1px solid var(--color-border, #e8dfce); border-radius: 6px; }
+.qed__opt button { width: 26px; border: none; background: #eee; border-radius: 6px; cursor: pointer; }
+.qed__add, .qed__add-opt { align-self: flex-start; background: none; border: 1px dashed var(--color-primary-dark, #2a5475); color: var(--color-primary-dark, #2a5475); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
