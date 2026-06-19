@@ -18,6 +18,7 @@ export function useToggleResource({
   msgOff,
   msgError = 'Не удалось выполнить действие',
   onActiveChange,
+  onBeforeActivate,
 }) {
   const [active, setActive] = useState(initialActive);
   const [count, setCount] = useState(initialCount);
@@ -36,13 +37,21 @@ export function useToggleResource({
       return;
     }
     const wasActive = active;
+
+    let body;
+    if (!wasActive && onBeforeActivate) {
+      const result = await onBeforeActivate();
+      if (result == null) return; // пользователь отменил
+      body = result;
+    }
+
     setBusy(true);
     // оптимистично
     setActive(!wasActive);
     setCount((c) => Math.max(0, c + (wasActive ? -1 : 1)));
     try {
       if (wasActive) await api.delete(deleteUrl);
-      else await api.post(postUrl);
+      else await api.post(postUrl, body);
       onActiveChange?.(!wasActive);
       const m = wasActive ? msgOff : msgOn;
       if (m) toast.success(m);
@@ -56,7 +65,7 @@ export function useToggleResource({
     } finally {
       setBusy(false);
     }
-  }, [busy, currentUserId, active, postUrl, deleteUrl, msgOn, msgOff, msgError, onActiveChange, navigate]);
+  }, [busy, currentUserId, active, postUrl, deleteUrl, msgOn, msgOff, msgError, onActiveChange, onBeforeActivate, navigate]);
 
   return { active, count, busy, toggle, setActive, setCount };
 }
