@@ -7,9 +7,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.ngcvfb.eventhubkz.common.dto.QuestionDef;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -42,6 +46,11 @@ public class EventRequest {
     @CollectionTable(name = "event_request_tags", joinColumns = @JoinColumn(name = "request_id"))
     @Column(name = "tag_name")
     private Set<String> tags = new HashSet<>();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Size(max = 10, message = "Не больше 10 вопросов")
+    private List<QuestionDef> questions;
 
     @NotBlank(message = "Локация обязательна")
     @Size(max = 200)
