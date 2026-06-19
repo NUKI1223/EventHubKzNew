@@ -97,6 +97,7 @@ public class EventRequestService {
         dto.setRegistrationDeadline(approved.getRegistrationDeadline());
         dto.setMainImageUrl(approved.getMainImageUrl());
         dto.setExternalLink(approved.getExternalLink());
+        dto.setQuestions(approved.getQuestions());
         String organizerEmail = approved.getContactEmail() != null && !approved.getContactEmail().isBlank()
                 ? approved.getContactEmail()
                 : approved.getRequesterEmail();

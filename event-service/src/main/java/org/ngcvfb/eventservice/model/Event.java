@@ -2,9 +2,13 @@ package org.ngcvfb.eventservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.ngcvfb.eventhubkz.common.dto.QuestionDef;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -55,6 +59,10 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(name = "registration_type", length = 20)
     private RegistrationType registrationType;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<QuestionDef> questions;
 
     @Column(name = "organizer_id", nullable = false)
     private Long organizerId;

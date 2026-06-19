@@ -108,6 +108,7 @@ public class EventService {
                 .mainImageUrl(dto.getMainImageUrl())
                 .externalLink(dto.getExternalLink())
                 .registrationType(resolveRegistrationType(dto.getRegistrationType(), dto.getExternalLink()))
+                .questions(dto.getQuestions())
                 .organizerId(organizerId)
                 .organizerEmail(organizerEmail)
                 .likeCount(0)
@@ -313,6 +314,7 @@ public class EventService {
         dto.setOrganizerId(event.getOrganizerId());
         dto.setLikesCount(event.getLikeCount());
         dto.setViewsCount(event.getViewCount() == null ? 0 : event.getViewCount());
+        dto.setQuestions(event.getQuestions());
         return dto;
     }
 }
