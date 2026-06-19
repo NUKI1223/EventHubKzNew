@@ -285,3 +285,9 @@
   color: var(--color-primary-dark, #2a5475);
   border-bottom-color: var(--color-primary-dark, #2a5475);
 }
+
+.pf__staffed { margin-top: 16px; }
+.pf__staffed-title { font-size: 13px; font-weight: 700; color: var(--ink-700, #374151); margin-bottom: 6px; }
+.pf__staffed-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.pf__staffed-link { font-size: 13px; color: var(--sky-ink, #4f46e5); text-decoration: none; }
+.pf__staffed-link:hover { text-decoration: underline; }

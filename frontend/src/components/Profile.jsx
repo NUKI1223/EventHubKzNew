@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import api from '../api';
 import { useAuthUser } from '../hooks/useAuthUser';
 import { useProfileData } from '../hooks/useProfileData';
 import { useAvatarUpload } from '../hooks/useAvatarUpload';
@@ -20,6 +21,14 @@ const UserProfile = () => {
 
   const { user, setUser, loading, error } = useProfileData(routeUsername, location.pathname);
   const { setAvatarFile, avatarLoading, avatarError } = useAvatarUpload(user, setUser);
+
+  const [staffedEvents, setStaffedEvents] = useState([]);
+  useEffect(() => {
+    if (!user?.id) { setStaffedEvents([]); return; }
+    api.get(`/api/events/staffed-by/${user.id}`)
+      .then(res => setStaffedEvents(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setStaffedEvents([]));
+  }, [user?.id]);
 
   const isOwnProfile =
     currentUser?.sub &&
@@ -106,6 +115,19 @@ const UserProfile = () => {
                   {getUsernameFromLink(s.href, s.prefix)}
                 </a>
               ))}
+            </div>
+          )}
+
+          {staffedEvents.length > 0 && (
+            <div className="pf__staffed">
+              <div className="pf__staffed-title">Помогает на мероприятиях</div>
+              <ul className="pf__staffed-list">
+                {staffedEvents.map(ev => (
+                  <li key={ev.id}>
+                    <Link to={`/events/${ev.id}`} className="pf__staffed-link">{ev.title}</Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
