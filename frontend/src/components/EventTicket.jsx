@@ -12,15 +12,9 @@ const EventTicket = ({ registration, event, username, email }) => {
   if (!registration) return null;
 
   const attended = registration.status === 'ATTENDED';
-  const payload = JSON.stringify({
-    type: 'eventhub-ticket',
-    code: registration.code,
-    eventId: event?.id,
-    eventTitle: event?.title,
-    name: username || '',
-    email: email || '',
-    registeredAt: registration.createdAt,
-  });
+  // QR кодирует ссылку отметки прихода: организатор/сотрудник наводит обычную
+  // камеру телефона → открывается /checkin/<код> → приход отмечается.
+  const payload = `${window.location.origin}/checkin/${registration.code}`;
 
   const download = () => {
     const canvas = wrapRef.current?.querySelector('canvas');
