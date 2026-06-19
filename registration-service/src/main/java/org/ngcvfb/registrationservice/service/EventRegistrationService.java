@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -29,6 +30,7 @@ public class EventRegistrationService {
     private final EventRegistrationRepository registrationRepository;
     private final RegistrationKafkaProducer kafkaProducer;
     private final EventClient eventClient;
+    private final AnswerValidator answerValidator;
 
     public boolean isRegistered(Long userId, Long eventId) {
         return registrationRepository.existsByUserIdAndEventId(userId, eventId);
@@ -71,22 +73,25 @@ public class EventRegistrationService {
 
     // Намеренно НЕ @Transactional: при гонке вставка падает на unique-constraint,
     // и повторное чтение должно идти в свежей транзакции, а не в помеченной rollback-only.
-    public EventRegistration register(Long userId, Long eventId, String userEmail, String username) {
+    public EventRegistration register(Long userId, Long eventId, String userEmail, String username,
+                                      Map<String, String> answers) {
         // Идемпотентность: повторная запись возвращает существующую (как лайк).
         EventRegistration existing = registrationRepository.findByUserIdAndEventId(userId, eventId).orElse(null);
         if (existing != null) {
             log.info("User {} already registered for event {}", userId, eventId);
-            return existing;
+            return existing; // идемпотентно: ответы НЕ перезаписываем
         }
 
         EventDTO event = fetchEvent(eventId);
         validateRegistrationOpen(event);
+        Map<String, String> cleanAnswers = answerValidator.validateAndClean(event.getQuestions(), answers);
 
         EventRegistration registration = EventRegistration.builder()
                 .userId(userId)
                 .eventId(eventId)
                 .status(RegistrationStatus.REGISTERED)
                 .code(generateUniqueCode())
+                .answers(cleanAnswers)
                 .build();
 
         EventRegistration saved;

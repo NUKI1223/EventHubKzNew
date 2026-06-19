@@ -2,8 +2,11 @@ package org.ngcvfb.registrationservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "event_registrations", uniqueConstraints = {
@@ -36,6 +39,10 @@ public class EventRegistration {
 
     @Column(name = "checked_in_at")
     private LocalDateTime checkedInAt;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, String> answers;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

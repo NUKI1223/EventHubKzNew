@@ -75,8 +75,12 @@ public class RegistrationController {
             @PathVariable Long eventId,
             @RequestHeader("X-User-Id") Long userId,
             @RequestHeader("X-User-Email") String userEmail,
-            @RequestHeader(value = "X-Username", required = false) String username) {
-        EventRegistration registration = registrationService.register(userId, eventId, userEmail, username);
+            @RequestHeader(value = "X-Username", required = false) String username,
+            @RequestBody(required = false) Map<String, Object> body) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> answers = body == null ? null
+                : (Map<String, String>) (Map<?, ?>) body.getOrDefault("answers", null);
+        EventRegistration registration = registrationService.register(userId, eventId, userEmail, username, answers);
         return ResponseEntity.status(HttpStatus.CREATED).body(registration);
     }
 
