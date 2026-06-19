@@ -65,6 +65,7 @@ const EventCard = ({ event, currentUserId, liked, likeCount, registered, regCoun
               initialCount={going}
               selfFetch={false}
               disabled={regClosed}
+              questions={event.registrationType === 'NATIVE' ? event.questions : null}
             />
             <span className="event-card__going">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="13" height="13">

@@ -1,0 +1,13 @@
+.rmodal__overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.rmodal { background: var(--color-surface, #fff); border-radius: 16px; width: 100%; max-width: 460px; max-height: 88vh; overflow: auto; padding: 22px; box-shadow: var(--shadow-lg); }
+.rmodal__title { margin: 0 0 14px; font-family: var(--font-family-heading); }
+.rmodal__form { display: flex; flex-direction: column; gap: 14px; }
+.rmodal__label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+.rmodal__req { color: #c0392b; }
+.rmodal__input { width: 100%; border: 1px solid var(--color-border, #e8dfce); border-radius: 8px; padding: 8px 10px; min-height: 64px; font: inherit; }
+.rmodal__opts { display: flex; flex-direction: column; gap: 6px; }
+.rmodal__opt { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.rmodal__err { color: #c0392b; font-size: 13px; }
+.rmodal__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+.rmodal__cancel { background: none; border: 1px solid var(--color-border, #e8dfce); border-radius: var(--radius-full); padding: 8px 16px; cursor: pointer; }
+.rmodal__submit { background: linear-gradient(135deg, var(--color-primary, #aecee3), var(--color-primary-dark, #2a5475)); color: #fff; border: none; border-radius: var(--radius-full); padding: 8px 18px; font-weight: 700; cursor: pointer; }

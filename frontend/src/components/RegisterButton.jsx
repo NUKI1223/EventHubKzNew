@@ -1,13 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import api from '../api';
 import { useToggleResource } from '../hooks/useToggleResource';
+import RegistrationModal from './RegistrationModal';
 import '../css/RegisterButton.css';
 
 const RegisterButton = ({
   eventId, currentUserId, onCountChange, onRegisteredChange, disabled = false,
-  variant = 'full', initialRegistered, initialCount, selfFetch,
+  variant = 'full', initialRegistered, initialCount, selfFetch, questions,
 }) => {
   const doSelfFetch = selfFetch ?? (initialRegistered === undefined);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const resolverRef = useRef(null);
+  const hasQuestions = Array.isArray(questions) && questions.length > 0;
+
+  const onBeforeActivate = hasQuestions
+    ? () => new Promise((resolve) => { resolverRef.current = resolve; setModalOpen(true); })
+    : undefined;
 
   const { active: registered, count, busy, toggle, setActive, setCount } = useToggleResource({
     initialActive: initialRegistered || false,
@@ -19,7 +28,16 @@ const RegisterButton = ({
     msgOff: 'Запись отменена',
     msgError: 'Не удалось изменить запись',
     onActiveChange: (v) => onRegisteredChange?.(v),
+    onBeforeActivate,
   });
+
+  const modal = modalOpen ? (
+    <RegistrationModal
+      questions={questions}
+      onSubmit={(answers) => { setModalOpen(false); resolverRef.current?.({ answers }); }}
+      onClose={() => { setModalOpen(false); resolverRef.current?.(null); }}
+    />
+  ) : null;
 
   useEffect(() => {
     if (!doSelfFetch || !eventId) return;
@@ -50,22 +68,28 @@ const RegisterButton = ({
 
   if (variant === 'compact') {
     return (
-      <button className={`register-button register-button--compact ${registered ? 'register-button--on' : ''} ${disabled ? 'register-button--disabled' : ''}`} {...common}>
-        {busy ? '…' : (registered ? '✓ Иду' : (disabled ? 'Закрыта' : 'Записаться'))}
-      </button>
+      <>
+        <button className={`register-button register-button--compact ${registered ? 'register-button--on' : ''} ${disabled ? 'register-button--disabled' : ''}`} {...common}>
+          {busy ? '…' : (registered ? '✓ Иду' : (disabled ? 'Закрыта' : 'Записаться'))}
+        </button>
+        {modal}
+      </>
     );
   }
 
   const label = registered ? '✓ Вы идёте' : (disabled ? 'Регистрация закрыта' : 'Записаться');
   return (
-    <button
-      className={`register-button ${registered ? 'register-button--on' : ''} ${disabled ? 'register-button--disabled' : ''}`}
-      {...common}
-      title={disabled ? 'Регистрация на это мероприятие закрыта' : undefined}
-    >
-      {busy ? '…' : label}
-      {!disabled && <span className="register-button__count">{count}</span>}
-    </button>
+    <>
+      <button
+        className={`register-button ${registered ? 'register-button--on' : ''} ${disabled ? 'register-button--disabled' : ''}`}
+        {...common}
+        title={disabled ? 'Регистрация на это мероприятие закрыта' : undefined}
+      >
+        {busy ? '…' : label}
+        {!disabled && <span className="register-button__count">{count}</span>}
+      </button>
+      {modal}
+    </>
   );
 };
 

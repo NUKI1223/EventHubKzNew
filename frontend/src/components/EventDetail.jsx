@@ -177,6 +177,7 @@ const EventDetail = () => {
                   onCountChange={setRegistrationCount}
                   onRegisteredChange={refreshMyRegistration}
                   disabled={isRegistrationClosed(event)}
+                  questions={event.questions}
                 />
                 <EventRegistrations eventId={event.id} count={registrationCount} />
               </>
