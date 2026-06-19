@@ -249,9 +249,11 @@ public class EventService {
     public List<AttendeeDTO> getAttendees(Long eventId, Long requesterId, String role) {
         Event event = findEventOrThrow(eventId);
         boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
-        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+        boolean isOrganizer = Objects.equals(event.getOrganizerId(), requesterId);
+        boolean isStaff = event.getStaffIds() != null && event.getStaffIds().contains(requesterId);
+        if (!isAdmin && !isOrganizer && !isStaff) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Список участников доступен только организатору мероприятия");
+                    "Список участников доступен только организатору или сотруднику мероприятия");
         }
 
         List<Map<String, Object>> registrations;

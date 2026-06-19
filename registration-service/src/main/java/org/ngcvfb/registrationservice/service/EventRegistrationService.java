@@ -75,14 +75,19 @@ public class EventRegistrationService {
     public List<org.ngcvfb.registrationservice.dto.AttendeeAnswerView> getAttendeeAnswers(
             Long eventId, Long requesterId, String role) {
         EventDTO event = fetchEvent(eventId);
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
-        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+        if (!canManageAttendees(event, requesterId, role)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Ответы участников доступны только организатору мероприятия");
+                    "Ответы участников доступны только организатору или сотруднику мероприятия");
         }
         return registrationRepository.findByEventId(eventId).stream()
                 .map(org.ngcvfb.registrationservice.dto.AttendeeAnswerView::from)
                 .toList();
+    }
+
+    private boolean canManageAttendees(EventDTO event, Long requesterId, String role) {
+        if ("ADMIN".equalsIgnoreCase(role)) return true;
+        if (Objects.equals(event.getOrganizerId(), requesterId)) return true;
+        return event.getStaffIds() != null && event.getStaffIds().contains(requesterId);
     }
 
     // Намеренно НЕ @Transactional: при гонке вставка падает на unique-constraint,
@@ -157,10 +162,9 @@ public class EventRegistrationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Код не найден"));
 
         EventDTO event = fetchEvent(reg.getEventId());
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
-        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+        if (!canManageAttendees(event, requesterId, role)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Отмечать участников может только организатор мероприятия");
+                    "Отмечать участников может только организатор или сотрудник мероприятия");
         }
 
         if (reg.getStatus() == RegistrationStatus.ATTENDED) {
