@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -25,6 +26,7 @@ public class EventDTO {
     private String externalLink;
     private String registrationType;
     private Set<String> tags;
+    private List<QuestionDef> questions;
     private Long organizerId;
     private String organizerUsername;
     private String organizerEmail;
