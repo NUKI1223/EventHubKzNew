@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import toast from 'react-hot-toast';
 import { useAuthUser } from '../hooks/useAuthUser';
@@ -111,6 +111,11 @@ const EventDetail = () => {
   if (error) return <div className="event-detail-container"><PageError message={error} /></div>;
   if (!event) return <div className="event-detail-container"><PageError message="Мероприятие не найдено" /></div>;
 
+  // Организатор, сотрудник или админ — есть доступ к списку участников и отметке прихода.
+  const canManage = isAdmin
+    || (currentUserId && String(event.organizerId) === String(currentUserId))
+    || (Array.isArray(event.staffIds) && event.staffIds.map(String).includes(String(currentUserId)));
+
   return (
     <div className="event-detail-container">
       <div className="event-detail-header">
@@ -190,6 +195,11 @@ const EventDetail = () => {
               disabled={isPastEvent(event)}
             />
             <EventLikes eventId={event.id} likeCount={likeCount} liked={liked} />
+            {canManage && (
+              <Link to={`/events/${event.id}/registrants`} className="manage-attendees-btn">
+                Участники · отметить приход
+              </Link>
+            )}
             {isAdmin && (
               <button className="delete-event-btn" onClick={() => setShowDeleteConfirm(true)}>
                 Удалить мероприятие

@@ -214,7 +214,7 @@ const EventRegistrants = () => {
           <div className="att-panel__hdr">
             <div>
               <div className="att-panel__title">Список участников</div>
-              <div className="att-panel__sub">Виден только вам как организатору</div>
+              <div className="att-panel__sub">Виден организатору и сотрудникам мероприятия</div>
             </div>
             <button type="button" className="att-panel__export" onClick={exportExcel} disabled={!attendees.length}>
               Выгрузить в Excel
