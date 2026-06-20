@@ -166,9 +166,85 @@
 
 .event-actions {
   display: flex;
-  justify-content: center;
-  gap: var(--space-md);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+/* Зона участника: запись (primary) + лайк (secondary) */
+.event-actions__user {
+  display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Инфо-ссылки «Кто идёт / Кто лайкнул» */
+.event-actions__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+}
+
+/* Демоут пилюль до мелких текст-ссылок только в этом блоке */
+.event-actions__meta a.toggle-likes-btn,
+.event-detail-description .event-actions__meta a.toggle-likes-btn {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--ink-500, #6b6450);
+}
+.event-actions__meta a.toggle-likes-btn:hover,
+.event-detail-description .event-actions__meta a.toggle-likes-btn:hover {
+  background: none;
+  border: none;
+  box-shadow: none;
+  transform: none;
+  color: var(--ink-900, #1f1c16);
+  text-decoration: underline;
+}
+
+/* Зона управления (организатор/staff/админ) — отделена линией */
+.event-actions__manage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line, #e7ddc8);
+}
+
+/* «Удалить» — сдержанная danger-ссылка вместо большой красной кнопки */
+.delete-event-link {
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-error, #ef4444);
+  cursor: pointer;
+  border-radius: var(--radius-sm, 8px);
+  transition: color 150ms;
+}
+.delete-event-link:hover {
+  color: var(--color-error-dark, #b91c1c);
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .event-actions__user {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
 }
 
 /* Edit Button */

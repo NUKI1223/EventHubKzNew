@@ -174,8 +174,8 @@ const EventDetail = () => {
             </p>
           )}
           <div className="event-actions">
-            {event.registrationType === 'NATIVE' && (
-              <>
+            <div className="event-actions__user">
+              {event.registrationType === 'NATIVE' && (
                 <RegisterButton
                   eventId={event.id}
                   currentUserId={currentUserId}
@@ -184,26 +184,34 @@ const EventDetail = () => {
                   disabled={isRegistrationClosed(event)}
                   questions={event.questions}
                 />
+              )}
+              <LikeButton
+                eventId={event.id}
+                currentUserId={currentUserId}
+                onLikeChange={setLikeCount}
+                onLikedChange={setLiked}
+                disabled={isPastEvent(event)}
+              />
+            </div>
+            <div className="event-actions__meta">
+              {event.registrationType === 'NATIVE' && (
                 <EventRegistrations eventId={event.id} count={registrationCount} />
-              </>
-            )}
-            <LikeButton
-              eventId={event.id}
-              currentUserId={currentUserId}
-              onLikeChange={setLikeCount}
-              onLikedChange={setLiked}
-              disabled={isPastEvent(event)}
-            />
-            <EventLikes eventId={event.id} likeCount={likeCount} liked={liked} />
-            {canManage && (
-              <Link to={`/events/${event.id}/registrants`} className="manage-attendees-btn">
-                Участники · отметить приход
-              </Link>
-            )}
-            {isAdmin && (
-              <button className="delete-event-btn" onClick={() => setShowDeleteConfirm(true)}>
-                Удалить мероприятие
-              </button>
+              )}
+              <EventLikes eventId={event.id} likeCount={likeCount} liked={liked} />
+            </div>
+            {(canManage || isAdmin) && (
+              <div className="event-actions__manage">
+                {canManage && (
+                  <Link to={`/events/${event.id}/registrants`} className="manage-attendees-btn">
+                    Участники · отметить приход
+                  </Link>
+                )}
+                {isAdmin && (
+                  <button type="button" className="delete-event-link" onClick={() => setShowDeleteConfirm(true)}>
+                    Удалить событие
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
