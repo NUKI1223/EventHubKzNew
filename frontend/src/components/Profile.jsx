@@ -7,7 +7,6 @@ import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { SOCIALS } from '../config/socials';
 import '../css/Profile.css';
 import LikedEvents from './LikedEvents';
-import RegisteredEvents from './RegisteredEvents';
 import OrganizerDashboard from './OrganizerDashboard';
 import { SkeletonProfile } from './Skeleton';
 import PageError from './PageError';
@@ -17,7 +16,6 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = useAuthUser();
-  const [eventsTab, setEventsTab] = useState('liked');
 
   const { user, setUser, loading, error } = useProfileData(routeUsername, location.pathname);
   const { setAvatarFile, avatarLoading, avatarError } = useAvatarUpload(user, setUser);
@@ -163,25 +161,12 @@ const UserProfile = () => {
 
       {isOwnProfile && <OrganizerDashboard />}
 
+      {/* Чужой профиль: показываем только лайкнутые (публичны). Регистрации
+          приватны — их список доступен только самому пользователю/админу. */}
       {!isOwnProfile && (
         <div className="pf-events">
-          <div className="pf-tabs">
-            <button
-              className={`pf-tab ${eventsTab === 'liked' ? 'pf-tab--active' : ''}`}
-              onClick={() => setEventsTab('liked')}
-            >
-              Лайкнутые
-            </button>
-            <button
-              className={`pf-tab ${eventsTab === 'registered' ? 'pf-tab--active' : ''}`}
-              onClick={() => setEventsTab('registered')}
-            >
-              Зарегистрирован
-            </button>
-          </div>
-          {eventsTab === 'liked'
-            ? <LikedEvents hideHeader />
-            : <RegisteredEvents hideHeader />}
+          <div className="pf-events__head">Лайкнутые мероприятия</div>
+          <LikedEvents hideHeader />
         </div>
       )}
     </div>

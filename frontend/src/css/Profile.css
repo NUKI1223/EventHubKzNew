@@ -291,3 +291,11 @@
 .pf__staffed-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .pf__staffed-link { font-size: 13px; color: var(--sky-ink, #4f46e5); text-decoration: none; }
 .pf__staffed-link:hover { text-decoration: underline; }
+
+.pf-events__head {
+  font-family: var(--font-family-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin-bottom: 14px;
+}
