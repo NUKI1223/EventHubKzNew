@@ -249,6 +249,15 @@ function MainPage() {
         ))}
       </div>
 
+      {/* ————— SIGNATURE ORNAMENT ————— */}
+      <div className="mp__container">
+        <div className="mp-ornament" aria-hidden="true">
+          <span className="mp-ornament__line" />
+          <span className="mp-ornament__mark" />
+          <span className="mp-ornament__line" />
+        </div>
+      </div>
+
       {/* ————— STATS ————— */}
       <div className="mp__container">
         <div className="mp-stats">

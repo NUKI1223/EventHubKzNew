@@ -644,3 +644,26 @@
   .mp-stats { grid-template-columns: repeat(2, 1fr); }
   .mp-footer__inner { grid-template-columns: 1fr; }
 }
+
+/* ————— Signature ornament (steppe geometric divider) ————— */
+.mp-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin: 10px 0 2px;
+}
+.mp-ornament__line {
+  height: 1px;
+  width: min(140px, 24%);
+  background: linear-gradient(90deg, transparent, var(--line-strong));
+}
+.mp-ornament__line:last-child {
+  background: linear-gradient(90deg, var(--line-strong), transparent);
+}
+.mp-ornament__mark {
+  flex: none;
+  width: 64px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cpath d='M32 1.5 L39 8 L32 14.5 L25 8 Z' fill='%23e0a23b'/%3E%3Cpath d='M16 3.5 L21.5 8 L16 12.5 L10.5 8 Z' fill='none' stroke='%230f6e7d' stroke-width='1.4'/%3E%3Cpath d='M48 3.5 L53.5 8 L48 12.5 L42.5 8 Z' fill='none' stroke='%230f6e7d' stroke-width='1.4'/%3E%3Ccircle cx='3' cy='8' r='1.5' fill='%230f6e7d'/%3E%3Ccircle cx='61' cy='8' r='1.5' fill='%230f6e7d'/%3E%3C/svg%3E") center / contain no-repeat;
+}

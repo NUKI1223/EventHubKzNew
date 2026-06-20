@@ -34,29 +34,29 @@
   --color-text-inverse:   #fbfaf7;
 
   /* ==================== PASTELS ==================== */
-  --peach:        #f4b79a;
-  --peach-ink:    #8a3f1f;
-  --peach-soft:   #fce3d3;
+  --peach:        #d49873;
+  --peach-ink:    #7c3f22;
+  --peach-soft:   #f1e3d6;
 
-  --sage:         #b8cfb0;
-  --sage-ink:     #3a5a3a;
-  --sage-soft:    #e2ecdd;
+  --sage:         #a6bd95;
+  --sage-ink:     #45532f;
+  --sage-soft:    #e7ebdd;
 
   --butter:       #e0a23b;
   --butter-ink:   #6e4f17;
   --butter-soft:  #fbeed4;
 
-  --lavender:     #c9bfe1;
-  --lavender-ink: #4a3e77;
-  --lavender-soft:#ece6f7;
+  --lavender:     #b1a6c4;
+  --lavender-ink: #4a416c;
+  --lavender-soft:#eae7f0;
 
   --sky:          #0f6e7d;
   --sky-ink:      #0a5460;
   --sky-soft:     #e1eff0;
 
-  --rose:         #eeb4b9;
-  --rose-ink:     #80343a;
-  --rose-soft:    #f8dcdf;
+  --rose:         #d49aa0;
+  --rose-ink:     #793a40;
+  --rose-soft:    #f2dee0;
 
   /* brand = steppe turquoise */
   --color-primary:        #0f6e7d;
