@@ -33,6 +33,10 @@ public class SupportEmailService {
     @Value("${spring.mail.username:}")
     private String fromAddress;
 
+    // Базовый адрес сайта для ссылки отметки прихода в QR билета.
+    @Value("${app.frontend-url:https://eventhub.kz}")
+    private String frontendUrl;
+
     public void sendSupportReply(String toEmail, String originalQuestion, String adminReply) {
         send(toEmail, "EventHub.kz — ответ службы поддержки",
                 buildSupportHtml(originalQuestion, adminReply), "support reply");
@@ -52,7 +56,7 @@ public class SupportEmailService {
                                           LocalDateTime eventDate, LocalDateTime registeredAt,
                                           String code, Long eventId, String location, boolean online) {
         String html = buildTicketHtml(username, eventTitle, eventDate, registeredAt, code, location, online);
-        byte[] qr = generateTicketQr(code, eventId, eventTitle, username, toEmail, registeredAt);
+        byte[] qr = generateTicketQr(code);
         sendTicketEmail(toEmail, "EventHub.kz — ваш билет на мероприятие", html, qr);
     }
 
@@ -193,16 +197,15 @@ public class SupportEmailService {
                 + "</tr>";
     }
 
-    /** Генерирует PNG QR-кода с теми же данными, что и билет на сайте. null при ошибке. */
-    private byte[] generateTicketQr(String code, Long eventId, String eventTitle,
-                                    String username, String email, LocalDateTime registeredAt) {
+    /**
+     * Генерирует PNG QR-кода со ссылкой отметки прихода /checkin/&lt;код&gt; — той же,
+     * что кодирует билет на сайте. Нативная камера телефона открывает страницу
+     * отметки. Код-билета достаточно для check-in, лишние PII в QR не кладём.
+     * null при ошибке.
+     */
+    private byte[] generateTicketQr(String code) {
         try {
-            String payload = String.format(
-                    "{\"type\":\"eventhub-ticket\",\"code\":%s,\"eventId\":%s,\"eventTitle\":%s,"
-                            + "\"name\":%s,\"email\":%s,\"registeredAt\":%s}",
-                    jsonStr(code), eventId == null ? "null" : eventId.toString(),
-                    jsonStr(eventTitle), jsonStr(username), jsonStr(email),
-                    jsonStr(registeredAt == null ? null : registeredAt.toString()));
+            String payload = frontendUrl + "/checkin/" + code;
             BitMatrix matrix = new MultiFormatWriter().encode(
                     payload, BarcodeFormat.QR_CODE, 220, 220,
                     Map.of(EncodeHintType.MARGIN, 1));
@@ -240,12 +243,6 @@ public class SupportEmailService {
         } catch (MessagingException | RuntimeException e) {
             log.error("Failed to send ticket email to {}: {}", toEmail, e.getMessage());
         }
-    }
-
-    private static String jsonStr(String s) {
-        if (s == null) return "null";
-        return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("\n", " ").replace("\r", " ") + "\"";
     }
 
     private static String escape(String s) {
