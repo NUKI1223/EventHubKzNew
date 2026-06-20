@@ -81,7 +81,8 @@ if [ "$FORCE" = 1 ] || [ "$SEEDED_PRESENT" != "0" ]; then
     psql -U "$DB_USER" -d events_db -v ON_ERROR_STOP=1 <<'SQL'
 -- like_count is denormalized in events_db.events; sync it from likes_db via a hardcoded map.
 UPDATE events SET like_count = c FROM (VALUES
-  (1,6),(2,5),(3,5),(4,4),(5,3),(6,4),(7,3),(8,3),(9,4),(10,9),(11,3),(12,3),(13,4),(14,4),(15,5)
+  (1,6),(2,5),(3,5),(4,4),(5,3),(6,4),(7,3),(8,3),(9,4),(10,9),(11,3),(12,3),(13,4),(14,4),(15,5),
+  (16,2),(17,5),(18,3),(19,4),(20,6),(21,1),(22,7),(23,2),(24,3),(25,8),(26,4),(27,5),(28,6),(29,3),(30,5)
 ) AS v(id, c) WHERE events.id = v.id;
 SQL
 else
