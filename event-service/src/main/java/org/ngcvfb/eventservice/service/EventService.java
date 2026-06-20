@@ -3,6 +3,7 @@ package org.ngcvfb.eventservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.dto.EventDTO;
+import org.ngcvfb.eventhubkz.common.dto.UserDTO;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
@@ -241,6 +242,18 @@ public class EventService {
                 .stream().map(this::toDTO).toList();
     }
 
+    // user-service сериализует ids как ?ids=1,2,3 — на популярном событии длинный
+    // список переполняет лимит строки запроса. Бьём на батчи, чтобы список участников
+    // (и напоминания) не падали с ростом аудитории.
+    private List<UserDTO> fetchUsersChunked(List<Long> ids) {
+        final int batch = 200;
+        List<UserDTO> users = new java.util.ArrayList<>();
+        for (int i = 0; i < ids.size(); i += batch) {
+            users.addAll(userClient.getUsersByIds(ids.subList(i, Math.min(i + batch, ids.size()))));
+        }
+        return users;
+    }
+
     /**
      * Список участников мероприятия для организатора (или администратора): id, имя, email.
      * Агрегирует записи из registration-service и контакты из user-service.
@@ -282,7 +295,7 @@ public class EventService {
             return List.of();
         }
 
-        return userClient.getUsersByIds(userIds).stream()
+        return fetchUsersChunked(userIds).stream()
                 .map(u -> new AttendeeDTO(u.getId(), u.getUsername(), u.getEmail(),
                         statusByUser.getOrDefault(u.getId(), "REGISTERED"),
                         answersByUser.getOrDefault(u.getId(), Map.of())))

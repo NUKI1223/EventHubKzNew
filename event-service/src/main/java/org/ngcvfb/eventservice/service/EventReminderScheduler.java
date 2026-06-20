@@ -2,7 +2,6 @@ package org.ngcvfb.eventservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ngcvfb.eventhubkz.common.dto.UserDTO;
 import org.ngcvfb.eventhubkz.common.events.EventReminderEvent;
 import org.ngcvfb.eventservice.client.LikeClient;
 import org.ngcvfb.eventservice.client.RegistrationClient;
@@ -75,10 +74,15 @@ public class EventReminderScheduler {
             return;
         }
 
+        // Батчим запрос к user-service: ids уходят как ?ids=1,2,3 и длинный список
+        // переполняет лимит строки запроса на популярном событии.
         List<Long> ids = List.copyOf(userIds);
-        Map<Long, String> emailById = userClient.getUsersByIds(ids).stream()
-                .filter(u -> u.getId() != null)
-                .collect(Collectors.toMap(UserDTO::getId, UserDTO::getEmail, (a, b) -> a));
+        Map<Long, String> emailById = new java.util.HashMap<>();
+        for (int i = 0; i < ids.size(); i += 200) {
+            userClient.getUsersByIds(ids.subList(i, Math.min(i + 200, ids.size()))).stream()
+                    .filter(u -> u.getId() != null)
+                    .forEach(u -> emailById.putIfAbsent(u.getId(), u.getEmail()));
+        }
 
         for (Long userId : userIds) {
             kafkaProducer.sendEventReminder(EventReminderEvent.create(
