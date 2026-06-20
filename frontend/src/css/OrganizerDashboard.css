@@ -306,6 +306,27 @@
   background: var(--rose-soft);
 }
 
+/* ==================== Показать ещё ==================== */
+.orgd__showmore {
+  display: block;
+  margin: var(--space-md) auto 0;
+  padding: 10px var(--space-lg);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--sky-ink);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.orgd__showmore:hover {
+  background: var(--bg-soft);
+  border-color: var(--sky-ink);
+}
+
 /* ==================== Адаптив ==================== */
 @media (max-width: 768px) {
   .orgd__stats {

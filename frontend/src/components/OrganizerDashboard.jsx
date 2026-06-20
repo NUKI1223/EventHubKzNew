@@ -5,6 +5,8 @@ import { formatDate, toDate, isPastEvent } from '../utils/dateUtils';
 import { SkeletonCard } from './Skeleton';
 import EmptyState from './EmptyState';
 import PageError from './PageError';
+import LikedEvents from './LikedEvents';
+import RegisteredEvents from './RegisteredEvents';
 import '../css/OrganizerDashboard.css';
 
 const STATUS_META = {
@@ -134,6 +136,18 @@ const OrganizerDashboard = () => {
         >
           Заявки{requests.length > 0 && ` (${requests.length})`}
         </button>
+        <button
+          className={`orgd__tab ${tab === 'liked' ? 'orgd__tab--active' : ''}`}
+          onClick={() => setTab('liked')}
+        >
+          Лайкнутые
+        </button>
+        <button
+          className={`orgd__tab ${tab === 'registered' ? 'orgd__tab--active' : ''}`}
+          onClick={() => setTab('registered')}
+        >
+          Зарегистрированные
+        </button>
       </div>
 
       {/* Опубликованные мероприятия */}
@@ -253,6 +267,12 @@ const OrganizerDashboard = () => {
           </div>
         )
       )}
+
+      {/* Лайкнутые */}
+      {tab === 'liked' && <LikedEvents hideHeader limit={6} />}
+
+      {/* Зарегистрированные */}
+      {tab === 'registered' && <RegisteredEvents hideHeader limit={6} />}
     </div>
   );
 };

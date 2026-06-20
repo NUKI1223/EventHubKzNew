@@ -8,11 +8,12 @@ import { SkeletonCard } from './Skeleton';
 import EmptyState from './EmptyState';
 import PageError from './PageError';
 
-const RegisteredEvents = ({ hideHeader = false }) => {
+const RegisteredEvents = ({ hideHeader = false, limit }) => {
   const { username: routeUsername } = useParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const fetchRegistered = async () => {
@@ -76,7 +77,7 @@ const RegisteredEvents = ({ hideHeader = false }) => {
       )}
 
       <div className="lev__grid">
-        {events.map(event => (
+        {(limit && !showAll ? events.slice(0, limit) : events).map(event => (
           <Link to={`/events/${event.id}`} key={event.id} className="lev__card">
             <div className="lev__card-img-wrap">
               {event.mainImageUrl ? (
@@ -101,6 +102,11 @@ const RegisteredEvents = ({ hideHeader = false }) => {
           </Link>
         ))}
       </div>
+      {limit && !showAll && events.length > limit && (
+        <button className="orgd__showmore" onClick={() => setShowAll(true)}>
+          Показать ещё
+        </button>
+      )}
     </div>
   );
 };

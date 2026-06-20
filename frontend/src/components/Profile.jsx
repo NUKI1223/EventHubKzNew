@@ -163,7 +163,7 @@ const UserProfile = () => {
 
       {isOwnProfile && <OrganizerDashboard />}
 
-      {isOwnProfile && (
+      {!isOwnProfile && (
         <div className="pf-events">
           <div className="pf-tabs">
             <button
