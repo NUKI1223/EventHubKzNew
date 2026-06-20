@@ -5,33 +5,33 @@
 
 :root {
   /* ==================== SURFACES (warm cream) ==================== */
-  --bg:         #faf6ef;
-  --bg-soft:    #f4eee3;
+  --bg:         #fbfaf7;
+  --bg-soft:    #f2f0e9;
   --bg-card:    #ffffff;
-  --bg-inset:   #f8f2e6;
-  --line:       #e8dfce;
-  --line-strong:#d4c7ad;
+  --bg-inset:   #f4f2eb;
+  --line:       #ece9e1;
+  --line-strong:#d8d3c6;
 
   /* mapped compat */
-  --color-background:   #faf6ef;
+  --color-background:   #fbfaf7;
   --color-surface:      #ffffff;
-  --color-surface-alt:  #f4eee3;
-  --color-border:       #e8dfce;
-  --color-border-light: #f4eee3;
-  --color-divider:      #d4c7ad;
+  --color-surface-alt:  #f2f0e9;
+  --color-border:       #ece9e1;
+  --color-border-light: #f2f0e9;
+  --color-divider:      #d8d3c6;
 
   /* ==================== INK (text) ==================== */
-  --ink-900: #1f1c16;
-  --ink-700: #3a342a;
-  --ink-500: #6b6253;
-  --ink-400: #8c8473;
-  --ink-300: #b6ad99;
+  --ink-900: #15140f;
+  --ink-700: #353129;
+  --ink-500: #635e52;
+  --ink-400: #8b8475;
+  --ink-300: #b6afa0;
 
   /* mapped compat */
-  --color-text-primary:   #1f1c16;
-  --color-text-secondary: #6b6253;
-  --color-text-tertiary:  #8c8473;
-  --color-text-inverse:   #faf6ef;
+  --color-text-primary:   #15140f;
+  --color-text-secondary: #635e52;
+  --color-text-tertiary:  #8b8475;
+  --color-text-inverse:   #fbfaf7;
 
   /* ==================== PASTELS ==================== */
   --peach:        #f4b79a;
@@ -42,38 +42,38 @@
   --sage-ink:     #3a5a3a;
   --sage-soft:    #e2ecdd;
 
-  --butter:       #f1d691;
-  --butter-ink:   #7a5a1e;
-  --butter-soft:  #faecc6;
+  --butter:       #e0a23b;
+  --butter-ink:   #6e4f17;
+  --butter-soft:  #fbeed4;
 
   --lavender:     #c9bfe1;
   --lavender-ink: #4a3e77;
   --lavender-soft:#ece6f7;
 
-  --sky:          #aecee3;
-  --sky-ink:      #2a5475;
-  --sky-soft:     #dceaf3;
+  --sky:          #0f6e7d;
+  --sky-ink:      #0a5460;
+  --sky-soft:     #e1eff0;
 
   --rose:         #eeb4b9;
   --rose-ink:     #80343a;
   --rose-soft:    #f8dcdf;
 
-  /* brand = sky mapped */
-  --color-primary:        #aecee3;
-  --color-primary-dark:   #2a5475;
-  --color-primary-light:  #dceaf3;
-  --color-primary-subtle: #dceaf3;
-  --color-primary-rgb:    174, 206, 227;
+  /* brand = steppe turquoise */
+  --color-primary:        #0f6e7d;
+  --color-primary-dark:   #0a5460;
+  --color-primary-light:  #d7eaec;
+  --color-primary-subtle: #eaf4f4;
+  --color-primary-rgb:    15, 110, 125;
 
   /* secondary = sage mapped */
   --color-secondary:       #b8cfb0;
   --color-secondary-dark:  #3a5a3a;
   --color-secondary-light: #e2ecdd;
 
-  /* accent = butter mapped */
-  --color-accent:       #f1d691;
-  --color-accent-dark:  #7a5a1e;
-  --color-accent-light: #faecc6;
+  /* accent = steppe gold */
+  --color-accent:       #e0a23b;
+  --color-accent-dark:  #b07a1e;
+  --color-accent-light: #fbeed4;
 
   /* ==================== FUNCTIONAL ==================== */
   --color-success:       #10B981;
@@ -90,12 +90,12 @@
   --color-info-light:    #DBEAFE;
 
   /* ==================== GRADIENTS ==================== */
-  --gradient-hero:    linear-gradient(135deg, #dceaf3 0%, #ece6f7 100%);
-  --gradient-button:  linear-gradient(135deg, #aecee3 0%, #7aaec8 100%);
-  --gradient-card:    linear-gradient(180deg, #faf6ef 0%, #ffffff 100%);
-  --gradient-accent:  linear-gradient(135deg, #f1d691 0%, #e8c55a 100%);
-  --gradient-overlay: linear-gradient(180deg, rgba(31,28,22,0) 0%, rgba(31,28,22,0.8) 100%);
-  --gradient-hover:   linear-gradient(135deg, #7aaec8 0%, #aecee3 100%);
+  --gradient-hero:    linear-gradient(135deg, #e1eff0 0%, #f6ecd6 100%);
+  --gradient-button:  linear-gradient(135deg, #0f6e7d 0%, #0a5460 100%);
+  --gradient-card:    linear-gradient(180deg, #fbfaf7 0%, #ffffff 100%);
+  --gradient-accent:  linear-gradient(135deg, #e0a23b 0%, #c8861f 100%);
+  --gradient-overlay: linear-gradient(180deg, rgba(21,20,15,0) 0%, rgba(21,20,15,0.82) 100%);
+  --gradient-hover:   linear-gradient(135deg, #0a5460 0%, #0f6e7d 100%);
 
   /* ==================== BORDER RADIUS ==================== */
   --r-xs:   6px;
@@ -114,25 +114,25 @@
   --radius-full: 999px;
 
   /* ==================== SHADOWS (warm) ==================== */
-  --sh-sm: 0 1px 0 rgba(60,45,20,0.04), 0 1px 2px rgba(60,45,20,0.04);
-  --sh-md: 0 2px 0 rgba(60,45,20,0.03), 0 8px 24px rgba(60,45,20,0.06);
-  --sh-lg: 0 12px 40px rgba(60,45,20,0.10);
+  --sh-sm: 0 1px 0 rgba(22,24,20,0.04), 0 1px 2px rgba(22,24,20,0.05);
+  --sh-md: 0 2px 0 rgba(22,24,20,0.03), 0 8px 24px rgba(22,24,20,0.07);
+  --sh-lg: 0 12px 40px rgba(22,24,20,0.11);
 
-  --shadow-xs:     0 1px 2px rgba(60,45,20,0.04);
-  --shadow-sm:     0 1px 0 rgba(60,45,20,0.04), 0 1px 2px rgba(60,45,20,0.04);
-  --shadow-md:     0 2px 0 rgba(60,45,20,0.03), 0 8px 24px rgba(60,45,20,0.06);
-  --shadow-lg:     0 12px 40px rgba(60,45,20,0.10);
-  --shadow-xl:     0 20px 60px rgba(60,45,20,0.15);
-  --shadow-hover:  0 6px 20px rgba(244,183,154,0.4);
-  --shadow-active: 0 2px 8px rgba(244,183,154,0.25);
+  --shadow-xs:     0 1px 2px rgba(22,24,20,0.05);
+  --shadow-sm:     0 1px 0 rgba(22,24,20,0.04), 0 1px 2px rgba(22,24,20,0.05);
+  --shadow-md:     0 2px 0 rgba(22,24,20,0.03), 0 8px 24px rgba(22,24,20,0.07);
+  --shadow-lg:     0 12px 40px rgba(22,24,20,0.11);
+  --shadow-xl:     0 20px 60px rgba(22,24,20,0.15);
+  --shadow-hover:  0 6px 20px rgba(15,110,125,0.30);
+  --shadow-active: 0 2px 8px rgba(15,110,125,0.22);
 
   /* ==================== TYPOGRAPHY ==================== */
   --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Manrope', 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', 'Manrope', 'Inter', sans-serif;
   --font-mono:    'JetBrains Mono', ui-monospace, monospace;
 
   --font-family-base:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-heading: 'Manrope', 'Inter', sans-serif;
+  --font-family-heading: 'Space Grotesk', 'Manrope', 'Inter', sans-serif;
 
   --font-size-xs:   0.75rem;
   --font-size-sm:   0.875rem;
