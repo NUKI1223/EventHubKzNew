@@ -90,7 +90,18 @@ else
 fi
 
 echo "== reindex Elasticsearch =="
-if curl -sf -X POST "${GATEWAY}/api/events/reindex" >/dev/null; then
+# /api/events/reindex теперь под аутентификацией — логинимся админом и шлём токен.
+ADMIN_EMAIL="${SEED_ADMIN_EMAIL:-dinara.zhumabaeva@example.kz}"
+ADMIN_PASSWORD="${SEED_ADMIN_PASSWORD:-password123}"
+REINDEX_TOKEN="$(curl -s -X POST "${GATEWAY}/auth/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}" \
+  | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')"
+
+if [ -z "$REINDEX_TOKEN" ]; then
+  echo "⚠ не удалось получить токен админа (${ADMIN_EMAIL}) — пропускаю reindex; поиск может быть устаревшим"
+elif curl -sf -X POST "${GATEWAY}/api/events/reindex" \
+    -H "Authorization: Bearer ${REINDEX_TOKEN}" >/dev/null; then
   echo "✓ reindex triggered"
 else
   echo "⚠ reindex call failed — search may show stale data until services are ready"
