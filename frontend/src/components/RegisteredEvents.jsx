@@ -19,11 +19,16 @@ const RegisteredEvents = ({ hideHeader = false, limit }) => {
     const fetchRegistered = async () => {
       try {
         const { id: userId } = await fetchUserByRoute(routeUsername);
-        const idsRes = await api.get(`/api/registrations/user/${userId}/events`);
-        const ids = Array.isArray(idsRes.data) ? idsRes.data : [];
-        if (ids.length === 0) { setEvents([]); return; }
-        const eventsRes = await api.get('/api/events/batch', { params: { ids: ids.join(',') } });
-        setEvents(Array.isArray(eventsRes.data) ? eventsRes.data : []);
+        // Берём сами записи (с датой регистрации), а не только id — чтобы показать
+        // мероприятия в порядке «на что записался последним» (свежие сверху).
+        const regRes = await api.get(`/api/registrations/user/${userId}`);
+        const regs = Array.isArray(regRes.data) ? regRes.data : [];
+        if (regs.length === 0) { setEvents([]); return; }
+        regs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const orderedIds = regs.map(r => r.eventId);
+        const eventsRes = await api.get('/api/events/batch', { params: { ids: orderedIds.join(',') } });
+        const byId = new Map((Array.isArray(eventsRes.data) ? eventsRes.data : []).map(e => [e.id, e]));
+        setEvents(orderedIds.map(id => byId.get(id)).filter(Boolean));
       } catch (err) {
         console.error(err);
         setError('Ошибка при загрузке ваших регистраций');
