@@ -335,7 +335,7 @@
 
 .mp-btn--secondary {
   background: var(--sky);
-  color: var(--sky-ink);
+  color: var(--color-text-inverse);
 }
 
 .mp-btn--secondary:hover { opacity: 0.9; }
@@ -506,7 +506,7 @@
   height: 28px;
   border-radius: 8px;
   background: var(--sky);
-  color: var(--sky-ink);
+  color: var(--color-text-inverse);
   display: grid;
   place-items: center;
   flex-shrink: 0;
