@@ -54,10 +54,14 @@ const EventDetail = () => {
       }
     };
     fetchEvent();
-    // Регистрируем просмотр (best-effort, не блокирует загрузку)
-    api.post(`/api/events/${id}/view`).catch(() => {});
+    // Регистрируем просмотр (best-effort). Только для залогиненных: endpoint требует
+    // аутентификацию, а у анонима 401 здесь вызвал бы глобальный редирект на /signin
+    // и ломал бы публичный просмотр события.
+    if (currentUserId) {
+      api.post(`/api/events/${id}/view`).catch(() => {});
+    }
     return () => { document.title = 'EventHub.kz'; };
-  }, [id]);
+  }, [id, currentUserId]);
 
   const handleShare = async () => {
     const url = window.location.href;
