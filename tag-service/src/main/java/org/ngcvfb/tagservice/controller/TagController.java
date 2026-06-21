@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.ngcvfb.tagservice.model.Tag;
 import org.ngcvfb.tagservice.model.TagType;
 import org.ngcvfb.tagservice.service.TagService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -38,18 +40,35 @@ public class TagController {
     @PostMapping
     public ResponseEntity<Tag> createTag(
             @RequestParam(name = "type", defaultValue = "EVENT") TagType type,
-            @RequestBody Map<String, String> request) {
+            @RequestBody Map<String, String> request,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        assertAdmin(role);
         return ResponseEntity.ok(tagService.createTag(request.get("name"), type));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tag> updateTag(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Tag> updateTag(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        assertAdmin(role);
         return ResponseEntity.ok(tagService.updateTag(id, request.get("name")));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTag(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        assertAdmin(role);
         tagService.deleteTag(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Создание/изменение/удаление тегов — только администратор.
+    private void assertAdmin(String role) {
+        if (!"ADMIN".equalsIgnoreCase(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Управление тегами доступно только администратору");
+        }
     }
 }

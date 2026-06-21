@@ -3,11 +3,14 @@ package org.ngcvfb.userservice.controller;
 import lombok.RequiredArgsConstructor;
 import org.ngcvfb.eventhubkz.common.dto.UserDTO;
 import org.ngcvfb.userservice.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @RestController
@@ -54,14 +57,30 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> updateUser(
+            @PathVariable Long id,
+            @RequestBody UserDTO userDTO,
+            @RequestHeader("X-User-Id") Long requesterId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        requireSelfOrAdmin(id, requesterId, role);
         return ResponseEntity.ok(userService.updateUser(id, userDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long requesterId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        requireSelfOrAdmin(id, requesterId, role);
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void requireSelfOrAdmin(Long targetUserId, Long requesterId, String role) {
+        if (!"ADMIN".equalsIgnoreCase(role) && !Objects.equals(targetUserId, requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Доступно только самому пользователю или администратору");
+        }
     }
 
     @GetMapping("/exists/email/{email}")

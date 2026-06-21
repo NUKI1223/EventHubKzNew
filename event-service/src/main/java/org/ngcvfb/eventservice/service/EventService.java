@@ -128,8 +128,9 @@ public class EventService {
             @CacheEvict(value = "events", key = "#id"),
             @CacheEvict(value = "eventsByTag", allEntries = true)
     })
-    public EventDTO updateEvent(Long id, EventDTO dto) {
+    public EventDTO updateEvent(Long id, EventDTO dto, Long requesterId, String role) {
         Event event = findEventOrThrow(id);
+        requireEventOwnerOrAdmin(event, requesterId, role);
         event.setTitle(dto.getTitle());
         event.setShortDescription(dto.getShortDescription());
         event.setFullDescription(dto.getFullDescription());
@@ -157,12 +158,23 @@ public class EventService {
             @CacheEvict(value = "events", key = "#id"),
             @CacheEvict(value = "eventsByTag", allEntries = true)
     })
-    public void deleteEvent(Long id) {
+    public void deleteEvent(Long id, Long requesterId, String role) {
+        Event event = findEventOrThrow(id);
+        requireEventOwnerOrAdmin(event, requesterId, role);
         eventRepository.deleteById(id);
-        log.info("Deleted event: {}", id);
+        log.info("Deleted event: {} by {}", id, requesterId);
 
         // Send Kafka event
         kafkaProducer.sendEventDeleted(EventDeletedEvent.create(id));
+    }
+
+    // Редактировать/удалять мероприятие может только его организатор или администратор.
+    private void requireEventOwnerOrAdmin(Event event, Long requesterId, String role) {
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+        if (!isAdmin && !Objects.equals(event.getOrganizerId(), requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Изменять мероприятие может только организатор или администратор");
+        }
     }
 
     @Transactional

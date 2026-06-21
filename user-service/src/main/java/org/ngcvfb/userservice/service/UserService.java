@@ -23,7 +23,7 @@ public class UserService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(this::mapToDTO)
+                .map(this::mapToListDTO)
                 .collect(Collectors.toList());
     }
 
@@ -37,7 +37,7 @@ public class UserService {
                     .filter(u -> u.getUsername() != null && u.getUsername().toLowerCase().contains(needle))
                     .collect(Collectors.toList());
         }
-        return source.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return source.stream().map(this::mapToListDTO).collect(Collectors.toList());
     }
 
     public List<UserDTO> getUsersByIds(List<Long> ids) {
@@ -119,6 +119,20 @@ public class UserService {
                 .contacts(user.getContacts())
                 .tags(user.getTags())
                 .enabled(user.isEnabled())
+                .build();
+    }
+
+    // Публичный список/поиск пользователей: без email/role/enabled, чтобы один
+    // запрос GET /api/users не выгружал почты всех пользователей. Поштучные
+    // lookups и batch (его потребляет внутренний Feign для рассылок/участников)
+    // оставляют email.
+    private UserDTO mapToListDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .description(user.getDescription())
+                .avatarUrl(user.getAvatarUrl())
+                .tags(user.getTags())
                 .build();
     }
 }

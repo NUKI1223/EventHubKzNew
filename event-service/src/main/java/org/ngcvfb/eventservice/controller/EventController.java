@@ -111,13 +111,18 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity<EventDTO> updateEvent(
             @PathVariable Long id,
-            @Valid @RequestBody EventDTO eventDTO) {
-        return ResponseEntity.ok(eventService.updateEvent(id, eventDTO));
+            @Valid @RequestBody EventDTO eventDTO,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        return ResponseEntity.ok(eventService.updateEvent(id, eventDTO, userId, role));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
-        eventService.deleteEvent(id);
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        eventService.deleteEvent(id, userId, role);
         return ResponseEntity.noContent().build();
     }
 

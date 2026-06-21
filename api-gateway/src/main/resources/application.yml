@@ -29,11 +29,24 @@ spring:
           filters:
             - name: AuthenticationFilter
 
-        # User Service (public endpoints)
-        - id: user-service-public
+        # User Service - PUT/DELETE (authenticated; self-or-admin enforced downstream)
+        - id: user-service-write
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
+            - Method=PUT,DELETE
+          filters:
+            - name: AuthenticationFilter
+
+        # User Service reads — require auth (no anonymous directory/PII dump).
+        # Internal service-to-service Feign (event-service attendee list, reminders)
+        # talks to user-service directly via Eureka, bypassing this gateway filter.
+        - id: user-service-read
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: AuthenticationFilter
 
         # Event Service - POST/PUT/DELETE (authenticated)
         - id: event-service-write
@@ -119,7 +132,16 @@ spring:
           filters:
             - name: AuthenticationFilter
 
-        # Tag Service
+        # Tag Service - writes (authenticated; admin enforced downstream, except /by-names lookup)
+        - id: tag-service-write
+          uri: lb://TAG-SERVICE
+          predicates:
+            - Path=/api/tags/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - name: AuthenticationFilter
+
+        # Tag Service - public reads
         - id: tag-service
           uri: lb://TAG-SERVICE
           predicates:
@@ -169,7 +191,9 @@ eureka:
 
 security:
   jwt:
-    secret-key: ${JWT_SECRET:your-256-bit-secret-key-here-for-development-only}
+    # Должен совпадать с auth-service (тот же дефолт), иначе gateway не валидирует
+    # выданные auth-service токены, когда JWT_SECRET не задан в окружении.
+    secret-key: ${JWT_SECRET:***REMOVED***=}
 
 resilience4j:
   circuitbreaker:
