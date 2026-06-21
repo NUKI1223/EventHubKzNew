@@ -19,13 +19,16 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
     private final JwtUtil jwtUtil;
 
+    // Применяется ТОЛЬКО к маршрутам с включённым AuthenticationFilter. Публичность
+    // GET-чтений тегов обеспечивает отдельный маршрут без фильтра, поэтому "/api/tags"
+    // сюда НЕ добавляем: иначе фильтр на write-маршруте тегов счёл бы POST/PUT/DELETE
+    // публичными и не подставил X-User-Role (ломая admin-проверку).
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/auth/signup",
             "/auth/login",
             "/auth/verify",
             "/auth/resend",
             "/api/search",
-            "/api/tags",
             "/swagger-ui",
             "/v3/api-docs",
             "/actuator"
