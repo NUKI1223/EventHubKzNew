@@ -38,7 +38,7 @@ const EventRegistrants = () => {
       const att = await api.get(`/api/events/${eventId}/attendees`);
       setAttendees(Array.isArray(att.data) ? att.data : []);
     } catch {
-      /* не критично — список карточек всё равно покажем */
+
     }
   }, [eventId]);
 

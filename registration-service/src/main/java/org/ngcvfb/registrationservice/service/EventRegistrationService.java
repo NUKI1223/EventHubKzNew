@@ -90,15 +90,13 @@ public class EventRegistrationService {
         return event.getStaffIds() != null && event.getStaffIds().contains(requesterId);
     }
 
-    // Намеренно НЕ @Transactional: при гонке вставка падает на unique-constraint,
-    // и повторное чтение должно идти в свежей транзакции, а не в помеченной rollback-only.
     public EventRegistration register(Long userId, Long eventId, String userEmail, String username,
                                       Map<String, String> answers) {
-        // Идемпотентность: повторная запись возвращает существующую (как лайк).
+
         EventRegistration existing = registrationRepository.findByUserIdAndEventId(userId, eventId).orElse(null);
         if (existing != null) {
             log.info("User {} already registered for event {}", userId, eventId);
-            return existing; // идемпотентно: ответы НЕ перезаписываем
+            return existing;
         }
 
         EventDTO event = fetchEvent(eventId);
@@ -117,9 +115,6 @@ public class EventRegistrationService {
         try {
             saved = registrationRepository.save(registration);
         } catch (DataIntegrityViolationException e) {
-            // Гонка: параллельный запрос успел записать того же пользователя на то же
-            // событие (unique(user_id,event_id)). Сохраняем идемпотентность — возвращаем
-            // уже существующую запись без повторной отправки события/письма.
             EventRegistration concurrent = registrationRepository
                     .findByUserIdAndEventId(userId, eventId).orElse(null);
             if (concurrent != null) {
@@ -189,7 +184,7 @@ public class EventRegistrationService {
         log.info("Deleted all registrations for event {}", eventId);
     }
 
-    // Алфавит без двусмысленных символов (0/O, 1/I) — код вводят вручную.
+
     private static final String CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -204,8 +199,6 @@ public class EventRegistrationService {
                 return code;
             }
         }
-        // 10 промахов по 32^8 пространству практически невозможны — это сигнал проблемы,
-        // а не повод выдать код вне алфавита и без проверки уникальности.
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Не удалось сгенерировать код билета, попробуйте ещё раз");
     }

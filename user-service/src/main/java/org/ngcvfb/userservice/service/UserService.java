@@ -123,10 +123,7 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    // Публичное представление (поштучно/batch через gateway): БЕЗ email/role/enabled,
-    // чтобы никакой залогиненный пользователь не выгружал чужие почты. Email отдаётся
-    // только самому пользователю (/me, mapToSelfDTO) и внутреннему Feign
-    // (/internal/users/contacts, mapToContactDTO), который ходит мимо gateway.
+
     private UserDTO mapToDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())

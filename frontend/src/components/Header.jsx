@@ -88,7 +88,7 @@ function Header() {
     { path: "/", label: "Главная" },
     ...(token ? [
       { path: "/eventlist", label: "Мероприятия" },
-      { path: "/request-event", label: "Создать заявку", badge: "NEW" },
+      { path: "/request-event", label: "Создать заявку" },
       { path: "/support", label: "Поддержка" },
       ...(currentUser?.role === "ADMIN" ? [{ path: "/admin", label: "Админ" }] : []),
     ] : []),
