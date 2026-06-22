@@ -15,8 +15,11 @@ services:
       context: ./eureka-server
       dockerfile: Dockerfile
     container_name: eureka-server
+    mem_limit: 512m
     ports:
       - "8761:8761"
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
     networks:
       - eventhub-network
     logging: *default-logging
@@ -33,9 +36,11 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     container_name: api-gateway
+    mem_limit: 512m
     ports:
       - "8180:8080"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -58,9 +63,11 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     container_name: auth-service
+    mem_limit: 512m
     ports:
       - "8081:8081"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-users:5432/users_db
@@ -94,9 +101,11 @@ services:
       context: ./user-service
       dockerfile: Dockerfile
     container_name: user-service
+    mem_limit: 512m
     ports:
       - "8082:8082"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-users:5432/users_db
@@ -118,9 +127,11 @@ services:
       context: ./tag-service
       dockerfile: Dockerfile
     container_name: tag-service
+    mem_limit: 512m
     ports:
       - "8087:8087"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-events:5432/events_db
@@ -142,9 +153,11 @@ services:
       context: ./event-service
       dockerfile: Dockerfile
     container_name: event-service
+    mem_limit: 512m
     ports:
       - "8083:8083"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-events:5432/events_db
@@ -174,9 +187,11 @@ services:
       context: ./search-service
       dockerfile: Dockerfile
     container_name: search-service
+    mem_limit: 512m
     ports:
       - "8085:8085"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - ELASTICSEARCH_URIS=http://elasticsearch:9200
@@ -199,9 +214,11 @@ services:
       context: ./like-service
       dockerfile: Dockerfile
     container_name: like-service
+    mem_limit: 512m
     ports:
       - "8084:8084"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-likes:5432/likes_db
@@ -226,9 +243,11 @@ services:
       context: ./registration-service
       dockerfile: Dockerfile
     container_name: registration-service
+    mem_limit: 512m
     ports:
       - "8089:8089"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-registrations:5432/registrations_db
@@ -253,9 +272,11 @@ services:
       context: ./notification-service
       dockerfile: Dockerfile
     container_name: notification-service
+    mem_limit: 512m
     ports:
       - "8086:8086"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-notifications:5432/notifications_db
@@ -284,9 +305,11 @@ services:
       context: ./file-service
       dockerfile: Dockerfile
     container_name: file-service
+    mem_limit: 512m
     ports:
       - "8088:8088"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
@@ -309,6 +332,7 @@ services:
   minio:
     image: minio/minio:latest
     container_name: minio
+    mem_limit: 384m
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY:-minioadmin}
@@ -352,6 +376,7 @@ services:
   postgres-users:
     image: postgres:14
     container_name: postgres-users
+    mem_limit: 256m
     environment:
       POSTGRES_DB: users_db
       POSTGRES_USER: ${DB_USER}
@@ -373,6 +398,7 @@ services:
   postgres-events:
     image: postgres:14
     container_name: postgres-events
+    mem_limit: 256m
     environment:
       POSTGRES_DB: events_db
       POSTGRES_USER: ${DB_USER}
@@ -394,6 +420,7 @@ services:
   postgres-likes:
     image: postgres:14
     container_name: postgres-likes
+    mem_limit: 256m
     environment:
       POSTGRES_DB: likes_db
       POSTGRES_USER: ${DB_USER}
@@ -410,6 +437,7 @@ services:
   postgres-registrations:
     image: postgres:14
     container_name: postgres-registrations
+    mem_limit: 256m
     environment:
       POSTGRES_DB: registrations_db
       POSTGRES_USER: ${DB_USER}
@@ -426,6 +454,7 @@ services:
   postgres-notifications:
     image: postgres:14
     container_name: postgres-notifications
+    mem_limit: 256m
     environment:
       POSTGRES_DB: notifications_db
       POSTGRES_USER: ${DB_USER}
@@ -442,9 +471,10 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
     container_name: elasticsearch
+    mem_limit: 768m
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms384m -Xmx384m
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
@@ -463,6 +493,7 @@ services:
   redis:
     image: redis:6.2
     container_name: redis
+    mem_limit: 256m
     ports:
       - "6380:6379"
     volumes:
@@ -482,9 +513,11 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
+    mem_limit: 384m
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_HEAP_OPTS: "-Xmx256m"
     ports:
       - "2181:2181"
     volumes:
@@ -498,12 +531,14 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: kafka
+    mem_limit: 768m
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
       - "29092:29092"
     environment:
+      KAFKA_HEAP_OPTS: "-Xmx512m -Xms256m"
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -527,6 +562,8 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    profiles: ["observability"]
+    mem_limit: 384m
     ports:
       - "8090:8080"
     environment:
@@ -545,6 +582,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.47.0
     container_name: prometheus
+    profiles: ["observability"]
     ports:
       - "9090:9090"
     volumes:
@@ -562,6 +600,7 @@ services:
   grafana:
     image: grafana/grafana:10.1.0
     container_name: grafana
+    profiles: ["observability"]
     ports:
       - "3000:3000"
     environment:
@@ -581,6 +620,8 @@ services:
   zipkin:
     image: openzipkin/zipkin:2.24
     container_name: zipkin
+    profiles: ["observability"]
+    mem_limit: 384m
     ports:
       - "9411:9411"
     environment:

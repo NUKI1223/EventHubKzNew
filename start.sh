@@ -5,9 +5,29 @@
 #   ./start.sh --seed       — прогнать seed только на пустых таблицах (идемпотентно)
 #   ./start.sh --seed-force — TRUNCATE + полный reseed (уничтожает данные!)
 #   ./start.sh --no-front   — поднять только backend
+#   ./start.sh --with-monitoring — добавить prometheus/grafana/zipkin/kafka-ui (ест ~2 ГБ RAM)
 #   ./start.sh stop         — остановить всё
 #   ./start.sh logs <svc>   — показать логи сервиса (eureka, api-gateway, ...)
 #   ./start.sh status       — статус контейнеров
+#   docker exec redis redis-cli KEYS '*'
+#   docker exec redis redis-cli GET 'events::5'
+#   # список индексов (увидишь events + системные)
+    #  curl 'http://localhost:9200/_cat/indices?v'
+    #
+    #  # сколько документов
+    #  curl 'http://localhost:9200/events/_count?pretty'
+    #
+    #  # все документы (как "SELECT *")
+    #  curl 'http://localhost:9200/events/_search?pretty&size=50'
+    #
+    #  # один документ по id
+    #  curl 'http://localhost:9200/events/_doc/5?pretty'
+    #
+    #  # схема (mapping — аналог DDL таблицы)
+    #  curl 'http://localhost:9200/events/_mapping?pretty'
+    #
+    #  # поиск по слову
+    #  curl 'http://localhost:9200/events/_search?q=React&pretty'
 #
 set -euo pipefail
 
@@ -85,9 +105,14 @@ build_backend() {
 
 # ── start backend ─────────────────────────────────────────────────
 start_backend() {
-  log "Поднимаю docker stack..."
   cd "$BACKEND_DIR"
-  docker compose up -d
+  if [ "$DO_MONITORING" = 1 ]; then
+    log "Поднимаю docker stack (+ мониторинг)..."
+    docker compose --profile observability up -d
+  else
+    log "Поднимаю docker stack (lite — без prometheus/grafana/zipkin/kafka-ui)..."
+    docker compose up -d
+  fi
   ok "контейнеры стартанули"
 }
 
@@ -173,7 +198,11 @@ print_summary() {
   echo "  API:        $GATEWAY_URL"
   echo "  Eureka:     http://localhost:8761"
   echo "  MinIO UI:   http://localhost:9101  (minioadmin / minioadmin)"
-  echo "  Grafana:    http://localhost:3000  (admin / admin)"
+  if [ "$DO_MONITORING" = 1 ]; then
+    echo "  Grafana:    http://localhost:3000  (admin / admin)"
+    echo "  Zipkin:     http://localhost:9411"
+    echo "  Kafka UI:   http://localhost:8090"
+  fi
   echo
   echo "  Тестовые учётки (пароль 'password123'):"
   echo "    aidar.kasenov@example.kz       — обычный"
@@ -207,15 +236,17 @@ DO_BUILD=0
 DO_SEED=0
 DO_SEED_FORCE=0
 DO_FRONT=1
+DO_MONITORING=0
 
 for arg in "$@"; do
   case "$arg" in
-    --build)      DO_BUILD=1 ;;
-    --seed)       DO_SEED=1 ;;
-    --seed-force) DO_SEED=1; DO_SEED_FORCE=1 ;;
-    --no-front)   DO_FRONT=0 ;;
+    --build)            DO_BUILD=1 ;;
+    --seed)             DO_SEED=1 ;;
+    --seed-force)       DO_SEED=1; DO_SEED_FORCE=1 ;;
+    --no-front)         DO_FRONT=0 ;;
+    --with-monitoring)  DO_MONITORING=1 ;;
     -h|--help)
-      sed -n '2,17p' "$0"; exit 0 ;;
+      sed -n '2,18p' "$0"; exit 0 ;;
     *) err "Неизвестный флаг: $arg"; exit 1 ;;
   esac
 done
