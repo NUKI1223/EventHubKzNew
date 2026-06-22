@@ -146,10 +146,12 @@ const UserProfile = () => {
               <span className="pf__row-value">{user.username || 'Не указано'}</span>
             </div>
 
-            <div className="pf__row">
-              <span className="pf__row-label">Email</span>
-              <span className="pf__row-value">{user.email || 'Не указано'}</span>
-            </div>
+            {isOwnProfile && (
+              <div className="pf__row">
+                <span className="pf__row-label">Email</span>
+                <span className="pf__row-value">{currentUser?.email || 'Не указано'}</span>
+              </div>
+            )}
 
             <div className="pf__row">
               <span className="pf__row-label">О себе</span>

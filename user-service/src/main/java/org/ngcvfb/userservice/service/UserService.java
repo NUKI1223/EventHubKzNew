@@ -53,6 +53,21 @@ public class UserService {
         return mapToDTO(user);
     }
 
+    // Сам пользователь (/me) — с email/role.
+    public UserDTO getSelf(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        return mapToSelfDTO(user);
+    }
+
+    // Контакты для внутренних сервисов (не через gateway).
+    public List<UserDTO> getContactsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return userRepository.findAllById(ids).stream()
+                .map(this::mapToContactDTO)
+                .collect(Collectors.toList());
+    }
+
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
@@ -108,7 +123,34 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
+    // Публичное представление (поштучно/batch через gateway): БЕЗ email/role/enabled,
+    // чтобы никакой залогиненный пользователь не выгружал чужие почты. Email отдаётся
+    // только самому пользователю (/me, mapToSelfDTO) и внутреннему Feign
+    // (/internal/users/contacts, mapToContactDTO), который ходит мимо gateway.
     private UserDTO mapToDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .description(user.getDescription())
+                .avatarUrl(user.getAvatarUrl())
+                .contacts(user.getContacts())
+                .tags(user.getTags())
+                .build();
+    }
+
+    // Список/поиск: минимум полей.
+    private UserDTO mapToListDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .description(user.getDescription())
+                .avatarUrl(user.getAvatarUrl())
+                .tags(user.getTags())
+                .build();
+    }
+
+    // Полное представление — только для самого пользователя (/me).
+    private UserDTO mapToSelfDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -122,17 +164,12 @@ public class UserService {
                 .build();
     }
 
-    // Публичный список/поиск пользователей: без email/role/enabled, чтобы один
-    // запрос GET /api/users не выгружал почты всех пользователей. Поштучные
-    // lookups и batch (его потребляет внутренний Feign для рассылок/участников)
-    // оставляют email.
-    private UserDTO mapToListDTO(User user) {
+    // Контакты для внутренних сервисов (рассылки, список участников): id+username+email.
+    private UserDTO mapToContactDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .description(user.getDescription())
-                .avatarUrl(user.getAvatarUrl())
-                .tags(user.getTags())
+                .email(user.getEmail())
                 .build();
     }
 }

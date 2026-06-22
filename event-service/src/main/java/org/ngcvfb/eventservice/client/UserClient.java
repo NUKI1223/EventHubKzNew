@@ -10,6 +10,8 @@ import java.util.List;
 @FeignClient(name = "user-service")
 public interface UserClient {
 
-    @GetMapping("/api/users/batch")
+    // Внутренний контракт user-service (мимо gateway) — единственный путь, отдающий
+    // email для рассылок и списка участников. Публичный /api/users/batch email не содержит.
+    @GetMapping("/internal/users/contacts")
     List<UserDTO> getUsersByIds(@RequestParam("ids") List<Long> ids);
 }
