@@ -65,6 +65,13 @@ step postgres-users  users_db  users          seed/users.sql    "users"
 step postgres-events events_db events         seed/events.sql   "events + tags"
 step postgres-events events_db event_requests seed/requests.sql "event-requests + support"
 step postgres-likes  likes_db  likes          seed/likes.sql    "likes"
+step postgres-registrations registrations_db event_registrations seed/registrations.sql "registrations"
+
+# Кастомные вопросы регистрации для части событий (3,4,9,10,17). Это идемпотентный
+# UPDATE по конкретным id — запускаем всегда (даже без --force), чтобы вопросы
+# применились и к уже залитым ранее событиям. Если этих id нет — UPDATE ничего не трогает.
+echo "== custom registration questions (always-run) =="
+run_sql postgres-events events_db seed/event_questions.sql
 
 # Денормализованный like_count: имеет смысл только когда реально стоят
 # наши тестовые события (id 1..15). Запускаем при --force ИЛИ когда в users

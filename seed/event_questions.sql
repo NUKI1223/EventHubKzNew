@@ -1,0 +1,11 @@
+-- Custom registration questions for selected NATIVE events.
+-- Always-run (idempotent UPDATE): applies even to already-seeded events without --force.
+-- Question ids here MUST match the answer keys in registrations.sql.
+
+BEGIN;
+UPDATE events SET registration_type = 'NATIVE', questions = '[{"id": "ml_level", "label": "Ваш уровень в ML/DL", "type": "SINGLE", "required": true, "options": ["Новичок", "Средний", "Продвинутый"]}, {"id": "cuda", "label": "Будет ноутбук с GPU/CUDA?", "type": "SINGLE", "required": true, "options": ["Да", "Нет"]}, {"id": "goal", "label": "Что хотите вынести с воркшопа?", "type": "TEXT", "required": false, "options": null}]'::jsonb WHERE id = 3;
+UPDATE events SET registration_type = 'NATIVE', questions = '[{"id": "lang", "label": "Основной язык", "type": "SINGLE", "required": true, "options": ["Java", "Go", "Kotlin", "Другое"]}, {"id": "exp", "label": "Опыт в бэкенде", "type": "SINGLE", "required": true, "options": ["до 1 года", "1–3 года", "3–5 лет", "5+ лет"]}, {"id": "afterparty", "label": "Придёте на after-party?", "type": "SINGLE", "required": false, "options": ["Да", "Нет"]}]'::jsonb WHERE id = 4;
+UPDATE events SET registration_type = 'NATIVE', questions = '[{"id": "ctf", "label": "Участвуете в CTF?", "type": "SINGLE", "required": true, "options": ["Да", "Нет"]}, {"id": "company", "label": "Компания / организация", "type": "TEXT", "required": false, "options": null}]'::jsonb WHERE id = 9;
+UPDATE events SET registration_type = 'NATIVE', questions = '[{"id": "job_status", "label": "Ищете работу?", "type": "SINGLE", "required": true, "options": ["Активно ищу", "Присматриваюсь", "Не ищу"]}, {"id": "position", "label": "Желаемая позиция", "type": "TEXT", "required": true, "options": null}, {"id": "cv_review", "label": "Нужно CV-ревью на месте?", "type": "SINGLE", "required": false, "options": ["Да", "Нет"]}]'::jsonb WHERE id = 10;
+UPDATE events SET registration_type = 'NATIVE', questions = '[{"id": "k8s_prod", "label": "Используете Kubernetes в проде?", "type": "SINGLE", "required": true, "options": ["Да", "Нет", "Планируем"]}, {"id": "role", "label": "Ваша роль / должность", "type": "TEXT", "required": true, "options": null}]'::jsonb WHERE id = 17;
+COMMIT;
