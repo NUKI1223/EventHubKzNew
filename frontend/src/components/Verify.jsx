@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useTranslation, Trans } from 'react-i18next';
 import api from "../api";
 import "../css/SignIn.css";
 
@@ -8,6 +9,7 @@ const CODE_LENGTH = 6;
 function Verify() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const email = location.state?.email || "";
 
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
@@ -18,18 +20,18 @@ function Verify() {
   const inputsRef = useRef([]);
 
   useEffect(() => {
-    document.title = "Подтверждение email — EventHub.kz";
+    document.title = t('auth.verifyTitle');
     if (!email) {
       navigate("/signupnew", { replace: true });
       return;
     }
     inputsRef.current[0]?.focus();
-  }, [email, navigate]);
+  }, [email, navigate, t]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
-    const t = setTimeout(() => setResendCooldown(c => c - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
   }, [resendCooldown]);
 
   const code = digits.join("");
@@ -66,7 +68,7 @@ function Verify() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isComplete) {
-      setError("Введите 6-значный код из письма.");
+      setError(t('auth.errorInvalidCode'));
       return;
     }
     setLoading(true);
@@ -74,10 +76,10 @@ function Verify() {
     try {
       await api.post("/auth/verify", { email, verificationCode: code });
       navigate("/signin", {
-        state: { notice: "Аккаунт подтверждён. Теперь войдите по email и паролю." },
+        state: { notice: t('auth.accountVerified') },
       });
     } catch (err) {
-      const msg = err.response?.data?.error || err.response?.data?.message || "Неверный или просроченный код.";
+      const msg = err.response?.data?.error || err.response?.data?.message || t('auth.errorExpiredCode');
       setError(msg);
     } finally {
       setLoading(false);
@@ -94,7 +96,7 @@ function Verify() {
       setDigits(Array(CODE_LENGTH).fill(""));
       inputsRef.current[0]?.focus();
     } catch (err) {
-      const msg = err.response?.data?.error || err.response?.data?.message || "Не удалось отправить код заново.";
+      const msg = err.response?.data?.error || err.response?.data?.message || t('auth.errorResendFailed');
       setError(msg);
     } finally {
       setResending(false);
@@ -113,10 +115,12 @@ function Verify() {
             <span className="auth-page__illus-name">eventhub.kz</span>
           </div>
           <h2 className="auth-page__illus-tagline">
-            Ещё один шаг —<br />и ты в&nbsp;<em>EventHub.</em>
+            {t('auth.illustVerifyTagline').split('\n').map((line, i, arr) =>
+              i === arr.length - 1 ? <em key={i}>{line}</em> : <React.Fragment key={i}>{line}<br /></React.Fragment>
+            )}
           </h2>
           <div className="auth-page__illus-stats">
-            {[["1200+","событий"],["60 тыс.","участников"],["480","организаторов"]].map(([n,l]) => (
+            {[["1200+", t('auth.statEvents')],["60 тыс.", t('auth.statParticipants')],["480", t('auth.statOrganizers')]].map(([n,l]) => (
               <div key={l} className="auth-page__illus-stat">
                 <div className="auth-page__illus-stat-n">{n}</div>
                 <div className="auth-page__illus-stat-l">{l}</div>
@@ -133,17 +137,17 @@ function Verify() {
           <div className="auth-page__steps">
             <div className="auth-page__step auth-page__step--active" />
             <div className="auth-page__step auth-page__step--active" />
-            <span className="auth-page__step-label">ШАГ 2 ИЗ 2</span>
+            <span className="auth-page__step-label">{t('auth.step2of2')}</span>
           </div>
 
-          <h1 className="auth-page__title">Подтверди email</h1>
+          <h1 className="auth-page__title">{t('auth.verifyHeading')}</h1>
           <p className="auth-page__sub">
-            Мы отправили 6-значный код на <strong>{email}</strong>
+            <Trans i18nKey="auth.verifySub" values={{ email }} components={{ bold: <strong /> }} />
           </p>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="auth-form__field">
-              <label className="auth-form__label">Код из письма</label>
+              <label className="auth-form__label">{t('auth.labelCodeFromEmail')}</label>
               <div className="auth-form__code-row">
                 {digits.map((d, i) => (
                   <input
@@ -166,13 +170,13 @@ function Verify() {
             {error && <div className="auth-form__error">{error}</div>}
 
             <button className="auth-form__submit" type="submit" disabled={loading || !isComplete}>
-              {loading ? "Проверяем..." : "Подтвердить →"}
+              {loading ? t('auth.btnConfirmLoading') : t('auth.btnConfirm')}
             </button>
 
             <div className="auth-form__resend">
               {resendCooldown > 0 ? (
                 <span className="auth-form__resend-hint">
-                  Отправить код заново можно через {resendCooldown}с
+                  {t('auth.resendCooldown', { count: resendCooldown })}
                 </span>
               ) : (
                 <button
@@ -181,13 +185,13 @@ function Verify() {
                   onClick={handleResend}
                   disabled={resending}
                 >
-                  {resending ? "Отправляем..." : "Отправить код заново"}
+                  {resending ? t('auth.btnResendLoading') : t('auth.btnResend')}
                 </button>
               )}
             </div>
 
             <p className="auth-form__footer">
-              Не тот email? <Link to="/signupnew" className="auth-form__link">Назад к регистрации</Link>
+              {t('auth.wrongEmail')} <Link to="/signupnew" className="auth-form__link">{t('auth.wrongEmailLink')}</Link>
             </p>
           </form>
         </div>

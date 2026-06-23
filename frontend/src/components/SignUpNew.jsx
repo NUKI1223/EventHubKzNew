@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import api from "../api";
 import "../css/SignIn.css";
 
 function SignUpNew() {
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = 'Регистрация — EventHub.kz';
-  }, []);
+    document.title = t('auth.signUpTitle');
+  }, [t]);
   const [formData, setFormData] = useState({ username: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,12 +28,12 @@ function SignUpNew() {
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(formData.password)) {
-      setError("Пароль: мин 8 символов, заглавная и строчная буква, цифра.");
+      setError(t('auth.errorPasswordWeak'));
       setLoading(false);
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError("Пароли не совпадают.");
+      setError(t('auth.errorPasswordMismatch'));
       setLoading(false);
       return;
     }
@@ -44,7 +46,7 @@ function SignUpNew() {
       });
       navigate("/verify", { state: { email: formData.email } });
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data?.error || "Ошибка регистрации.";
+      const msg = err.response?.data?.message || err.response?.data?.error || t('auth.errorSignUpFailed');
       setError(msg);
     } finally {
       setLoading(false);
@@ -66,11 +68,12 @@ function SignUpNew() {
             <span className="auth-page__illus-name">eventhub.kz</span>
           </div>
           <h2 className="auth-page__illus-tagline">
-            Присоединяйся<br />к IT-сообществу<br />
-            <em>Казахстана.</em>
+            {t('auth.illustSignUpTagline').split('\n').map((line, i, arr) =>
+              i === arr.length - 1 ? <em key={i}>{line}</em> : <React.Fragment key={i}>{line}<br /></React.Fragment>
+            )}
           </h2>
           <div className="auth-page__illus-stats">
-            {[["1200+","событий"],["60 тыс.","участников"],["480","организаторов"]].map(([n,l]) => (
+            {[["1200+", t('auth.statEvents')],["60 тыс.", t('auth.statParticipants')],["480", t('auth.statOrganizers')]].map(([n,l]) => (
               <div key={l} className="auth-page__illus-stat">
                 <div className="auth-page__illus-stat-n">{n}</div>
                 <div className="auth-page__illus-stat-l">{l}</div>
@@ -87,15 +90,15 @@ function SignUpNew() {
           <div className="auth-page__steps">
             <div className="auth-page__step auth-page__step--active" />
             <div className="auth-page__step" />
-            <span className="auth-page__step-label">ШАГ 1 ИЗ 2</span>
+            <span className="auth-page__step-label">{t('auth.step1of2')}</span>
           </div>
 
-          <h1 className="auth-page__title">Создай аккаунт</h1>
-          <p className="auth-page__sub">Заполни основные данные</p>
+          <h1 className="auth-page__title">{t('auth.signUpHeading')}</h1>
+          <p className="auth-page__sub">{t('auth.signUpSub')}</p>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="auth-form__field">
-              <label className="auth-form__label">Имя пользователя</label>
+              <label className="auth-form__label">{t('auth.labelUsername')}</label>
               <input className="auth-form__input" type="text" name="username"
                 placeholder="username" value={formData.username}
                 onChange={handleChange} required />
@@ -109,7 +112,7 @@ function SignUpNew() {
             </div>
 
             <div className="auth-form__field">
-              <label className="auth-form__label">Пароль</label>
+              <label className="auth-form__label">{t('auth.labelPassword')}</label>
               <div className="auth-form__input-wrap">
                 <input className="auth-form__input" type={showPassword ? "text" : "password"}
                   name="password" placeholder="••••••••" value={formData.password}
@@ -127,14 +130,14 @@ function SignUpNew() {
                   <div className={`auth-form__strength-bar auth-form__strength-bar--${strength >= 2 ? "fill" : ""}`} />
                   <div className={`auth-form__strength-bar auth-form__strength-bar--${strength >= 3 ? "fill" : ""}`} />
                   <span className="auth-form__strength-hint">
-                    {strength < 2 ? "слабый" : strength < 3 ? "средний" : "надёжный"}
+                    {strength < 2 ? t('auth.strengthWeak') : strength < 3 ? t('auth.strengthMedium') : t('auth.strengthStrong')}
                   </span>
                 </div>
               )}
             </div>
 
             <div className="auth-form__field">
-              <label className="auth-form__label">Повтори пароль</label>
+              <label className="auth-form__label">{t('auth.labelConfirmPassword')}</label>
               <input className="auth-form__input" type="password" name="confirmPassword"
                 placeholder="••••••••" value={formData.confirmPassword}
                 onChange={handleChange} required />
@@ -143,11 +146,11 @@ function SignUpNew() {
             {error && <div className="auth-form__error">{error}</div>}
 
             <button className="auth-form__submit" type="submit" disabled={loading}>
-              {loading ? "Загрузка..." : "Продолжить →"}
+              {loading ? t('auth.btnContinueLoading') : t('auth.btnContinue')}
             </button>
 
             <p className="auth-form__footer">
-              Уже есть аккаунт? <Link to="/signin" className="auth-form__link">Войти</Link>
+              {t('auth.hasAccount')} <Link to="/signin" className="auth-form__link">{t('auth.hasAccountLink')}</Link>
             </p>
           </form>
         </div>

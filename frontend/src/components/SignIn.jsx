@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import api from "../api";
 import "../css/SignIn.css";
 
 function SignIn() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState(location.state?.notice || "");
 
   useEffect(() => {
-    document.title = 'Войти — EventHub.kz';
+    document.title = t('auth.signInTitle');
     if (location.state?.notice) {
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+  }, [location.state, t]);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ function SignIn() {
       const redirect = new URLSearchParams(location.search).get("redirect");
       navigate(redirect || "/");
     } catch (err) {
-      const msg = err.response?.data?.message || "Неверный email или пароль";
+      const msg = err.response?.data?.message || t('auth.errorInvalidCredentials');
       setError(msg);
     } finally {
       setLoading(false);
@@ -57,11 +59,12 @@ function SignIn() {
             <span className="auth-page__illus-name">eventhub.kz</span>
           </div>
           <h2 className="auth-page__illus-tagline">
-            Все IT-события<br />Казахстана —<br />
-            <em>в одном месте.</em>
+            {t('auth.illustSignInTagline').split('\n').map((line, i, arr) =>
+              i === arr.length - 1 ? <em key={i}>{line}</em> : <React.Fragment key={i}>{line}<br /></React.Fragment>
+            )}
           </h2>
           <div className="auth-page__illus-stats">
-            {[["1200+","событий"],["60 тыс.","участников"],["38","городов"]].map(([n,l]) => (
+            {[["1200+", t('auth.statEvents')],["60 тыс.", t('auth.statParticipants')],["38", t('auth.statCities')]].map(([n,l]) => (
               <div key={l} className="auth-page__illus-stat">
                 <div className="auth-page__illus-stat-n">{n}</div>
                 <div className="auth-page__illus-stat-l">{l}</div>
@@ -75,8 +78,8 @@ function SignIn() {
 
       <div className="auth-page__right">
         <div className="auth-page__form-wrap">
-          <h1 className="auth-page__title">С возвращением!</h1>
-          <p className="auth-page__sub">Войди по email и паролю</p>
+          <h1 className="auth-page__title">{t('auth.signInHeading')}</h1>
+          <p className="auth-page__sub">{t('auth.signInSub')}</p>
 
           {notice && (
             <div className="auth-form__notice" role="status">
@@ -93,7 +96,7 @@ function SignIn() {
             </div>
 
             <div className="auth-form__field">
-              <label className="auth-form__label">Пароль</label>
+              <label className="auth-form__label">{t('auth.labelPassword')}</label>
               <div className="auth-form__input-wrap">
                 <input className="auth-form__input" type={showPassword ? "text" : "password"}
                   name="password" placeholder="••••••••" value={formData.password}
@@ -110,13 +113,13 @@ function SignIn() {
             {error && <div className="auth-form__error">{error}</div>}
 
             <button className="auth-form__submit" type="submit" disabled={loading}>
-              {loading ? "Вход..." : "Войти"}
+              {loading ? t('auth.btnSignInLoading') : t('auth.btnSignIn')}
             </button>
 
-            <div className="auth-form__divider"><span>или</span></div>
+            <div className="auth-form__divider"><span>{t('auth.dividerOr')}</span></div>
 
             <p className="auth-form__footer">
-              Нет аккаунта? <Link to="/signupnew" className="auth-form__link">Зарегистрируйся</Link>
+              {t('auth.noAccount')} <Link to="/signupnew" className="auth-form__link">{t('auth.noAccountLink')}</Link>
             </p>
           </form>
         </div>
