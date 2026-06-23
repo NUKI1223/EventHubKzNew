@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { useToggleResource } from '../hooks/useToggleResource';
 import RegistrationModal from './RegistrationModal';
@@ -9,6 +10,7 @@ const RegisterButton = ({
   variant = 'full', initialRegistered, initialCount, selfFetch, questions,
 }) => {
   const doSelfFetch = selfFetch ?? (initialRegistered === undefined);
+  const { t } = useTranslation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const resolverRef = useRef(null);
@@ -24,9 +26,9 @@ const RegisterButton = ({
     currentUserId,
     postUrl: `/api/registrations/event/${eventId}`,
     deleteUrl: `/api/registrations/event/${eventId}`,
-    msgOn: 'Вы записаны! Билет отправлен на почту',
-    msgOff: 'Запись отменена',
-    msgError: 'Не удалось изменить запись',
+    msgOn: t('eventDetail.registerSuccess'),
+    msgOff: t('eventDetail.registerCancelled'),
+    msgError: t('eventDetail.registerError'),
     onActiveChange: (v) => onRegisteredChange?.(v),
     onBeforeActivate,
   });
@@ -62,7 +64,7 @@ const RegisterButton = ({
     disabled: disabled || busy || modalOpen,
     'aria-pressed': registered,
     'aria-busy': busy,
-    'aria-label': registered ? 'Отменить запись на мероприятие' : 'Записаться на мероприятие',
+    'aria-label': registered ? t('eventDetail.ariaUnregister') : t('eventDetail.ariaRegister'),
     onClick: handleClick,
   };
 
@@ -70,20 +72,20 @@ const RegisterButton = ({
     return (
       <>
         <button className={`register-button register-button--compact ${registered ? 'register-button--on' : ''} ${disabled ? 'register-button--disabled' : ''}`} {...common}>
-          {busy ? '…' : (registered ? '✓ Иду' : (disabled ? 'Закрыта' : 'Записаться'))}
+          {busy ? '…' : (registered ? `✓ ${t('eventDetail.compactGoing')}` : (disabled ? t('eventDetail.compactClosed') : t('eventDetail.compactRegister')))}
         </button>
         {modal}
       </>
     );
   }
 
-  const label = registered ? '✓ Вы идёте' : (disabled ? 'Регистрация закрыта' : 'Записаться');
+  const label = registered ? `✓ ${t('eventDetail.labelGoing')}` : (disabled ? t('eventDetail.labelClosed') : t('eventDetail.labelRegister'));
   return (
     <>
       <button
         className={`register-button ${registered ? 'register-button--on' : ''} ${disabled ? 'register-button--disabled' : ''}`}
         {...common}
-        title={disabled ? 'Регистрация на это мероприятие закрыта' : undefined}
+        title={disabled ? t('eventDetail.titleClosed') : undefined}
       >
         {busy ? '…' : label}
         {!disabled && <span className="register-button__count">{count}</span>}

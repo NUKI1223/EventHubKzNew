@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../css/RegistrationModal.css';
 
 export default function RegistrationModal({ questions, onSubmit, onClose }) {
+  const { t } = useTranslation();
   const [values, setValues] = useState({});
   const [err, setErr] = useState('');
   const set = (id, v) => setValues(prev => ({ ...prev, [id]: v }));
@@ -10,7 +12,7 @@ export default function RegistrationModal({ questions, onSubmit, onClose }) {
     e.preventDefault();
     for (const q of questions) {
       const v = (values[q.id] || '').trim();
-      if (q.required && !v) { setErr(`Ответьте на вопрос: ${q.label}`); return; }
+      if (q.required && !v) { setErr(t('eventDetail.answerRequired', { label: q.label })); return; }
     }
     onSubmit(values);
   };
@@ -18,7 +20,7 @@ export default function RegistrationModal({ questions, onSubmit, onClose }) {
   return (
     <div className="rmodal__overlay" onMouseDown={onClose}>
       <div className="rmodal" onMouseDown={e => e.stopPropagation()}>
-        <h3 className="rmodal__title">Анкета участника</h3>
+        <h3 className="rmodal__title">{t('eventDetail.modalTitle')}</h3>
         <form onSubmit={submit} className="rmodal__form">
           {questions.map(q => (
             <div className="rmodal__field" key={q.id}>
@@ -41,8 +43,8 @@ export default function RegistrationModal({ questions, onSubmit, onClose }) {
           ))}
           {err && <div className="rmodal__err">{err}</div>}
           <div className="rmodal__actions">
-            <button type="button" className="rmodal__cancel" onClick={onClose}>Отмена</button>
-            <button type="submit" className="rmodal__submit">Записаться</button>
+            <button type="button" className="rmodal__cancel" onClick={onClose}>{t('eventDetail.modalCancel')}</button>
+            <button type="submit" className="rmodal__submit">{t('eventDetail.modalSubmit')}</button>
           </div>
         </form>
       </div>

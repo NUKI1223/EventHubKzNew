@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
 import { formatDate } from '../utils/dateUtils';
 import '../css/EventTicket.css';
@@ -8,6 +9,7 @@ import '../css/EventTicket.css';
  * и датой регистрации. Организатор вводит код, чтобы отметить приход.
  */
 const EventTicket = ({ registration, event, username, email }) => {
+  const { t } = useTranslation();
   const wrapRef = useRef(null);
   if (!registration) return null;
 
@@ -28,8 +30,8 @@ const EventTicket = ({ registration, event, username, email }) => {
   return (
     <div className="ticket">
       <div className="ticket__head">
-        <span className="ticket__label">Ваш билет</span>
-        {attended && <span className="ticket__badge">✓ Вы отмечены</span>}
+        <span className="ticket__label">{t('eventDetail.ticketLabel')}</span>
+        {attended && <span className="ticket__badge">✓ {t('eventDetail.ticketAttended')}</span>}
       </div>
 
       <div className="ticket__code-box" ref={wrapRef}>
@@ -38,19 +40,19 @@ const EventTicket = ({ registration, event, username, email }) => {
 
       <div className="ticket__meta">
         <div className="ticket__row">
-          <span className="ticket__row-label">Код</span>
+          <span className="ticket__row-label">{t('eventDetail.ticketCode')}</span>
           <span className="ticket__code">{registration.code}</span>
         </div>
         <div className="ticket__row">
-          <span className="ticket__row-label">Дата регистрации</span>
+          <span className="ticket__row-label">{t('eventDetail.ticketRegDate')}</span>
           <span className="ticket__row-val">{formatDate(registration.createdAt)}</span>
         </div>
       </div>
 
       <p className="ticket__hint">
-        Покажите QR или назовите код организатору на входе — он отметит ваш приход.
+        {t('eventDetail.ticketHint')}
       </p>
-      <button type="button" className="ticket__btn" onClick={download}>Скачать билет</button>
+      <button type="button" className="ticket__btn" onClick={download}>{t('eventDetail.ticketDownload')}</button>
     </div>
   );
 };
