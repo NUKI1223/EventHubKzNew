@@ -25,13 +25,13 @@ public class EventDocument {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Text, analyzer = "russian")
     private String title;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Text, analyzer = "russian")
     private String shortDescription;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Text, analyzer = "russian")
     private String fullDescription;
 
     @Field(type = FieldType.Keyword)
