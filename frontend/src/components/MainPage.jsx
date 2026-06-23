@@ -1,19 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from "../api";
 import { CATEGORIES } from "../config/categories";
 import "../css/MainPage.css";
-
-const MONTHS_ABBR = ["ЯНВ", "ФЕВ", "МАР", "АПР", "МАЙ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК"];
-const MONTHS_IN = ["январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре"];
-const SEASONS = ["Зимний", "Зимний", "Весенний", "Весенний", "Весенний", "Летний", "Летний", "Летний", "Осенний", "Осенний", "Осенний", "Зимний"];
-
-const FEATURES = [
-  "Поиск по тегам и городам",
-  "Уведомления об одобрении заявок",
-  "Личный кабинет с подписками",
-  "Поддержка через встроенный чат",
-];
 
 function plural(n, [one, few, many]) {
   const mod10 = n % 10;
@@ -24,6 +14,13 @@ function plural(n, [one, few, many]) {
 }
 
 function MainPage() {
+  const { t } = useTranslation();
+
+  const MONTHS_ABBR = t('landing.monthsAbbr', { returnObjects: true });
+  const MONTHS_IN   = t('landing.monthsIn',   { returnObjects: true });
+  const SEASONS     = t('landing.seasons',     { returnObjects: true });
+  const FEATURES    = t('landing.features',    { returnObjects: true });
+
   const [events, setEvents] = useState(null);
 
   useEffect(() => {
@@ -87,8 +84,7 @@ function MainPage() {
         organizers: organizers.size,
         likes: totalLikes,
       },
-      monthLabel: MONTHS_IN[month],
-      season: SEASONS[month],
+      monthIndex: month,
     };
   }, [events]);
 
@@ -103,7 +99,10 @@ function MainPage() {
     if (parts.length >= 2) { nextCity = parts[0]; nextVenue = parts.slice(1).join(', '); }
     else { nextCity = parts[0] || ''; }
   }
-  if (next?.online) { nextVenue = nextVenue || 'Онлайн'; nextCity = nextCity || ''; }
+  if (next?.online) { nextVenue = nextVenue || t('landing.venueOnline'); nextCity = nextCity || ''; }
+
+  const monthLabel = derived != null ? MONTHS_IN[derived.monthIndex] : '';
+  const season     = derived != null ? SEASONS[derived.monthIndex]   : '';
 
   return (
     <main className="mp">
@@ -116,29 +115,33 @@ function MainPage() {
             <div className="mp-hero__season-badge">
               <span className="mp-hero__season-dot" />
               {derived
-                ? `${derived.season} сезон · ${derived.inThisMonth} ${plural(derived.inThisMonth, ['событие', 'события', 'событий'])} в ${derived.monthLabel}`
-                : 'Загружаем актуальные события…'}
+                ? t('landing.seasonBadge', {
+                    season,
+                    count: derived.inThisMonth,
+                    eventWord: plural(derived.inThisMonth, t('landing.pluralEvent', { returnObjects: true })),
+                    month: monthLabel,
+                  })
+                : t('landing.seasonBadgeLoading')}
             </div>
 
             <h1 className="mp-hero__title">
-              Все IT‑события<br />
-              Казахстана —<br />
-              <em className="mp-hero__title-em">в одном месте.</em>
+              {t('landing.heroTitle1')}<br />
+              {t('landing.heroTitle2') && <>{t('landing.heroTitle2')}<br /></>}
+              <em className="mp-hero__title-em">{t('landing.heroTitleEm')}</em>
             </h1>
 
             <p className="mp-hero__sub">
-              Хакатоны, митапы, конференции и воркшопы от сообщества.
-              Находи, сохраняй и приходи — или создавай свои.
+              {t('landing.heroSub')}
             </p>
 
             <div className="mp-hero__actions">
               <Link to="/eventlist" className="mp-btn mp-btn--primary">
-                Смотреть события
+                {t('landing.btnBrowse')}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
               </Link>
               <Link to="/request-event" className="mp-btn mp-btn--ghost">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
-                Создать событие
+                {t('landing.btnCreate')}
               </Link>
             </div>
 
@@ -153,10 +156,13 @@ function MainPage() {
                 ))}
               </div>
               <div className="mp-hero__trust-text">
-                <div className="mp-hero__trust-orgs">Astana Hub · nFactorial · GDG · MOST · Kaspi</div>
+                <div className="mp-hero__trust-orgs">{t('landing.trustOrgs')}</div>
                 {derived
-                  ? `${derived.stats.organizers} ${plural(derived.stats.organizers, ['организатор уже', 'организатора уже', 'организаторов уже'])} с нами`
-                  : 'организаторы доверяют платформе'}
+                  ? t('landing.trustCountLine', {
+                      orgCount: derived.stats.organizers,
+                      orgWord: plural(derived.stats.organizers, t('landing.pluralOrgTrust', { returnObjects: true })),
+                    })
+                  : t('landing.trustFallback')}
               </div>
             </div>
           </div>
@@ -175,7 +181,14 @@ function MainPage() {
               )}
               <div className="mp-hero__cover-live">
                 <span className="mp-hero__cover-live-dot" />
-                {next ? (daysUntilNext === 0 ? 'Сегодня' : `Через ${daysUntilNext} ${plural(daysUntilNext, ['день','дня','дней'])}`) : 'Сейчас идёт'}
+                {next
+                  ? (daysUntilNext === 0
+                      ? t('landing.liveToday')
+                      : t('landing.liveDays', {
+                          count: daysUntilNext,
+                          dayWord: plural(daysUntilNext, t('landing.pluralDay', { returnObjects: true })),
+                        }))
+                  : t('landing.liveSoon')}
               </div>
             </div>
 
@@ -187,7 +200,7 @@ function MainPage() {
             >
               <div className="mp-hero__card-date">
                 <div className="mp-hero__card-month">
-                  {nextDate ? MONTHS_ABBR[nextDate.getMonth()] : 'СКОРО'}
+                  {nextDate ? MONTHS_ABBR[nextDate.getMonth()] : t('landing.cardSoon')}
                 </div>
                 <div className="mp-hero__card-day">
                   {nextDate ? nextDate.getDate() : '—'}
@@ -195,11 +208,11 @@ function MainPage() {
               </div>
               <div>
                 <div className="mp-hero__card-title">
-                  {next ? next.title : 'Загружаем ближайшее событие…'}
+                  {next ? next.title : t('landing.cardLoading')}
                 </div>
                 <div className="mp-hero__card-meta">
                   {next
-                    ? [nextVenue, nextCity].filter(Boolean).join(' · ') || 'IT-сообщество'
+                    ? [nextVenue, nextCity].filter(Boolean).join(' · ') || t('landing.cardMetaFallback')
                     : ''}
                 </div>
               </div>
@@ -207,12 +220,20 @@ function MainPage() {
                 <div className="mp-hero__card-bar-meta">
                   <span>
                     {next?.likesCount
-                      ? `${next.likesCount} ${plural(next.likesCount, ['лайк','лайка','лайков'])}`
-                      : (next ? 'Пока без лайков' : '')}
+                      ? t('landing.cardLikes', {
+                          count: next.likesCount,
+                          likeWord: plural(next.likesCount, t('landing.pluralLike', { returnObjects: true })),
+                        })
+                      : (next ? t('landing.cardNoLikes') : '')}
                   </span>
                   <span className="mp-mono">
                     {daysUntilNext != null
-                      ? (daysUntilNext === 0 ? 'сегодня' : `до события ${daysUntilNext} ${plural(daysUntilNext, ['день','дня','дней'])}`)
+                      ? (daysUntilNext === 0
+                          ? t('landing.cardDaysToday')
+                          : t('landing.cardDaysUntil', {
+                              count: daysUntilNext,
+                              dayWord: plural(daysUntilNext, t('landing.pluralDay', { returnObjects: true })),
+                            }))
                       : ''}
                   </span>
                 </div>
@@ -223,8 +244,11 @@ function MainPage() {
             <div className="mp-hero__open-badge">
               <span className="mp-hero__open-dot" />
               {derived
-                ? `${derived.openNow} ${plural(derived.openNow, ['событие открыто', 'события открыты', 'событий открыто'])} к регистрации`
-                : 'регистрация открыта'}
+                ? t('landing.openBadge', {
+                    count: derived.openNow,
+                    eventWord: plural(derived.openNow, t('landing.pluralEventOpen', { returnObjects: true })),
+                  })
+                : t('landing.openBadgeFallback')}
             </div>
           </div>
         </div>
@@ -242,7 +266,7 @@ function MainPage() {
             <span className="mp-cat__label">{c.label}</span>
             <span className="mp-cat__count mp-mono">
               {derived
-                ? `${c.count} ${plural(c.count, ['событие','события','событий'])}`
+                ? `${c.count} ${plural(c.count, t('landing.pluralEvent', { returnObjects: true }))}`
                 : '…'}
             </span>
           </Link>
@@ -262,15 +286,15 @@ function MainPage() {
       <div className="mp__container">
         <div className="mp-stats">
           {(derived ? [
-            { n: String(derived.stats.total), l: plural(derived.stats.total, ['событие на платформе', 'события на платформе', 'событий на платформе']) },
-            { n: String(derived.stats.cities), l: plural(derived.stats.cities, ['город', 'города', 'городов']) },
-            { n: String(derived.stats.organizers), l: plural(derived.stats.organizers, ['организатор', 'организатора', 'организаторов']) },
-            { n: String(derived.stats.likes), l: plural(derived.stats.likes, ['лайк', 'лайка', 'лайков']) },
+            { n: String(derived.stats.total),      l: plural(derived.stats.total,      t('landing.pluralEventOnPlatform', { returnObjects: true })) },
+            { n: String(derived.stats.cities),     l: plural(derived.stats.cities,     t('landing.pluralCity',            { returnObjects: true })) },
+            { n: String(derived.stats.organizers), l: plural(derived.stats.organizers, t('landing.pluralOrg',             { returnObjects: true })) },
+            { n: String(derived.stats.likes),      l: plural(derived.stats.likes,      t('landing.pluralLike',            { returnObjects: true })) },
           ] : [
-            { n: '—', l: 'событий' },
-            { n: '—', l: 'городов' },
-            { n: '—', l: 'организаторов' },
-            { n: '—', l: 'лайков' },
+            { n: '—', l: t('landing.statsEventsFallback') },
+            { n: '—', l: t('landing.statsCitiesFallback') },
+            { n: '—', l: t('landing.statsOrgsFallback') },
+            { n: '—', l: t('landing.statsLikesFallback') },
           ]).map((s, i, arr) => (
             <div key={i} className={`mp-stats__item ${i < arr.length - 1 ? "mp-stats__item--border" : ""}`}>
               <div className="mp-stats__n">{s.n}</div>
@@ -286,26 +310,26 @@ function MainPage() {
           <div className="mp-cta__blob-1" />
           <div className="mp-cta__blob-2" />
           <div className="mp-cta__left">
-            <div className="mp-cta__eyebrow mp-mono">Для организаторов</div>
+            <div className="mp-cta__eyebrow mp-mono">{t('landing.ctaEyebrow')}</div>
             <h2 className="mp-cta__title">
-              Опубликуй событие за{" "}
-              <em className="mp-cta__title-em">5 минут</em>
+              {t('landing.ctaTitle1')}{" "}
+              <em className="mp-cta__title-em">{t('landing.ctaTitleEm')}</em>
             </h2>
             <p className="mp-cta__sub">
-              Заполни форму — модерация подтверждает заявку и публикует мероприятие.
+              {t('landing.ctaSub')}
             </p>
             <Link to="/request-event" className="mp-btn mp-btn--secondary mp-cta__btn">
-              Создать событие
+              {t('landing.btnCreate')}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </Link>
           </div>
           <div className="mp-cta__right">
-            {FEATURES.map((t, i) => (
+            {FEATURES.map((feat, i) => (
               <div key={i} className="mp-cta__feature">
                 <div className="mp-cta__feature-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="13" height="13"><path d="M4 12l5 5L20 6"/></svg>
                 </div>
-                <span>{t}</span>
+                <span>{feat}</span>
               </div>
             ))}
           </div>
@@ -323,7 +347,7 @@ function MainPage() {
               <span className="mp-footer__logo-text">eventhub.kz</span>
             </div>
             <p className="mp-footer__tagline">
-              Платформа IT-событий Казахстана. Хакатоны, митапы, конференции и воркшопы — в одном месте.
+              {t('landing.footerTagline')}
             </p>
             <div className="mp-footer__social">
               {[
@@ -346,17 +370,17 @@ function MainPage() {
             </div>
           </div>
           {[
-            { h: "Продукт",  items: [
-              { label: "События", to: "/eventlist" },
-              { label: "Создать событие", to: "/request-event" },
-              { label: "Профиль", to: "/profile" },
-              { label: "Поиск", to: "/search" },
+            { h: t('landing.footerColProduct'), items: [
+              { label: t('landing.footerLinkEvents'),  to: "/eventlist" },
+              { label: t('landing.footerLinkCreate'),  to: "/request-event" },
+              { label: t('landing.footerLinkProfile'), to: "/profile" },
+              { label: t('landing.footerLinkSearch'),  to: "/search" },
             ]},
-            { h: "Помощь",   items: [
-              { label: "Поддержка", to: "/support" },
-              { label: "О платформе", to: "/eventlist" },
-              { label: "Регистрация", to: "/signupnew" },
-              { label: "Вход", to: "/signin" },
+            { h: t('landing.footerColHelp'), items: [
+              { label: t('landing.footerLinkSupport'), to: "/support" },
+              { label: t('landing.footerLinkAbout'),   to: "/eventlist" },
+              { label: t('landing.footerLinkSignup'),  to: "/signupnew" },
+              { label: t('landing.footerLinkSignin'),  to: "/signin" },
             ]},
           ].map((col) => (
             <div key={col.h} className="mp-footer__col">
@@ -368,7 +392,7 @@ function MainPage() {
           ))}
         </div>
         <div className="mp__container mp-footer__bottom">
-          <span>© 2026 EventHub Kazakhstan · Астана</span>
+          <span>{t('landing.footerCopyright')}</span>
         </div>
       </footer>
 
