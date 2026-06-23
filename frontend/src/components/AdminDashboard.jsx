@@ -1,34 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import AdminEventRequests from './AdminEventRequests';
 import AdminSupportMessages from './AdminSupportMessages';
+import { useTranslation } from 'react-i18next';
 import '../css/AdminDashboard.css';
 
 const TABS = [
-  { key: 'requests', label: 'Заявки на мероприятия' },
-  { key: 'support',  label: 'Сообщения от пользователей' },
+  { key: 'requests', labelKey: 'admin.tabRequests' },
+  { key: 'support',  labelKey: 'admin.tabSupport' },
 ];
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState('requests');
 
   useEffect(() => {
-    document.title = 'Панель администратора — EventHub.kz';
-  }, []);
+    document.title = t('admin.pageTitle');
+  }, [t]);
 
   return (
     <div className="adm">
       <div className="adm__hdr">
-        <h2 className="adm__title">Панель администратора</h2>
+        <h2 className="adm__title">{t('admin.heading')}</h2>
       </div>
 
       <div className="adm__tabs">
-        {TABS.map(t => (
+        {TABS.map(item => (
           <button
-            key={t.key}
-            className={`adm__tab ${tab === t.key ? 'adm__tab--active' : ''}`}
-            onClick={() => setTab(t.key)}
+            key={item.key}
+            className={`adm__tab ${tab === item.key ? 'adm__tab--active' : ''}`}
+            onClick={() => setTab(item.key)}
           >
-            {t.label}
+            {t(item.labelKey)}
           </button>
         ))}
       </div>

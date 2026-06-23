@@ -7,9 +7,11 @@ import { SkeletonCard } from './Skeleton';
 import EmptyState from './EmptyState';
 import PageError from './PageError';
 import TagSelector from './TagSelector';
+import { useTranslation } from 'react-i18next';
 import '../css/EventLikers.css';
 
 const EventRegistrants = () => {
+  const { t } = useTranslation();
   const { id: eventId } = useParams();
   const authUser = useAuthUser();
   const role = authUser?.role;
@@ -59,13 +61,13 @@ const EventRegistrants = () => {
     try {
       const u = await api.get(`/api/users/username/${encodeURIComponent(name)}`);
       const userId = u.data?.id;
-      if (!userId) { toast.error('Пользователь не найден'); return; }
+      if (!userId) { toast.error(t('organizer.staffNotFound')); return; }
       await api.post(`/api/events/${eventId}/staff`, { userId });
       setStaffInput('');
       setStaff(prev => prev.some(s => s.id === userId) ? prev : [...prev, u.data]);
-      toast.success(`${u.data.username} добавлен в сотрудники`);
+      toast.success(t('organizer.staffAdded', { username: u.data.username }));
     } catch (err) {
-      toast.error(err?.response?.status === 404 ? 'Пользователь не найден' : 'Не удалось добавить');
+      toast.error(err?.response?.status === 404 ? t('organizer.staffNotFound') : t('organizer.staffAddFailed'));
     } finally {
       setStaffBusy(false);
     }
@@ -75,7 +77,7 @@ const EventRegistrants = () => {
     try {
       await api.delete(`/api/events/${eventId}/staff/${userId}`);
       setStaff(prev => prev.filter(s => s.id !== userId));
-    } catch { toast.error('Не удалось убрать сотрудника'); }
+    } catch { toast.error(t('organizer.staffRemoveFailed')); }
   };
 
   useEffect(() => {
@@ -110,7 +112,7 @@ const EventRegistrants = () => {
         const usersRes = await api.get('/api/users/batch', { params: { ids: userIds.join(',') } });
         setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
       } catch {
-        setError('Не удалось загрузить список');
+        setError(t('organizer.loadListError'));
       } finally {
         setLoading(false);
       }
@@ -127,37 +129,37 @@ const EventRegistrants = () => {
       const res = await api.post('/api/registrations/checkin', { code });
       const uid = res.data?.userId;
       const who = attendees.find(a => a.userId === uid);
-      toast.success(`Отмечен: ${who?.username || who?.email || ('пользователь ' + uid)}`);
+      toast.success(t('organizer.checkinSuccess', { name: who?.username || who?.email || uid }));
       setCheckinCode('');
       await fetchAttendees();
     } catch (err) {
       const status = err?.response?.status;
       const serverMsg = err?.response?.data?.message;
       let msg;
-      if (status === 404) msg = 'Код не найден';
-      else if (status === 403) msg = 'Отмечать можно только участников своего мероприятия';
-      else msg = (serverMsg && serverMsg.trim()) || 'Не удалось отметить участника';
+      if (status === 404) msg = t('organizer.checkinNotFound');
+      else if (status === 403) msg = t('organizer.checkinForbidden');
+      else msg = (serverMsg && serverMsg.trim()) || t('organizer.checkinFailed');
       toast.error(msg);
     } finally {
       setCheckinBusy(false);
     }
   };
 
-  const statusLabel = (s) => (s === 'ATTENDED' ? 'Пришёл' : 'Записан');
+  const statusLabel = (s) => (s === 'ATTENDED' ? t('organizer.statusAttended') : t('organizer.statusRegistered'));
 
   const exportExcel = async () => {
     if (!attendees.length) {
-      toast.error('Нет участников для выгрузки');
+      toast.error(t('organizer.exportEmpty'));
       return;
     }
     const XLSX = await import('xlsx');
     const rows = attendees.map((a, i) => {
       const base = {
-        '№': i + 1,
+        [t('organizer.colNum')]: i + 1,
         'ID': a.userId,
-        'Имя': a.username || '',
+        [t('organizer.colName')]: a.username || '',
         'Email': a.email || '',
-        'Статус': statusLabel(a.status),
+        [t('organizer.colStatus')]: statusLabel(a.status),
       };
       questions.forEach(q => { base[q.label] = a.answers?.[q.id] || ''; });
       return base;
@@ -190,7 +192,7 @@ const EventRegistrants = () => {
 
   if (loading) return (
     <div className="liker-page">
-      <div className="liker-page__hdr"><span className="liker-page__title">Загрузка...</span></div>
+      <div className="liker-page__hdr"><span className="liker-page__title">{t('common.loading')}</span></div>
       <div className="liker-page__grid">
         {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
@@ -202,22 +204,22 @@ const EventRegistrants = () => {
   return (
     <div className="liker-page">
       <div className="liker-page__hdr">
-        <Link to={`/events/${eventId}`} className="liker-page__back">← к событию</Link>
+        <Link to={`/events/${eventId}`} className="liker-page__back">{t('organizer.backToEvent')}</Link>
         <h1 className="liker-page__title">
-          Идут на «{event?.title}»
+          {t('organizer.registrantsTitle', { title: event?.title })}
         </h1>
-        <p className="liker-page__sub">{users.length} {users.length === 1 ? 'участник' : 'участников'}</p>
+        <p className="liker-page__sub">{users.length === 1 ? t('organizer.participantOne', { count: users.length }) : t('organizer.participantMany', { count: users.length })}</p>
       </div>
 
       {isManager && (
         <div className="att-panel">
           <div className="att-panel__hdr">
             <div>
-              <div className="att-panel__title">Список участников</div>
-              <div className="att-panel__sub">Виден организатору и сотрудникам мероприятия</div>
+              <div className="att-panel__title">{t('organizer.attendeesTitle')}</div>
+              <div className="att-panel__sub">{t('organizer.attendeesSub')}</div>
             </div>
             <button type="button" className="att-panel__export" onClick={exportExcel} disabled={!attendees.length}>
-              Выгрузить в Excel
+              {t('organizer.exportExcel')}
             </button>
           </div>
 
@@ -225,30 +227,30 @@ const EventRegistrants = () => {
             <input
               className="att-checkin__input"
               type="text"
-              placeholder="Код участника с QR-билета"
+              placeholder={t('organizer.checkinPlaceholder')}
               value={checkinCode}
               onChange={e => setCheckinCode(e.target.value.toUpperCase())}
               maxLength={16}
             />
             <button type="submit" className="att-checkin__btn" disabled={checkinBusy || !checkinCode.trim()}>
-              Отметить приход
+              {t('organizer.checkinBtn')}
             </button>
           </form>
 
           {isOwner && (
             <div className="att-staff">
-              <div className="att-staff__title">Сотрудники мероприятия</div>
-              <div className="att-staff__sub">Могут отмечать приход и видеть ответы. Не редактируют событие.</div>
+              <div className="att-staff__title">{t('organizer.staffTitle')}</div>
+              <div className="att-staff__sub">{t('organizer.staffSub')}</div>
               <form className="att-staff__add" onSubmit={addStaff}>
                 <input
                   className="att-staff__input"
                   type="text"
-                  placeholder="username сотрудника"
+                  placeholder={t('organizer.staffPlaceholder')}
                   value={staffInput}
                   onChange={e => setStaffInput(e.target.value)}
                 />
                 <button type="submit" className="att-staff__btn" disabled={staffBusy || !staffInput.trim()}>
-                  Добавить
+                  {t('organizer.staffAddBtn')}
                 </button>
               </form>
               {staff.length > 0 && (
@@ -265,12 +267,12 @@ const EventRegistrants = () => {
           )}
 
           {attendees.length === 0 ? (
-            <p className="att-panel__empty">Пока никто не записался.</p>
+            <p className="att-panel__empty">{t('organizer.attendeesEmpty')}</p>
           ) : (
             <div className="att-table-wrap">
               <table className="att-table">
                 <thead>
-                  <tr><th>№</th><th>ID</th><th>Имя</th><th>Email</th><th>Статус</th><th></th></tr>
+                  <tr><th>{t('organizer.colNum')}</th><th>ID</th><th>{t('organizer.colName')}</th><th>Email</th><th>{t('organizer.colStatus')}</th><th></th></tr>
                 </thead>
                 <tbody>
                   {attendees.map((a, i) => (
@@ -288,7 +290,7 @@ const EventRegistrants = () => {
                         <td>
                           {a.answers && Object.keys(a.answers).length > 0 && (
                             <button type="button" className="att-answers__toggle" onClick={() => toggleRow(a.userId)}>
-                              {expanded.has(a.userId) ? 'Скрыть' : 'Ответы'}
+                              {expanded.has(a.userId) ? t('organizer.answersHide') : t('organizer.answersShow')}
                             </button>
                           )}
                         </td>
@@ -320,7 +322,7 @@ const EventRegistrants = () => {
         <input
           className="liker-page__search"
           type="text"
-          placeholder="Поиск по имени или описанию..."
+          placeholder={t('organizer.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -332,8 +334,8 @@ const EventRegistrants = () => {
       {filtered.length === 0 ? (
         <EmptyState
           icon="search"
-          title="Пока никто не записался"
-          subtitle="Будьте первым, кто запишется на это мероприятие"
+          title={t('organizer.registrantsEmptyTitle')}
+          subtitle={t('organizer.registrantsEmptySubtitle')}
         />
       ) : (
         <div className="liker-page__grid">
@@ -345,7 +347,7 @@ const EventRegistrants = () => {
                 <div className="liker-card__avatar-ph">{u.username?.[0]?.toUpperCase() || '?'}</div>
               )}
               <div className="liker-card__body">
-                <div className="liker-card__name">{u.username || 'Без имени'}</div>
+                <div className="liker-card__name">{u.username || t('organizer.noName')}</div>
                 {u.description && (
                   <div className="liker-card__desc">{u.description}</div>
                 )}

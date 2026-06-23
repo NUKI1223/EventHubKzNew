@@ -5,11 +5,13 @@ import { formatDate } from '../utils/dateUtils';
 import Skeleton from './Skeleton';
 import EmptyState from './EmptyState';
 import PageError from './PageError';
+import { useTranslation } from 'react-i18next';
 
-const statusLabel = { APPROVED: 'Одобрено', REJECTED: 'Отклонено', PENDING: 'На рассмотрении' };
+const statusLabelKey = { APPROVED: 'admin.statusApproved', REJECTED: 'admin.statusRejected', PENDING: 'admin.statusPending' };
 const statusMod = { APPROVED: 'approved', REJECTED: 'rejected', PENDING: 'pending' };
 
 const AdminEventRequests = () => {
+  const { t } = useTranslation();
   const [eventRequests, setEventRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,7 +35,7 @@ const AdminEventRequests = () => {
         const res = await api.get('/api/admin/all');
         setEventRequests(res.data);
       } catch {
-        setError('Ошибка при загрузке заявок');
+        setError(t('admin.loadError'));
       } finally {
         setLoading(false);
       }
@@ -45,9 +47,9 @@ const AdminEventRequests = () => {
     setReindexing(true);
     try {
       await api.post('/api/events/reindex');
-      toast.success('Переиндексация запущена');
+      toast.success(t('admin.reindexSuccess'));
     } catch {
-      toast.error('Ошибка при переиндексации');
+      toast.error(t('admin.reindexError'));
     } finally {
       setReindexing(false);
     }
@@ -61,10 +63,10 @@ const AdminEventRequests = () => {
       await api.put(`/api/admin/${id}/update`, { status, adminComment });
       setEventRequests(prev => prev.map(req => req.id === id ? { ...req, status, adminComment } : req));
       setShowModal(false);
-      toast.success(status === 'APPROVED' ? 'Заявка одобрена' : 'Заявка отклонена');
+      toast.success(status === 'APPROVED' ? t('admin.requestApproved') : t('admin.requestRejected'));
     } catch (err) {
       const msg = err?.response?.data?.error
-        || (err?.response?.status === 409 ? 'Заявка уже обработана' : 'Ошибка при обновлении заявки');
+        || (err?.response?.status === 409 ? t('admin.requestAlreadyProcessed') : t('admin.updateError'));
       toast.error(msg);
     } finally {
       setSubmittingId(null);
@@ -104,7 +106,7 @@ const AdminEventRequests = () => {
           disabled={reindexing}
           style={{ fontSize: 12, padding: '6px 14px' }}
         >
-          {reindexing ? 'Индексация...' : 'Переиндексировать поиск'}
+          {reindexing ? t('admin.reindexing') : t('admin.reindexBtn')}
         </button>
       </div>
 
@@ -115,7 +117,7 @@ const AdminEventRequests = () => {
               <div className="adm__card-hdr">
                 <div className="adm__card-title">{request.title}</div>
                 <span className={`adm__status adm__status--${statusMod[request.status] || 'pending'}`}>
-                  {statusLabel[request.status] || request.status}
+                  {statusLabelKey[request.status] ? t(statusLabelKey[request.status]) : request.status}
                 </span>
               </div>
 
@@ -134,48 +136,48 @@ const AdminEventRequests = () => {
                       className="adm__expand-btn"
                       onClick={() => toggleExpanded(request.id)}
                     >
-                      {expandedIds.has(request.id) ? 'Скрыть' : 'Открыть полностью'}
+                      {expandedIds.has(request.id) ? t('admin.collapse') : t('admin.expand')}
                     </button>
                   </div>
                 )}
 
                 <div className="adm__meta-grid">
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Дата события</span>
+                    <span className="adm__meta-label">{t('admin.fieldEventDate')}</span>
                     <span className="adm__meta-value">{formatDate(request.eventDate)}</span>
                   </div>
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Дедлайн регистрации</span>
+                    <span className="adm__meta-label">{t('admin.fieldDeadline')}</span>
                     <span className="adm__meta-value">{formatDate(request.registrationDeadline)}</span>
                   </div>
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Место</span>
+                    <span className="adm__meta-label">{t('admin.fieldLocation')}</span>
                     <span className="adm__meta-value">{request.location || '—'}</span>
                   </div>
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Формат</span>
+                    <span className="adm__meta-label">{t('admin.fieldFormat')}</span>
                     <span className="adm__meta-value">
                       <span className={`adm__type adm__type--${request.online ? 'online' : 'offline'}`}>
-                        {request.online ? 'Онлайн' : 'Офлайн'}
+                        {request.online ? t('admin.formatOnline') : t('admin.formatOffline')}
                       </span>
                     </span>
                   </div>
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Аккаунт заявителя</span>
+                    <span className="adm__meta-label">{t('admin.fieldRequesterEmail')}</span>
                     <span className="adm__meta-value">{request.requesterEmail || '—'}</span>
                   </div>
                   <div className="adm__meta-row">
-                    <span className="adm__meta-label">Email из заявки</span>
+                    <span className="adm__meta-label">{t('admin.fieldContactEmail')}</span>
                     <span className="adm__meta-value">
-                      {request.contactEmail || <span style={{ color: 'var(--text-muted, #888)' }}>не указан</span>}
+                      {request.contactEmail || <span style={{ color: 'var(--text-muted, #888)' }}>{t('admin.notSpecified')}</span>}
                     </span>
                   </div>
                   {request.externalLink && (
                     <div className="adm__meta-row">
-                      <span className="adm__meta-label">Ссылка</span>
+                      <span className="adm__meta-label">{t('admin.fieldLink')}</span>
                       <span className="adm__meta-value">
                         <a href={request.externalLink} target="_blank" rel="noopener noreferrer">
-                          Открыть →
+                          {t('admin.openLink')}
                         </a>
                       </span>
                     </div>
@@ -192,7 +194,7 @@ const AdminEventRequests = () => {
 
                 {Array.isArray(request.questions) && request.questions.length > 0 && (
                   <div className="adm__questions">
-                    <div className="adm__meta-label">ВОПРОСЫ УЧАСТНИКАМ</div>
+                    <div className="adm__meta-label">{t('admin.questionsLabel')}</div>
                     <ol className="adm__questions-list">
                       {request.questions.map(q => (
                         <li key={q.id}>
@@ -205,12 +207,12 @@ const AdminEventRequests = () => {
                 )}
 
                 {request.mainImageUrl && (
-                  <img className="adm__img" src={request.mainImageUrl} alt="Обложка" />
+                  <img className="adm__img" src={request.mainImageUrl} alt={t('admin.coverAlt')} />
                 )}
 
                 <textarea
                   className="adm__comment"
-                  placeholder="Комментарий администратора..."
+                  placeholder={t('admin.commentPlaceholder')}
                   value={request.adminComment || ''}
                   onChange={e => {
                     const newComment = e.target.value;
@@ -229,21 +231,21 @@ const AdminEventRequests = () => {
                       disabled={submittingId === request.id}
                       onClick={() => openModal(request.id, 'APPROVED', request.adminComment)}
                     >
-                      {submittingId === request.id ? 'Сохраняем…' : 'Одобрить'}
+                      {submittingId === request.id ? t('admin.saving') : t('admin.approveBtn')}
                     </button>
                     <button
                       className="adm__reject"
                       disabled={submittingId === request.id}
                       onClick={() => openModal(request.id, 'REJECTED', request.adminComment)}
                     >
-                      {submittingId === request.id ? 'Сохраняем…' : 'Отклонить'}
+                      {submittingId === request.id ? t('admin.saving') : t('admin.rejectBtn')}
                     </button>
                   </>
                 ) : (
                   <span className="adm__final-state">
                     {request.status === 'APPROVED'
-                      ? 'Заявка одобрена — изменить нельзя'
-                      : 'Заявка отклонена — изменить нельзя'}
+                      ? t('admin.finalApproved')
+                      : t('admin.finalRejected')}
                   </span>
                 )}
               </div>
@@ -253,8 +255,8 @@ const AdminEventRequests = () => {
       ) : (
         <EmptyState
           icon="inbox"
-          title="Нет заявок"
-          subtitle="Новые заявки на мероприятия появятся здесь"
+          title={t('admin.requestsEmptyTitle')}
+          subtitle={t('admin.requestsEmptySubtitle')}
         />
       )}
 
@@ -262,19 +264,18 @@ const AdminEventRequests = () => {
         <div className="adm__modal">
           <div className="adm__modal-inner">
             <p className="adm__modal-msg">
-              Вы уверены, что хотите{' '}
-              <strong>{currentAction.status === 'APPROVED' ? 'одобрить' : 'отклонить'}</strong> эту заявку?
+              {currentAction.status === 'APPROVED' ? t('admin.confirmApprove') : t('admin.confirmReject')}
             </p>
             <div className="adm__modal-btns">
               <button className="adm__cancel" onClick={closeModal} disabled={submittingId != null}>
-                Отмена
+                {t('admin.cancelBtn')}
               </button>
               <button
                 className="adm__confirm"
                 onClick={updateRequest}
                 disabled={submittingId != null}
               >
-                {submittingId != null ? 'Сохраняем…' : 'Подтвердить'}
+                {submittingId != null ? t('admin.saving') : t('admin.confirmBtn')}
               </button>
             </div>
           </div>

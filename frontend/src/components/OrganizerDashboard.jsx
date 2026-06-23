@@ -7,27 +7,30 @@ import EmptyState from './EmptyState';
 import PageError from './PageError';
 import LikedEvents from './LikedEvents';
 import RegisteredEvents from './RegisteredEvents';
+import { useTranslation } from 'react-i18next';
 import '../css/OrganizerDashboard.css';
 
-const STATUS_META = {
-  PENDING:  { label: 'На рассмотрении', cls: 'pending' },
-  APPROVED: { label: 'Одобрено',        cls: 'approved' },
-  REJECTED: { label: 'Отклонено',       cls: 'rejected' },
-};
-
 // Обратный отсчёт до дедлайна регистрации
-function deadlineLabel(event) {
+function deadlineLabel(event, t) {
   const d = toDate(event?.registrationDeadline);
   if (!d) return null;
   const diff = d.getTime() - Date.now();
-  if (diff <= 0) return { text: 'Регистрация закрыта', closed: true };
+  if (diff <= 0) return { text: t('organizer.deadlineClosed'), closed: true };
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
-  if (days > 0) return { text: `До конца регистрации: ${days} дн.`, closed: false };
-  return { text: `До конца регистрации: ${hours} ч.`, closed: false };
+  if (days > 0) return { text: t('organizer.deadlineDays', { count: days }), closed: false };
+  return { text: t('organizer.deadlineHours', { count: hours }), closed: false };
 }
 
 const OrganizerDashboard = () => {
+  const { t } = useTranslation();
+
+  const STATUS_META = {
+    PENDING:  { labelKey: 'organizer.statusPending', cls: 'pending' },
+    APPROVED: { labelKey: 'organizer.statusApproved', cls: 'approved' },
+    REJECTED: { labelKey: 'organizer.statusRejected', cls: 'rejected' },
+  };
+
   const [tab, setTab] = useState('events');
   const [events, setEvents] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -64,7 +67,7 @@ const OrganizerDashboard = () => {
         setRequests(reqs);
       } catch (err) {
         console.error(err);
-        setError('Не удалось загрузить ваши мероприятия');
+        setError(t('organizer.loadError'));
       } finally {
         setLoading(false);
       }
@@ -82,7 +85,7 @@ const OrganizerDashboard = () => {
 
   if (loading) return (
     <div className="orgd">
-      <div className="orgd__hdr"><h1 className="orgd__title">Мои мероприятия</h1></div>
+      <div className="orgd__hdr"><h1 className="orgd__title">{t('organizer.title')}</h1></div>
       <div className="orgd__grid">
         {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
@@ -94,31 +97,31 @@ const OrganizerDashboard = () => {
   return (
     <div className="orgd">
       <div className="orgd__hdr">
-        <h1 className="orgd__title">Мои мероприятия</h1>
-        <p className="orgd__sub">Кабинет организатора — публикации, заявки и вовлечённость аудитории</p>
+        <h1 className="orgd__title">{t('organizer.title')}</h1>
+        <p className="orgd__sub">{t('organizer.subtitle')}</p>
       </div>
 
       {/* Сводка */}
       <div className="orgd__stats">
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.events}</span>
-          <span className="orgd__stat-lbl">Опубликовано</span>
+          <span className="orgd__stat-lbl">{t('organizer.statPublished')}</span>
         </div>
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.registrations}</span>
-          <span className="orgd__stat-lbl">Записалось всего</span>
+          <span className="orgd__stat-lbl">{t('organizer.statRegistrations')}</span>
         </div>
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.likes}</span>
-          <span className="orgd__stat-lbl">Лайков всего</span>
+          <span className="orgd__stat-lbl">{t('organizer.statLikes')}</span>
         </div>
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.views}</span>
-          <span className="orgd__stat-lbl">Просмотров всего</span>
+          <span className="orgd__stat-lbl">{t('organizer.statViews')}</span>
         </div>
         <div className="orgd__stat">
           <span className="orgd__stat-val">{stats.pending}</span>
-          <span className="orgd__stat-lbl">Заявок на рассмотрении</span>
+          <span className="orgd__stat-lbl">{t('organizer.statPending')}</span>
         </div>
       </div>
 
@@ -128,25 +131,25 @@ const OrganizerDashboard = () => {
           className={`orgd__tab ${tab === 'events' ? 'orgd__tab--active' : ''}`}
           onClick={() => setTab('events')}
         >
-          Опубликованные{events.length > 0 && ` (${events.length})`}
+          {t('organizer.tabPublished')}{events.length > 0 && ` (${events.length})`}
         </button>
         <button
           className={`orgd__tab ${tab === 'requests' ? 'orgd__tab--active' : ''}`}
           onClick={() => setTab('requests')}
         >
-          Заявки{requests.length > 0 && ` (${requests.length})`}
+          {t('organizer.tabRequests')}{requests.length > 0 && ` (${requests.length})`}
         </button>
         <button
           className={`orgd__tab ${tab === 'liked' ? 'orgd__tab--active' : ''}`}
           onClick={() => setTab('liked')}
         >
-          Лайкнутые
+          {t('organizer.tabLiked')}
         </button>
         <button
           className={`orgd__tab ${tab === 'registered' ? 'orgd__tab--active' : ''}`}
           onClick={() => setTab('registered')}
         >
-          Зарегистрированные
+          {t('organizer.tabRegistered')}
         </button>
       </div>
 
@@ -155,15 +158,15 @@ const OrganizerDashboard = () => {
         events.length === 0 ? (
           <EmptyState
             icon="search"
-            title="У вас пока нет опубликованных мероприятий"
-            subtitle="Подайте заявку — после одобрения администратором мероприятие появится здесь"
-            actionText="Создать заявку"
+            title={t('organizer.eventsEmptyTitle')}
+            subtitle={t('organizer.eventsEmptySubtitle')}
+            actionText={t('organizer.createRequest')}
             actionLink="/request-event"
           />
         ) : (
           <div className="orgd__grid">
             {events.map(ev => {
-              const dl = deadlineLabel(ev);
+              const dl = deadlineLabel(ev, t);
               const past = isPastEvent(ev);
               return (
                 <div key={ev.id} className="orgd-card">
@@ -179,14 +182,14 @@ const OrganizerDashboard = () => {
                         </svg>
                       </div>
                     )}
-                    {past && <span className="orgd-card__badge orgd-card__badge--past">Прошло</span>}
+                    {past && <span className="orgd-card__badge orgd-card__badge--past">{t('organizer.badgePast')}</span>}
                   </Link>
                   <div className="orgd-card__body">
                     <Link to={`/events/${ev.id}`} className="orgd-card__title">{ev.title}</Link>
                     <div className="orgd-card__date">{formatDate(ev.eventDate)}</div>
 
                     <div className="orgd-card__metrics">
-                      <span className="orgd-metric" title="Записалось">
+                      <span className="orgd-metric" title={t('organizer.metricRegistrations')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
                           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                           <circle cx="9" cy="7" r="4"/>
@@ -195,13 +198,13 @@ const OrganizerDashboard = () => {
                         </svg>
                         {ev.registrationsCount || 0}
                       </span>
-                      <span className="orgd-metric" title="Лайки">
+                      <span className="orgd-metric" title={t('organizer.metricLikes')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
                           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>
                         </svg>
                         {ev.likesCount || 0}
                       </span>
-                      <span className="orgd-metric" title="Просмотры">
+                      <span className="orgd-metric" title={t('organizer.metricViews')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
                           <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
                           <circle cx="12" cy="12" r="3"/>
@@ -212,11 +215,11 @@ const OrganizerDashboard = () => {
                     <div className="orgd-card__links">
                       {ev.registrationType === 'NATIVE' && (
                         <Link to={`/events/${ev.id}/registrants`} className="orgd-card__likers">
-                          Кто идёт →
+                          {t('organizer.whoGoing')}
                         </Link>
                       )}
                       <Link to={`/events/${ev.id}/likers`} className="orgd-card__likers">
-                        Кто лайкнул →
+                        {t('organizer.whoLiked')}
                       </Link>
                     </div>
 
@@ -238,9 +241,9 @@ const OrganizerDashboard = () => {
         requests.length === 0 ? (
           <EmptyState
             icon="search"
-            title="Вы ещё не подавали заявок"
-            subtitle="Создайте заявку на мероприятие — она появится здесь со статусом рассмотрения"
-            actionText="Создать заявку"
+            title={t('organizer.requestsEmptyTitle')}
+            subtitle={t('organizer.requestsEmptySubtitle')}
+            actionText={t('organizer.createRequest')}
             actionLink="/request-event"
           />
         ) : (
@@ -252,15 +255,15 @@ const OrganizerDashboard = () => {
                   <div className="orgd-req__main">
                     <div className="orgd-req__title">{r.title}</div>
                     <div className="orgd-req__meta">
-                      Подано: {formatDate(r.createdAt)} · {formatDate(r.eventDate)}
+                      {t('organizer.reqSubmitted')}: {formatDate(r.createdAt)} · {formatDate(r.eventDate)}
                     </div>
                     {r.status === 'REJECTED' && r.adminComment && (
                       <div className="orgd-req__comment">
-                        <strong>Комментарий администратора:</strong> {r.adminComment}
+                        <strong>{t('organizer.adminComment')}:</strong> {r.adminComment}
                       </div>
                     )}
                   </div>
-                  <span className={`orgd-status orgd-status--${meta.cls}`}>{meta.label}</span>
+                  <span className={`orgd-status orgd-status--${meta.cls}`}>{t(meta.labelKey)}</span>
                 </div>
               );
             })}

@@ -3,12 +3,15 @@ import api from '../api';
 import toast from 'react-hot-toast';
 import TagSelector from './TagSelector';
 import QuestionEditor from './QuestionEditor';
+import { useTranslation } from 'react-i18next';
 import '../css/EventRequestForm.css';
 
 const EventRequestForm = () => {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    document.title = 'Создать событие — EventHub.kz';
-  }, []);
+    document.title = t('requestForm.pageTitle');
+  }, [t]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -40,7 +43,7 @@ const EventRequestForm = () => {
 
   const handleSuggestTags = async () => {
     if (!formData.title.trim() && !formData.shortDescription.trim() && !formData.fullDescription.trim()) {
-      toast.error('Заполни название и описание — ИИ подберёт теги');
+      toast.error(t('requestForm.suggestTagsEmpty'));
       return;
     }
     setSuggesting(true);
@@ -52,18 +55,18 @@ const EventRequestForm = () => {
       });
       const suggested = Array.isArray(res.data?.tags) ? res.data.tags : [];
       if (suggested.length === 0) {
-        toast.error('ИИ не смог подобрать теги. Заполни описание подробнее или проверь подключение.');
+        toast.error(t('requestForm.suggestTagsFailed'));
         return;
       }
       setSelectedTags(prev => {
         const set = new Set(prev);
-        suggested.forEach(t => set.add(t));
+        suggested.forEach(tag => set.add(tag));
         return Array.from(set);
       });
-      toast.success(`Добавлено: ${suggested.join(', ')}`);
+      toast.success(t('requestForm.suggestTagsAdded', { tags: suggested.join(', ') }));
     } catch (err) {
       console.error('Ошибка подбора тегов', err);
-      toast.error('Не удалось получить подсказку');
+      toast.error(t('requestForm.suggestTagsError'));
     } finally {
       setSuggesting(false);
     }
@@ -84,7 +87,7 @@ const EventRequestForm = () => {
       let externalLink = formData.externalLink ? formData.externalLink.trim() : '';
       if (isExternal) {
         if (!externalLink) {
-          setError('Укажите ссылку на сайт мероприятия');
+          setError(t('requestForm.errorExternalLinkRequired'));
           setLoading(false);
           return;
         }
@@ -93,7 +96,7 @@ const EventRequestForm = () => {
         }
         const URL_RE = /^https?:\/\/[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#][^\s]*)?$/;
         if (!URL_RE.test(externalLink)) {
-          setError('Введите корректный URL вида https://example.com');
+          setError(t('requestForm.errorExternalLinkInvalid'));
           setLoading(false);
           return;
         }
@@ -131,7 +134,7 @@ const EventRequestForm = () => {
         questions: cleanQuestions,
       });
 
-      toast.success('Заявка успешно отправлена!');
+      toast.success(t('requestForm.submitSuccess'));
 
       setFormData({
         title: '',
@@ -151,8 +154,8 @@ const EventRequestForm = () => {
       setFileName('');
     } catch (err) {
       console.error(err);
-      toast.error('Ошибка при отправке заявки');
-      setError('Ошибка при отправке. Проверьте данные и попробуйте снова.');
+      toast.error(t('requestForm.submitError'));
+      setError(t('requestForm.submitErrorDetail'));
     } finally {
       setLoading(false);
     }
@@ -161,50 +164,50 @@ const EventRequestForm = () => {
   return (
     <div className="erf">
       <div className="erf__hdr">
-        <div className="erf__eyebrow">Для организаторов</div>
-        <h1 className="erf__title">Создать событие</h1>
-        <p className="erf__sub">Заполните форму — мы проверим и опубликуем ваше мероприятие в течение 1–2 дней.</p>
+        <div className="erf__eyebrow">{t('requestForm.eyebrow')}</div>
+        <h1 className="erf__title">{t('requestForm.title')}</h1>
+        <p className="erf__sub">{t('requestForm.subtitle')}</p>
       </div>
 
       <form className="erf__form" onSubmit={handleSubmit}>
         {/* Основное */}
         <div className="erf__section">
-          <div className="erf__section-title">Основное</div>
+          <div className="erf__section-title">{t('requestForm.sectionBasic')}</div>
 
           <div className="erf__field">
-            <label className="erf__label">Название события</label>
+            <label className="erf__label">{t('requestForm.labelTitle')}</label>
             <input
               className="erf__input"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Например: Almaty Spring Hackathon 2026"
+              placeholder={t('requestForm.placeholderTitle')}
               required
             />
           </div>
 
           <div className="erf__field">
-            <label className="erf__label">Краткое описание</label>
+            <label className="erf__label">{t('requestForm.labelShortDesc')}</label>
             <textarea
               className="erf__textarea"
               name="shortDescription"
               value={formData.shortDescription}
               onChange={handleChange}
-              placeholder="1–2 предложения для карточки события"
+              placeholder={t('requestForm.placeholderShortDesc')}
               required
             />
           </div>
 
           <div className="erf__field">
-            <label className="erf__label">Полное описание</label>
+            <label className="erf__label">{t('requestForm.labelFullDesc')}</label>
             <textarea
               className="erf__textarea"
               style={{ minHeight: 140 }}
               name="fullDescription"
               value={formData.fullDescription}
               onChange={handleChange}
-              placeholder="Подробная программа, условия участия, призы..."
+              placeholder={t('requestForm.placeholderFullDesc')}
               required
             />
           </div>
@@ -212,23 +215,23 @@ const EventRequestForm = () => {
 
         {/* Место и формат */}
         <div className="erf__section">
-          <div className="erf__section-title">Место и формат</div>
+          <div className="erf__section-title">{t('requestForm.sectionVenue')}</div>
 
           <div className="erf__field">
-            <label className="erf__label">Место проведения</label>
+            <label className="erf__label">{t('requestForm.labelLocation')}</label>
             <input
               className="erf__input"
               type="text"
               name="location"
               value={formData.location}
               onChange={handleChange}
-              placeholder="Город, адрес или площадка"
+              placeholder={t('requestForm.placeholderLocation')}
               required
             />
           </div>
 
           <div className="erf__field">
-            <label className="erf__label">Формат</label>
+            <label className="erf__label">{t('requestForm.labelFormat')}</label>
             <label className="erf__toggle-wrap">
               <input
                 className="erf__toggle-input"
@@ -238,7 +241,7 @@ const EventRequestForm = () => {
                 onChange={handleChange}
               />
               <span className="erf__toggle-label">
-                {formData.online ? 'Онлайн' : 'Офлайн'} — нажмите для переключения
+                {formData.online ? t('requestForm.formatOnline') : t('requestForm.formatOffline')} — {t('requestForm.formatToggleHint')}
               </span>
             </label>
           </div>
@@ -246,11 +249,11 @@ const EventRequestForm = () => {
 
         {/* Даты */}
         <div className="erf__section">
-          <div className="erf__section-title">Даты</div>
+          <div className="erf__section-title">{t('requestForm.sectionDates')}</div>
 
           <div className="erf__two-col">
             <div className="erf__field">
-              <label className="erf__label">Дата проведения</label>
+              <label className="erf__label">{t('requestForm.labelEventDate')}</label>
               <input
                 className="erf__input"
                 type="datetime-local"
@@ -261,7 +264,7 @@ const EventRequestForm = () => {
               />
             </div>
             <div className="erf__field">
-              <label className="erf__label">Дедлайн регистрации</label>
+              <label className="erf__label">{t('requestForm.labelDeadline')}</label>
               <input
                 className="erf__input"
                 type="datetime-local"
@@ -277,14 +280,14 @@ const EventRequestForm = () => {
         {/* Теги */}
         <div className="erf__section">
           <div className="erf__section-title-row">
-            <div className="erf__section-title">Теги</div>
+            <div className="erf__section-title">{t('requestForm.sectionTags')}</div>
             <button
               type="button"
               className="erf__ai-btn"
               onClick={handleSuggestTags}
               disabled={suggesting}
             >
-              {suggesting ? 'Подбираю…' : '✨ Подобрать тегами ИИ'}
+              {suggesting ? t('requestForm.suggestTagsBusy') : t('requestForm.suggestTagsBtn')}
             </button>
           </div>
           <TagSelector selectedTags={selectedTags} onChange={setSelectedTags} />
@@ -292,7 +295,7 @@ const EventRequestForm = () => {
 
         {/* Регистрация */}
         <div className="erf__section">
-          <div className="erf__section-title">Регистрация</div>
+          <div className="erf__section-title">{t('requestForm.sectionRegistration')}</div>
 
           <div className="erf__field">
             <div className="erf__regtype">
@@ -304,8 +307,8 @@ const EventRequestForm = () => {
                   checked={formData.registrationType === 'NATIVE'}
                   onChange={handleChange}
                 />
-                <span className="erf__regtype-title">На нашем сайте</span>
-                <span className="erf__regtype-desc">Участники записываются здесь — вы получаете список, QR-билеты и ответы на вопросы.</span>
+                <span className="erf__regtype-title">{t('requestForm.regTypeNativeTitle')}</span>
+                <span className="erf__regtype-desc">{t('requestForm.regTypeNativeDesc')}</span>
               </label>
               <label className={`erf__regtype-opt ${formData.registrationType === 'EXTERNAL' ? 'erf__regtype-opt--on' : ''}`}>
                 <input
@@ -315,8 +318,8 @@ const EventRequestForm = () => {
                   checked={formData.registrationType === 'EXTERNAL'}
                   onChange={handleChange}
                 />
-                <span className="erf__regtype-title">По внешней ссылке</span>
-                <span className="erf__regtype-desc">Регистрация на вашем сайте — мы просто покажем кнопку-ссылку.</span>
+                <span className="erf__regtype-title">{t('requestForm.regTypeExternalTitle')}</span>
+                <span className="erf__regtype-desc">{t('requestForm.regTypeExternalDesc')}</span>
               </label>
             </div>
           </div>
@@ -324,7 +327,7 @@ const EventRequestForm = () => {
           {formData.registrationType === 'EXTERNAL' && (
             <div className="erf__field">
               <label className="erf__label">
-                Ссылка на сайт мероприятия <span className="erf__required">*</span>
+                {t('requestForm.labelExternalLink')} <span className="erf__required">*</span>
               </label>
               <input
                 className="erf__input"
@@ -335,7 +338,7 @@ const EventRequestForm = () => {
                 placeholder="https://example.com/event"
                 required
                 pattern="^https?://[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#].*)?$"
-                title="Введите корректный URL вида https://example.com"
+                title={t('requestForm.errorExternalLinkInvalid')}
               />
             </div>
           )}
@@ -343,12 +346,12 @@ const EventRequestForm = () => {
 
         {/* Дополнительно */}
         <div className="erf__section">
-          <div className="erf__section-title">Дополнительно</div>
+          <div className="erf__section-title">{t('requestForm.sectionExtra')}</div>
 
           <div className="erf__field">
             <label className="erf__label">
-              Email для связи <span className="erf__required">*</span>
-              <span className="erf__hint"> — будет показан как контакт организатора на странице события</span>
+              {t('requestForm.labelContactEmail')} <span className="erf__required">*</span>
+              <span className="erf__hint"> — {t('requestForm.contactEmailHint')}</span>
             </label>
             <input
               className="erf__input"
@@ -362,15 +365,15 @@ const EventRequestForm = () => {
           </div>
 
           <div className="erf__field">
-            <label className="erf__label">Обложка события</label>
+            <label className="erf__label">{t('requestForm.labelCover')}</label>
             <label className="erf__file-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
                 <rect x="3" y="3" width="18" height="18" rx="3"/>
                 <circle cx="8.5" cy="8.5" r="1.5"/>
                 <path d="m21 15-5-5L5 21"/>
               </svg>
-              <span>{fileName || 'Загрузить изображение'}</span>
-              <span className="erf__file-hint">PNG, JPG до 5 МБ</span>
+              <span>{fileName || t('requestForm.uploadImage')}</span>
+              <span className="erf__file-hint">{t('requestForm.uploadHint')}</span>
               <input type="file" onChange={handleFileChange} accept="image/*" />
             </label>
           </div>
@@ -378,9 +381,9 @@ const EventRequestForm = () => {
 
         {formData.registrationType === 'NATIVE' && (
           <div className="erf__section">
-            <div className="erf__section-title">Вопросы к участникам (необязательно)</div>
+            <div className="erf__section-title">{t('requestForm.sectionQuestions')}</div>
             <p className="erf__sub" style={{ margin: '0 0 10px' }}>
-              Участник ответит на них при регистрации на нашем сайте.
+              {t('requestForm.questionsHint')}
             </p>
             <QuestionEditor questions={questions} onChange={setQuestions} />
           </div>
@@ -390,7 +393,7 @@ const EventRequestForm = () => {
 
         <div className="erf__footer">
           <button type="submit" className="erf__submit" disabled={loading}>
-            {loading ? 'Отправка...' : 'Отправить заявку →'}
+            {loading ? t('requestForm.submitting') : t('requestForm.submitBtn')}
           </button>
         </div>
       </form>
