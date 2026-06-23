@@ -24,8 +24,11 @@ public class EventSearchService {
     }
 
     public Page<EventDocument> searchByTitleOrDescription(String query, Pageable pageable) {
-        return eventSearchRepository.findByTitleContainingOrShortDescriptionContaining(
-                query, query, pageable);
+        // Делегируем в match-запрос: он анализирует фразу по словам и ищет по
+        // title/description/tags. Прежний derived-метод *Containing строил wildcard
+        // '*query*', который Spring Data ES запрещает с пробелом внутри
+        // (assertNoBlankInWildcardQuery) — отсюда 500 при поиске из нескольких слов.
+        return eventSearchRepository.searchByKeyword(query, pageable);
     }
 
     public Page<EventDocument> findByTag(String tag, Pageable pageable) {

@@ -13,9 +13,6 @@ import java.util.List;
 @Repository
 public interface EventSearchRepository extends ElasticsearchRepository<EventDocument, String> {
 
-    Page<EventDocument> findByTitleContainingOrShortDescriptionContaining(
-            String title, String shortDescription, Pageable pageable);
-
     Page<EventDocument> findByTagsContaining(String tag, Pageable pageable);
 
     Page<EventDocument> findByOrganizerId(Long organizerId, Pageable pageable);
