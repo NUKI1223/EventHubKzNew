@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthUser } from "../hooks/useAuthUser";
 import api from "../api";
 import NotificationsDropdown from "./NotificationsDropdown";
+import LanguageSwitcher from "./LanguageSwitcher";
 import "../css/Header.css";
 
 function Header() {
@@ -23,6 +25,7 @@ function Header() {
 
   const currentUser = useAuthUser();
   const username = currentUser?.sub ?? null;
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!username) return;
@@ -85,12 +88,12 @@ function Header() {
   const isActive = (path) => location.pathname === path;
 
   const navItems = [
-    { path: "/", label: "Главная" },
+    { path: "/", labelKey: "header.home" },
     ...(token ? [
-      { path: "/eventlist", label: "Мероприятия" },
-      { path: "/request-event", label: "Создать заявку" },
-      { path: "/support", label: "Поддержка" },
-      ...(currentUser?.role === "ADMIN" ? [{ path: "/admin", label: "Админ" }] : []),
+      { path: "/eventlist", labelKey: "header.events" },
+      { path: "/request-event", labelKey: "header.createRequest" },
+      { path: "/support", labelKey: "header.support" },
+      ...(currentUser?.role === "ADMIN" ? [{ path: "/admin", labelKey: "header.admin" }] : []),
     ] : []),
   ];
 
@@ -118,7 +121,7 @@ function Header() {
               to={item.path}
               className={`header__nav-item ${isActive(item.path) ? "header__nav-item--active" : ""}`}
             >
-              {item.label}
+              {t(item.labelKey)}
               {item.badge && (
                 <span className="header__nav-badge">{item.badge}</span>
               )}
@@ -137,17 +140,20 @@ function Header() {
             className="header__search-input"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Поиск событий, тегов..."
+            placeholder={t('header.searchPlaceholder')}
           />
           <kbd className="header__search-kbd">⌘K</kbd>
         </form>
+
+        {/* Language switcher */}
+        <LanguageSwitcher />
 
         {/* Notifications */}
         {token && (
           <div className="header__notif-wrap" ref={notificationRef}>
             <button
               className="header__notif-btn"
-              aria-label="Уведомления"
+              aria-label={t('header.notificationsLabel')}
               onClick={() => {
                 setShowNotifications((v) => !v);
                 if (unreadCount > 0) setUnreadCount(0);
@@ -175,7 +181,7 @@ function Header() {
         {/* User */}
         {token ? (
           <div className="header__user-wrap" ref={dropdownRef}>
-            <button className="header__user-btn" aria-label="Меню профиля" onClick={() => setShowDropdown((v) => !v)}>
+            <button className="header__user-btn" aria-label={t('header.profileMenuLabel')} onClick={() => setShowDropdown((v) => !v)}>
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt={username} className="header__avatar-img" />
               ) : (
@@ -193,7 +199,7 @@ function Header() {
               <ul className="header__dropdown">
                 <li>
                   <Link to={`/profile/${username}`} className="header__dropdown-item" onClick={() => setShowDropdown(false)}>
-                    Профиль
+                    {t('header.profile')}
                   </Link>
                 </li>
                 <li>
@@ -201,7 +207,7 @@ function Header() {
                     className="header__dropdown-item header__dropdown-item--danger"
                     onClick={() => { setShowDropdown(false); setShowLogoutConfirm(true); }}
                   >
-                    Выйти
+                    {t('header.signOut')}
                   </button>
                 </li>
               </ul>
@@ -209,15 +215,15 @@ function Header() {
           </div>
         ) : (
           <div className="header__auth">
-            <Link to="/signin" className="header__auth-signin">Войти</Link>
-            <Link to="/signupnew" className="header__auth-signup">Регистрация</Link>
+            <Link to="/signin" className="header__auth-signin">{t('header.signIn')}</Link>
+            <Link to="/signupnew" className="header__auth-signup">{t('header.signUp')}</Link>
           </div>
         )}
 
         {/* Burger (mobile) */}
         <button
           className="header__burger"
-          aria-label="Меню"
+          aria-label={t('header.menuLabel')}
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((v) => !v)}
         >
@@ -235,8 +241,8 @@ function Header() {
               className="header__mobile-input"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Поиск событий, тегов..."
-              aria-label="Поиск"
+              placeholder={t('header.searchPlaceholder')}
+              aria-label={t('header.searchLabel')}
             />
           </form>
           {navItems.map((item) => (
@@ -246,14 +252,14 @@ function Header() {
               className={`header__mobile-item ${isActive(item.path) ? "header__mobile-item--active" : ""}`}
               onClick={() => setMobileOpen(false)}
             >
-              {item.label}
+              {t(item.labelKey)}
               {item.badge && <span className="header__nav-badge">{item.badge}</span>}
             </Link>
           ))}
           {!token && (
             <div className="header__mobile-auth">
-              <Link to="/signin" className="header__auth-signin" onClick={() => setMobileOpen(false)}>Войти</Link>
-              <Link to="/signupnew" className="header__auth-signup" onClick={() => setMobileOpen(false)}>Регистрация</Link>
+              <Link to="/signin" className="header__auth-signin" onClick={() => setMobileOpen(false)}>{t('header.signIn')}</Link>
+              <Link to="/signupnew" className="header__auth-signup" onClick={() => setMobileOpen(false)}>{t('header.signUp')}</Link>
             </div>
           )}
         </div>
@@ -263,11 +269,11 @@ function Header() {
       {showLogoutConfirm && (
         <div className="logout-overlay">
           <div className="logout-dialog">
-            <h3 className="logout-dialog__title">Выйти из аккаунта?</h3>
-            <p className="logout-dialog__text">Вы уверены, что хотите выйти?</p>
+            <h3 className="logout-dialog__title">{t('header.logoutTitle')}</h3>
+            <p className="logout-dialog__text">{t('header.logoutConfirm')}</p>
             <div className="logout-dialog__actions">
-              <button className="logout-dialog__confirm" onClick={confirmLogout}>Да, выйти</button>
-              <button className="logout-dialog__cancel" onClick={() => setShowLogoutConfirm(false)}>Отмена</button>
+              <button className="logout-dialog__confirm" onClick={confirmLogout}>{t('header.logoutYes')}</button>
+              <button className="logout-dialog__cancel" onClick={() => setShowLogoutConfirm(false)}>{t('common.cancel')}</button>
             </div>
           </div>
         </div>

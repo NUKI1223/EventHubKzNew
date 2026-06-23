@@ -1,0 +1,31 @@
+{
+  "common": {
+    "loading": "Жүктелуде...",
+    "save": "Сақтау",
+    "cancel": "Бас тарту",
+    "back": "Артқа",
+    "notFound": "Табылмады",
+    "loadFailed": "Жүктеу сәтсіз аяқталды",
+    "retry": "Қайталап көру",
+    "pageRange": "{{from}}–{{to}} / {{total}}"
+  },
+  "header": {
+    "home": "Басты бет",
+    "events": "Іс-шаралар",
+    "createRequest": "Өтінім жасау",
+    "support": "Қолдау",
+    "admin": "Әкімші",
+    "signIn": "Кіру",
+    "signOut": "Шығу",
+    "signUp": "Тіркелу",
+    "profile": "Профиль",
+    "searchPlaceholder": "Іс-шараларды, тегтерді іздеу...",
+    "notificationsLabel": "Хабарландырулар",
+    "profileMenuLabel": "Профиль мәзірі",
+    "menuLabel": "Мәзір",
+    "searchLabel": "Іздеу",
+    "logoutTitle": "Аккаунттан шығу керек пе?",
+    "logoutConfirm": "Шынымен шыққыңыз келе ме?",
+    "logoutYes": "Иә, шығу"
+  }
+}

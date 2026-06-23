@@ -1,0 +1,31 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "back": "Назад",
+    "notFound": "Не найдено",
+    "loadFailed": "Не удалось загрузить",
+    "retry": "Попробовать снова",
+    "pageRange": "{{from}}–{{to}} из {{total}}"
+  },
+  "header": {
+    "home": "Главная",
+    "events": "Мероприятия",
+    "createRequest": "Создать заявку",
+    "support": "Поддержка",
+    "admin": "Админ",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "signUp": "Регистрация",
+    "profile": "Профиль",
+    "searchPlaceholder": "Поиск событий, тегов...",
+    "notificationsLabel": "Уведомления",
+    "profileMenuLabel": "Меню профиля",
+    "menuLabel": "Меню",
+    "searchLabel": "Поиск",
+    "logoutTitle": "Выйти из аккаунта?",
+    "logoutConfirm": "Вы уверены, что хотите выйти?",
+    "logoutYes": "Да, выйти"
+  }
+}
