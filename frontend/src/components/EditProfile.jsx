@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { contactsFromForm, formFromContacts } from '../config/socials';
 import TagSelector from './TagSelector';
 import '../css/EditProfile.css';
 
 const EditProfile = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -27,7 +29,7 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Редактирование профиля — EventHub.kz';
+    document.title = t('profile.pageTitle');
   }, []);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ const EditProfile = () => {
         setTags(userTags);
         setOriginalTags(userTags);
       } catch (err) {
-          setError('Ошибка загрузки данных');
+          setError(t('profile.errorLoadData'));
       }
     };
     fetchUserData();
@@ -90,14 +92,14 @@ const EditProfile = () => {
       }) || tagsChanged || file !== null;
 
       if (!hasChanges) {
-        setSuccessMessage('Данные не изменились');
+        setSuccessMessage(t('profile.noChanges'));
         setLoading(false);
         setTimeout(() => navigate('/profile'), 1000);
         return;
       }
 
       if (!userId) {
-        setError('Не удалось определить пользователя, перезайди в аккаунт');
+        setError(t('profile.errorNoUser'));
         setLoading(false);
         return;
       }
@@ -113,13 +115,13 @@ const EditProfile = () => {
 
       await api.put(`/api/users/${userId}`, updatedUser);
 
-      setSuccessMessage('Профиль успешно обновлён!');
+      setSuccessMessage(t('profile.saveSuccess'));
       setTimeout(() => navigate('/profile'), 1000);
     } catch (err) {
       setError(
         err.response
-          ? `Ошибка: ${err.response.data.message || err.response.statusText}`
-          : 'Нет ответа от сервера'
+          ? t('profile.errorPrefix', { message: err.response.data.message || err.response.statusText })
+          : t('profile.errorNoResponse')
       );
     } finally {
       setLoading(false);
@@ -132,31 +134,31 @@ const EditProfile = () => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
-        Назад к профилю
+        {t('profile.backToProfile')}
       </button>
 
-      <h1 className="ep__title">Редактирование профиля</h1>
+      <h1 className="ep__title">{t('profile.editTitle')}</h1>
 
       <form className="ep__form" onSubmit={handleSubmit}>
         {/* Personal info */}
         <div className="ep__section">
-          <div className="ep__section-title">Личная информация</div>
+          <div className="ep__section-title">{t('profile.sectionPersonal')}</div>
 
           <div className="ep__field">
-            <label className="ep__label">Имя пользователя</label>
+            <label className="ep__label">{t('profile.labelUsername')}</label>
             <input
               className="ep__input"
               type="text"
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              placeholder="Введите имя"
+              placeholder={t('profile.placeholderName')}
               required
             />
           </div>
 
           <div className="ep__field">
-            <label className="ep__label">Email</label>
+            <label className="ep__label">{t('profile.labelEmail')}</label>
             <input
               className="ep__input"
               type="email"
@@ -169,29 +171,29 @@ const EditProfile = () => {
           </div>
 
           <div className="ep__field">
-            <label className="ep__label">О себе</label>
+            <label className="ep__label">{t('profile.labelBio')}</label>
             <textarea
               className="ep__textarea"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Расскажите о себе..."
+              placeholder={t('profile.placeholderBio')}
             />
           </div>
         </div>
 
         {/* Tags */}
         <div className="ep__section">
-          <div className="ep__section-title">Теги</div>
+          <div className="ep__section-title">{t('profile.sectionTags')}</div>
           <div className="ep__field">
-            <label className="ep__label">Скиллы и интересы — по ним вас будут находить другие</label>
+            <label className="ep__label">{t('profile.tagsLabel')}</label>
             <TagSelector selectedTags={tags} onChange={setTags} type="USER" />
           </div>
         </div>
 
         {/* Social links */}
         <div className="ep__section">
-          <div className="ep__section-title">Социальные сети</div>
+          <div className="ep__section-title">{t('profile.sectionSocials')}</div>
 
           {[
             { name: 'github', label: 'GitHub', prefix: 'github.com/' },
@@ -218,16 +220,16 @@ const EditProfile = () => {
 
         {/* Avatar upload */}
         <div className="ep__section">
-          <div className="ep__section-title">Аватар</div>
+          <div className="ep__section-title">{t('profile.sectionAvatar')}</div>
           <div className="ep__field">
-            <label className="ep__label">Загрузить фото</label>
+            <label className="ep__label">{t('profile.uploadPhoto')}</label>
             <label className="ep__file-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              {fileName || 'Выберите изображение'}
+              {fileName || t('profile.chooseImage')}
               <input type="file" onChange={handleFileChange} accept="image/*" />
             </label>
           </div>
@@ -238,7 +240,7 @@ const EditProfile = () => {
 
         <div>
           <button type="submit" className="ep__save-btn" disabled={loading}>
-            {loading ? 'Сохранение...' : 'Сохранить изменения'}
+            {loading ? t('profile.saving') : t('profile.saveChanges')}
           </button>
         </div>
       </form>

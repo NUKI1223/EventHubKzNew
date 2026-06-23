@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { useAuthUser } from '../hooks/useAuthUser';
 import { useProfileData } from '../hooks/useProfileData';
@@ -16,6 +17,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = useAuthUser();
+  const { t } = useTranslation();
 
   const { user, setUser, loading, error } = useProfileData(routeUsername, location.pathname);
   const { setAvatarFile, avatarLoading, avatarError } = useAvatarUpload(user, setUser);
@@ -45,7 +47,7 @@ const UserProfile = () => {
 
   if (loading) return <SkeletonProfile />;
   if (error) return <div className="pf"><PageError message={error} /></div>;
-  if (!user) return <div className="pf"><PageError message="Пользователь не найден" /></div>;
+  if (!user) return <div className="pf"><PageError message={t('profile.userNotFound')} /></div>;
 
   const initials = user.username?.[0]?.toUpperCase() || '?';
 
@@ -85,7 +87,7 @@ const UserProfile = () => {
 
           {avatarError && <div className="pf__error">{avatarError}</div>}
 
-          <h2 className="pf__name">{user.username || 'Имя не указано'}</h2>
+          <h2 className="pf__name">{user.username || t('profile.nameNotSet')}</h2>
 
           {user.description && (
             <p className="pf__bio">{user.description}</p>
@@ -118,7 +120,7 @@ const UserProfile = () => {
 
           {staffedEvents.length > 0 && (
             <div className="pf__staffed">
-              <div className="pf__staffed-title">Помогает на мероприятиях</div>
+              <div className="pf__staffed-title">{t('profile.staffedTitle')}</div>
               <ul className="pf__staffed-list">
                 {staffedEvents.map(ev => (
                   <li key={ev.id}>
@@ -131,7 +133,7 @@ const UserProfile = () => {
 
           {isOwnProfile && (
             <button className="pf__edit-btn" onClick={() => navigate('/edit-profile')}>
-              Редактировать профиль
+              {t('profile.editBtn')}
             </button>
           )}
         </div>
@@ -139,23 +141,23 @@ const UserProfile = () => {
         {/* Main info */}
         <div className="pf__main">
           <div className="pf__card">
-            <div className="pf__card-title">Информация</div>
+            <div className="pf__card-title">{t('profile.infoTitle')}</div>
 
             <div className="pf__row">
-              <span className="pf__row-label">Имя пользователя</span>
-              <span className="pf__row-value">{user.username || 'Не указано'}</span>
+              <span className="pf__row-label">{t('profile.fieldUsername')}</span>
+              <span className="pf__row-value">{user.username || t('profile.notSet')}</span>
             </div>
 
             {isOwnProfile && (
               <div className="pf__row">
-                <span className="pf__row-label">Email</span>
-                <span className="pf__row-value">{currentUser?.email || 'Не указано'}</span>
+                <span className="pf__row-label">{t('profile.fieldEmail')}</span>
+                <span className="pf__row-value">{currentUser?.email || t('profile.notSet')}</span>
               </div>
             )}
 
             <div className="pf__row">
-              <span className="pf__row-label">О себе</span>
-              <span className="pf__row-value">{user.description || 'Не указано'}</span>
+              <span className="pf__row-label">{t('profile.fieldBio')}</span>
+              <span className="pf__row-value">{user.description || t('profile.notSet')}</span>
             </div>
           </div>
         </div>
@@ -167,7 +169,7 @@ const UserProfile = () => {
           приватны — их список доступен только самому пользователю/админу. */}
       {!isOwnProfile && (
         <div className="pf-events">
-          <div className="pf-events__head">Лайкнутые мероприятия</div>
+          <div className="pf-events__head">{t('profile.likedEvents')}</div>
           <LikedEvents hideHeader />
         </div>
       )}
