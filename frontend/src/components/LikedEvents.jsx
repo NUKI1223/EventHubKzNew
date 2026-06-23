@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { fetchUserByRoute } from '../api/users';
 import { formatDate } from '../utils/dateUtils';
@@ -9,6 +10,7 @@ import EmptyState from './EmptyState';
 import PageError from './PageError';
 
 const LikedEvents = ({ hideHeader = false, limit }) => {
+  const { t } = useTranslation();
   const { username: routeUsername } = useParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ const LikedEvents = ({ hideHeader = false, limit }) => {
         setEvents(Array.isArray(eventsRes.data) ? eventsRes.data : []);
       } catch (err) {
         console.error(err);
-        setError('Ошибка при загрузке сохранённых мероприятий');
+        setError(t('events.likedLoadError'));
       } finally {
         setLoading(false);
       }
@@ -38,7 +40,7 @@ const LikedEvents = ({ hideHeader = false, limit }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Сохранённые события</span>
+          <span className="lev__title">{t('events.likedTitle')}</span>
         </div>
       )}
       <div className="lev__grid">
@@ -53,15 +55,15 @@ const LikedEvents = ({ hideHeader = false, limit }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Сохранённые события</span>
+          <span className="lev__title">{t('events.likedTitle')}</span>
           <span className="lev__count">0</span>
         </div>
       )}
       <EmptyState
         icon="heart"
-        title="Нет сохранённых событий"
-        subtitle="Ставьте лайки мероприятиям, которые вам нравятся, и они появятся здесь"
-        actionText="Смотреть события"
+        title={t('events.likedEmptyTitle')}
+        subtitle={t('events.likedEmptySubtitle')}
+        actionText={t('events.likedEmptyAction')}
         actionLink="/eventlist"
       />
     </div>
@@ -72,7 +74,7 @@ const LikedEvents = ({ hideHeader = false, limit }) => {
       {!hideHeader && (
         <div className="lev__hdr">
           <span className="lev__title">
-            {routeUsername ? `Сохранённые — ${routeUsername}` : 'Сохранённые события'}
+            {routeUsername ? t('events.likedTitleUser', { username: routeUsername }) : t('events.likedTitle')}
           </span>
           <span className="lev__count">{events.length}</span>
         </div>
@@ -106,7 +108,7 @@ const LikedEvents = ({ hideHeader = false, limit }) => {
       </div>
       {limit && !showAll && events.length > limit && (
         <button className="orgd__showmore" onClick={() => setShowAll(true)}>
-          Показать ещё
+          {t('events.showMore')}
         </button>
       )}
     </div>

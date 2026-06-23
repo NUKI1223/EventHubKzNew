@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { fetchUserByRoute } from '../api/users';
 import { formatDate } from '../utils/dateUtils';
@@ -9,6 +10,7 @@ import EmptyState from './EmptyState';
 import PageError from './PageError';
 
 const RegisteredEvents = ({ hideHeader = false, limit }) => {
+  const { t } = useTranslation();
   const { username: routeUsername } = useParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ const RegisteredEvents = ({ hideHeader = false, limit }) => {
         setEvents(orderedIds.map(id => byId.get(id)).filter(Boolean));
       } catch (err) {
         console.error(err);
-        setError('Ошибка при загрузке ваших регистраций');
+        setError(t('events.regLoadError'));
       } finally {
         setLoading(false);
       }
@@ -43,7 +45,7 @@ const RegisteredEvents = ({ hideHeader = false, limit }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Мои регистрации</span>
+          <span className="lev__title">{t('events.regTitle')}</span>
         </div>
       )}
       <div className="lev__grid">
@@ -58,15 +60,15 @@ const RegisteredEvents = ({ hideHeader = false, limit }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Мои регистрации</span>
+          <span className="lev__title">{t('events.regTitle')}</span>
           <span className="lev__count">0</span>
         </div>
       )}
       <EmptyState
         icon="search"
-        title="Вы ещё никуда не записались"
-        subtitle="Запишитесь на мероприятие — оно появится здесь вместе с вашим билетом"
-        actionText="Смотреть события"
+        title={t('events.regEmptyTitle')}
+        subtitle={t('events.regEmptySubtitle')}
+        actionText={t('events.regEmptyAction')}
         actionLink="/eventlist"
       />
     </div>
@@ -76,7 +78,7 @@ const RegisteredEvents = ({ hideHeader = false, limit }) => {
     <div className="lev">
       {!hideHeader && (
         <div className="lev__hdr">
-          <span className="lev__title">Мои регистрации</span>
+          <span className="lev__title">{t('events.regTitle')}</span>
           <span className="lev__count">{events.length}</span>
         </div>
       )}
@@ -109,7 +111,7 @@ const RegisteredEvents = ({ hideHeader = false, limit }) => {
       </div>
       {limit && !showAll && events.length > limit && (
         <button className="orgd__showmore" onClick={() => setShowAll(true)}>
-          Показать ещё
+          {t('events.showMore')}
         </button>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import '../css/EventList.css';
 import { SkeletonCard } from './Skeleton';
@@ -13,6 +14,7 @@ import { isPastEvent, timeBucket, BUCKET_LABELS } from '../utils/dateUtils';
 import { findCategory } from '../config/categories';
 
 const EventList = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ const EventList = () => {
   });
 
   useEffect(() => {
-    document.title = 'Мероприятия — EventHub.kz';
+    document.title = t('events.pageTitle');
   }, []);
 
   const fetchEvents = async () => {
@@ -64,7 +66,7 @@ const EventList = () => {
       setEvents(list);
       loadEngagement(list.map(e => e.id));
     } catch (err) {
-      setError('Ошибка при загрузке мероприятий');
+      setError(t('events.loadError'));
     } finally {
       setLoading(false);
     }
@@ -97,7 +99,7 @@ const EventList = () => {
 
   if (loading) return (
     <div className="events-container">
-      <h2 className="events-heading">Мероприятия</h2>
+      <h2 className="events-heading">{t('events.heading')}</h2>
       <div className="events-grid">
         {[...Array(EVENTS_PER_PAGE)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
@@ -106,7 +108,7 @@ const EventList = () => {
 
   if (error) return (
     <div className="events-container">
-      <h2 className="events-heading">Мероприятия</h2>
+      <h2 className="events-heading">{t('events.heading')}</h2>
       <PageError message={error} onRetry={fetchEvents} />
     </div>
   );
@@ -117,7 +119,7 @@ const EventList = () => {
 
   return (
     <div className="events-container">
-      <h2 className="events-heading">Мероприятия</h2>
+      <h2 className="events-heading">{t('events.heading')}</h2>
 
       <div className="filters">
         <div className="filters__row">
@@ -127,7 +129,7 @@ const EventList = () => {
             </svg>
             <input
               type="text"
-              placeholder="Поиск по городу..."
+              placeholder={t('events.cityPlaceholder')}
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
               className="filter-input"
@@ -135,13 +137,13 @@ const EventList = () => {
           </div>
           <label className="filter-toggle">
             <input type="checkbox" checked={onlineOnly} onChange={() => setOnlineOnly(!onlineOnly)} />
-            <span className="filter-toggle__label">Онлайн</span>
+            <span className="filter-toggle__label">{t('events.online')}</span>
           </label>
           <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="filter-select">
-            <option value="">Сортировка</option>
-            <option value="nameAsc">Название (А-Я)</option>
-            <option value="date">Дата</option>
-            <option value="likes">Популярность</option>
+            <option value="">{t('events.sortDefault')}</option>
+            <option value="nameAsc">{t('events.sortNameAsc')}</option>
+            <option value="date">{t('events.sortDate')}</option>
+            <option value="likes">{t('events.sortLikes')}</option>
           </select>
           {pastCount > 0 && (
             <button
@@ -149,7 +151,7 @@ const EventList = () => {
               className={`filter-toggle__btn ${showPast ? 'filter-toggle__btn--active' : ''}`}
               onClick={() => setShowPast(p => !p)}
             >
-              {showPast ? `Скрыть прошедшие (${pastCount})` : `Показать скрытые (${pastCount})`}
+              {showPast ? t('events.hidePast', { count: pastCount }) : t('events.showPast', { count: pastCount })}
             </button>
           )}
         </div>
@@ -162,7 +164,7 @@ const EventList = () => {
                 type="button"
                 className="active-category__x"
                 onClick={() => setCategory(null)}
-                aria-label="Сбросить категорию"
+                aria-label={t('events.resetCategory')}
               >×</button>
             </span>
           </div>
@@ -183,12 +185,12 @@ const EventList = () => {
             ))}
             {availableTags.length > 5 && (
               <button className="tag-pill tag-pill--more" onClick={() => setShowAllTags(!showAllTags)}>
-                {showAllTags ? 'Свернуть' : `Ещё +${availableTags.length - 5}`}
+                {showAllTags ? t('events.tagsCollapse') : t('events.tagsMore', { count: availableTags.length - 5 })}
               </button>
             )}
             {selectedTags.length > 0 && (
               <button className="tag-pill tag-pill--reset" onClick={() => setSelectedTags([])}>
-                Сбросить
+                {t('events.tagsReset')}
               </button>
             )}
           </div>
@@ -237,9 +239,9 @@ const EventList = () => {
         ) : (
           <EmptyState
             icon="search"
-            title="Ничего не найдено"
-            subtitle="Попробуйте изменить фильтры или сбросить параметры поиска"
-            actionText="Сбросить фильтры"
+            title={t('events.emptyTitle')}
+            subtitle={t('events.emptySubtitle')}
+            actionText={t('events.emptyAction')}
             onAction={() => { setSelectedTags([]); setSelectedCity(''); setOnlineOnly(false); setSortOption('nameAsc'); setCategory(null); }}
           />
         )}

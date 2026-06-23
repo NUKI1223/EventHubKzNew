@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import '../css/TagSelector.css';
 
 const TagSelector = ({ selectedTags, onChange, type = 'EVENT' }) => {
+  const { t } = useTranslation();
   const [tags, setTags] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const TagSelector = ({ selectedTags, onChange, type = 'EVENT' }) => {
         setTags(res.data);
       } catch (err) {
         console.error('Ошибка загрузки тегов:', err);
-        setError('Ошибка загрузки тегов');
+        setError(t('events.tagLoadError'));
       } finally {
         setLoading(false);
       }
@@ -49,11 +51,11 @@ const TagSelector = ({ selectedTags, onChange, type = 'EVENT' }) => {
         className="tag-selector-input"
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >
-        {selectedTags.length > 0 ? selectedTags.join(', ') : 'Выберите тэги'}
+        {selectedTags.length > 0 ? selectedTags.join(', ') : t('events.tagSelectorPlaceholder')}
       </div>
       {dropdownOpen && (
         <div className="tag-selector-list">
-          {loading && <p>Загрузка...</p>}
+          {loading && <p>{t('common.loading')}</p>}
           {error && <p>{error}</p>}
           {!loading &&
             !error &&

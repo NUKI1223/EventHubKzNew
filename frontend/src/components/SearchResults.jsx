@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import '../css/SearchResult.css';
 import '../css/EventList.css';
@@ -16,6 +17,7 @@ function useQuery() {
 }
 
 const SearchResults = () => {
+  const { t } = useTranslation();
   const params = useQuery();
   const query = params.get('query') || params.get('q') || '';
   const [tab, setTab] = useState('events');
@@ -38,8 +40,8 @@ const SearchResults = () => {
 
   useEffect(() => {
     document.title = query
-      ? `Поиск: ${query} — EventHub.kz`
-      : 'Поиск — EventHub.kz';
+      ? t('events.searchPageTitle', { query })
+      : t('events.searchPageTitleEmpty');
   }, [query]);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const SearchResults = () => {
   useEffect(() => {
     const fetchResults = async () => {
       if (!query) {
-        setError('Введите запрос для поиска');
+        setError(t('events.searchEmptyQuery'));
         setLoading(false);
         return;
       }
@@ -68,7 +70,7 @@ const SearchResults = () => {
         );
       } catch (err) {
         console.error('Ошибка поиска:', err);
-        setError(err.response?.data?.message || 'Ошибка при поиске');
+        setError(err.response?.data?.message || t('events.loadError'));
       } finally {
         setLoading(false);
       }
@@ -84,7 +86,7 @@ const SearchResults = () => {
   if (loading) return (
     <div className="sr">
       <div className="sr__hdr">
-        <h1 className="sr__query">Поиск: <em>{query}</em></h1>
+        <h1 className="sr__query">{t('events.searchPrefix')}<em>{query}</em></h1>
       </div>
       <div className="events-grid">
         {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
@@ -98,7 +100,7 @@ const SearchResults = () => {
     <div className="sr">
       <div className="sr__hdr">
         <h1 className="sr__query">
-          Результаты: <em>«{query}»</em>
+          {t('events.searchResultsPrefix')}<em>«{query}»</em>
         </h1>
       </div>
 
@@ -108,13 +110,13 @@ const SearchResults = () => {
           className={`sr__tab ${tab === 'events' ? 'sr__tab--active' : ''}`}
           onClick={() => setTab('events')}
         >
-          Мероприятия{eventResults.length > 0 && ` (${eventResults.length})`}
+          {t('events.tabEvents')}{eventResults.length > 0 && ` (${eventResults.length})`}
         </button>
         <button
           className={`sr__tab ${tab === 'users' ? 'sr__tab--active' : ''}`}
           onClick={() => setTab('users')}
         >
-          Пользователи{userResults.length > 0 && ` (${userResults.length})`}
+          {t('events.tabUsers')}{userResults.length > 0 && ` (${userResults.length})`}
         </button>
       </div>
 
@@ -125,7 +127,7 @@ const SearchResults = () => {
             <input
               className="sr__filter-input"
               type="text"
-              placeholder="Город..."
+              placeholder={t('events.srCityPlaceholder')}
               value={selectedCity}
               onChange={e => setSelectedCity(e.target.value)}
             />
@@ -135,17 +137,17 @@ const SearchResults = () => {
                 checked={onlineOnly}
                 onChange={() => setOnlineOnly(!onlineOnly)}
               />
-              Онлайн
+              {t('events.online')}
             </label>
             <select
               className="sr__filter-select"
               value={sortOption}
               onChange={e => setSortOption(e.target.value)}
             >
-              <option value="">Сортировка</option>
-              <option value="nameAsc">Название (А-Я)</option>
-              <option value="date">По дате</option>
-              <option value="likes">По популярности</option>
+              <option value="">{t('events.sortDefault')}</option>
+              <option value="nameAsc">{t('events.sortNameAsc')}</option>
+              <option value="date">{t('events.srSortDate')}</option>
+              <option value="likes">{t('events.srSortLikes')}</option>
             </select>
           </div>
 
@@ -161,7 +163,7 @@ const SearchResults = () => {
             ))}
             {selectedTags.length > 0 && (
               <button className="sr__tag-reset" onClick={() => setSelectedTags([])}>
-                Сбросить
+                {t('events.tagsReset')}
               </button>
             )}
           </div>
@@ -181,9 +183,9 @@ const SearchResults = () => {
             ) : (
               <EmptyState
                 icon="search"
-                title="Ничего не найдено"
-                subtitle="Попробуйте изменить поисковый запрос или фильтры"
-                actionText="Все мероприятия"
+                title={t('events.srEventsEmptyTitle')}
+                subtitle={t('events.srEventsEmptySubtitle')}
+                actionText={t('events.srEventsEmptyAction')}
                 actionLink="/eventlist"
               />
             )}
@@ -210,7 +212,7 @@ const SearchResults = () => {
                     {user.username?.[0]?.toUpperCase() || '?'}
                   </div>
                 )}
-                <div className="sr__user-name">{user.username || 'Без имени'}</div>
+                <div className="sr__user-name">{user.username || t('events.noName')}</div>
                 {user.description && (
                   <div className="sr__user-desc">{user.description}</div>
                 )}
@@ -219,8 +221,8 @@ const SearchResults = () => {
           ) : (
             <EmptyState
               icon="search"
-              title="Пользователи не найдены"
-              subtitle="Попробуйте изменить поисковый запрос"
+              title={t('events.srUsersEmptyTitle')}
+              subtitle={t('events.srUsersEmptySubtitle')}
             />
           )}
         </div>

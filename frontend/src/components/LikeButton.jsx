@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { useToggleResource } from '../hooks/useToggleResource';
 import '../css/LikeButton.css';
@@ -18,6 +19,7 @@ const LikeButton = ({
   eventId, currentUserId, onLikeChange, onLikedChange, disabled = false,
   variant = 'full', initialLiked, initialCount, selfFetch,
 }) => {
+  const { t } = useTranslation();
   // Если родитель (список) уже передал состояние — собственных запросов не делаем.
   const doSelfFetch = selfFetch ?? (initialLiked === undefined);
 
@@ -54,8 +56,8 @@ const LikeButton = ({
     disabled: disabled || busy,
     'aria-pressed': liked,
     'aria-busy': busy,
-    'aria-label': liked ? 'Убрать лайк' : 'Поставить лайк',
-    title: disabled ? 'Мероприятие уже прошло' : undefined,
+    'aria-label': liked ? t('events.likeRemove') : t('events.likeAdd'),
+    title: disabled ? t('events.likePastTitle') : undefined,
     onClick: handleClick,
   };
 
@@ -71,7 +73,7 @@ const LikeButton = ({
   return (
     <button className={`like-button ${liked ? 'like-button--liked' : ''} ${disabled ? 'like-button--disabled' : ''}`} {...common}>
       <Heart filled={liked} />
-      Нравится ({count})
+      {t('events.likeLabel', { count })}
     </button>
   );
 };

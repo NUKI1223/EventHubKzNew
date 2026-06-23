@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { SkeletonCard } from './Skeleton';
 import EmptyState from './EmptyState';
@@ -8,6 +9,7 @@ import TagSelector from './TagSelector';
 import '../css/EventLikers.css';
 
 const EventLikers = () => {
+  const { t } = useTranslation();
   const { id: eventId } = useParams();
   const [event, setEvent] = useState(null);
   const [users, setUsers] = useState([]);
@@ -34,7 +36,7 @@ const EventLikers = () => {
         const usersRes = await api.get('/api/users/batch', { params: { ids: userIds.join(',') } });
         setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
       } catch {
-        setError('Не удалось загрузить список');
+        setError(t('events.likersLoadError'));
       } finally {
         setLoading(false);
       }
@@ -59,7 +61,7 @@ const EventLikers = () => {
 
   if (loading) return (
     <div className="liker-page">
-      <div className="liker-page__hdr"><span className="liker-page__title">Загрузка...</span></div>
+      <div className="liker-page__hdr"><span className="liker-page__title">{t('common.loading')}</span></div>
       <div className="liker-page__grid">
         {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
@@ -71,18 +73,18 @@ const EventLikers = () => {
   return (
     <div className="liker-page">
       <div className="liker-page__hdr">
-        <Link to={`/events/${eventId}`} className="liker-page__back">← к событию</Link>
+        <Link to={`/events/${eventId}`} className="liker-page__back">{t('events.backToEvent')}</Link>
         <h1 className="liker-page__title">
-          Лайкнули «{event?.title}»
+          {t('events.likersTitle', { title: event?.title })}
         </h1>
-        <p className="liker-page__sub">{users.length} {users.length === 1 ? 'участник' : 'участников'}</p>
+        <p className="liker-page__sub">{users.length === 1 ? t('events.participantsOne', { count: users.length }) : t('events.participantsMany', { count: users.length })}</p>
       </div>
 
       <div className="liker-page__filters">
         <input
           className="liker-page__search"
           type="text"
-          placeholder="Поиск по имени или описанию..."
+          placeholder={t('events.likersSearchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -94,8 +96,8 @@ const EventLikers = () => {
       {filtered.length === 0 ? (
         <EmptyState
           icon="search"
-          title="Никого не нашли"
-          subtitle="Попробуйте изменить запрос или сбросить фильтр"
+          title={t('events.likersEmptyTitle')}
+          subtitle={t('events.likersEmptySubtitle')}
         />
       ) : (
         <div className="liker-page__grid">
@@ -107,7 +109,7 @@ const EventLikers = () => {
                 <div className="liker-card__avatar-ph">{u.username?.[0]?.toUpperCase() || '?'}</div>
               )}
               <div className="liker-card__body">
-                <div className="liker-card__name">{u.username || 'Без имени'}</div>
+                <div className="liker-card__name">{u.username || t('events.noName')}</div>
                 {u.description && (
                   <div className="liker-card__desc">{u.description}</div>
                 )}
