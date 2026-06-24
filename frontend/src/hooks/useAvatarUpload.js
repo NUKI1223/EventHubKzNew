@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import { SOCIALS } from '../config/socials';
 
 const EMPTY_CONTACTS = SOCIALS.reduce((acc, s) => ({ ...acc, [s.contactKey]: '' }), {});
 
 export function useAvatarUpload(user, setUser) {
+  const { t } = useTranslation();
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
@@ -42,8 +44,8 @@ export function useAvatarUpload(user, setUser) {
       } catch (err) {
         setAvatarError(
           err.response
-            ? `Ошибка: ${err.response.data.message || err.response.statusText}`
-            : 'Нет ответа от сервера'
+            ? t('profile.errorPrefix', { message: err.response.data.message || err.response.statusText })
+            : t('profile.errorNoResponse')
         );
       } finally {
         setAvatarLoading(false);

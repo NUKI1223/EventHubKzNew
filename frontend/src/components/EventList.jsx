@@ -10,7 +10,7 @@ import EventCard from './EventCard';
 import Pagination from './Pagination';
 import { EVENTS_PER_PAGE } from '../constants';
 import { useEventFiltering } from '../hooks/useEventFiltering';
-import { isPastEvent, timeBucket, BUCKET_LABELS } from '../utils/dateUtils';
+import { isPastEvent, timeBucket } from '../utils/dateUtils';
 import { findCategory } from '../config/categories';
 
 const EventList = () => {
@@ -159,7 +159,7 @@ const EventList = () => {
         {category && (
           <div className="active-category">
             <span className="active-category__chip">
-              {category.label}
+              {t(category.labelKey)}
               <button
                 type="button"
                 className="active-category__x"
@@ -220,7 +220,7 @@ const EventList = () => {
               const b = timeBucket(event);
               if (b !== last) {
                 nodes.push(
-                  <div key={`grp-${b}`} className="events-group-header">{BUCKET_LABELS[b] || ''}</div>
+                  <div key={`grp-${b}`} className="events-group-header">{t('buckets.' + b)}</div>
                 );
                 last = b;
               }

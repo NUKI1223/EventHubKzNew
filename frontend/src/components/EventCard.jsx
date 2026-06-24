@@ -11,7 +11,7 @@ const EventCard = ({ event, currentUserId, liked, likeCount, registered, regCoun
   const isPast = isPastEvent(event);
   const isNative = event.registrationType === 'NATIVE';
   const regClosed = isRegistrationClosed(event);
-  const when = relativeEventLabel(event);
+  const when = relativeEventLabel(event, t);
   const likes = likeCount ?? event.likesCount ?? 0;
   const going = regCount ?? 0;
 

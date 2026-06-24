@@ -24,7 +24,7 @@ function MainPage() {
   const [events, setEvents] = useState(null);
 
   useEffect(() => {
-    document.title = 'EventHub.kz — IT-события Казахстана';
+    document.title = t('landing.pageTitle');
   }, []);
 
   useEffect(() => {
@@ -263,7 +263,7 @@ function MainPage() {
             className={`mp-cat mp-cat--${c.color}`}
           >
             <span className="mp-cat__icon">{c.icon}</span>
-            <span className="mp-cat__label">{c.label}</span>
+            <span className="mp-cat__label">{t(c.labelKey)}</span>
             <span className="mp-cat__count mp-mono">
               {derived
                 ? `${c.count} ${plural(c.count, t('landing.pluralEvent', { returnObjects: true }))}`

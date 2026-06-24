@@ -29,7 +29,7 @@ const LikeButton = ({
     currentUserId,
     postUrl: `/api/likes/event/${eventId}`,
     deleteUrl: `/api/likes/event/${eventId}`,
-    msgError: 'Не удалось обновить лайк',
+    msgError: t('events.likeError'),
     onActiveChange: (v) => onLikedChange?.(v),
   });
 

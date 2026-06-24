@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 const AUTH_PAGES = ['/signin', '/signupnew', '/verify', '/verification'];
@@ -16,6 +17,7 @@ function readExpiryMs(token) {
 export function useAuthExpiryWatcher() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (AUTH_PAGES.some(p => location.pathname.startsWith(p))) return;
@@ -27,7 +29,7 @@ export function useAuthExpiryWatcher() {
     const logout = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
-      toast.error('Сессия истекла, войдите снова');
+      toast.error(t('common.sessionExpired'));
       navigate('/signin', { replace: true });
     };
 

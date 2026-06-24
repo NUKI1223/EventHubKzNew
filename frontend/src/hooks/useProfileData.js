@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fetchUserByRoute } from '../api/users';
 
 export function useProfileData(routeUsername, locationKey) {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,8 +16,8 @@ export function useProfileData(routeUsername, locationKey) {
         setUser(data);
         document.title = `${data.username} — EventHub.kz`;
       } catch {
-        setError('Ошибка при загрузке данных пользователя');
-        document.title = 'Профиль — EventHub.kz';
+        setError(t('profile.loadUserError'));
+        document.title = t('profile.viewPageTitle');
       } finally {
         setLoading(false);
       }

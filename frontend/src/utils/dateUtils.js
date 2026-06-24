@@ -21,17 +21,18 @@ export const isRegistrationClosed = (event) => {
 };
 
 // Короткая относительная метка времени до события: «Сегодня», «Завтра», «через N дн.», «Прошло».
-export const relativeEventLabel = (event) => {
+// Принимает функцию перевода t (из useTranslation) — ключи в namespace `relative`.
+export const relativeEventLabel = (event, t) => {
   const d = toDate(event?.eventDate);
   if (!d) return null;
   const diff = d.getTime() - Date.now();
-  if (diff < 0) return 'Прошло';
+  if (diff < 0) return t('relative.past');
   const days = Math.floor(diff / 86400000);
-  if (days === 0) return 'Сегодня';
-  if (days === 1) return 'Завтра';
-  if (days < 7) return `через ${days} дн.`;
-  if (days < 30) return `через ${Math.floor(days / 7)} нед.`;
-  return `через ${Math.floor(days / 30)} мес.`;
+  if (days === 0) return t('relative.today');
+  if (days === 1) return t('relative.tomorrow');
+  if (days < 7) return t('relative.inDays', { count: days });
+  if (days < 30) return t('relative.inWeeks', { count: Math.floor(days / 7) });
+  return t('relative.inMonths', { count: Math.floor(days / 30) });
 };
 
 // Временной «ведро»-ключ для группировки списка.
@@ -45,14 +46,6 @@ export const timeBucket = (event) => {
   if (days < 7) return 'week';
   if (days < 31) return 'month';
   return 'later';
-};
-
-export const BUCKET_LABELS = {
-  today: 'Сегодня',
-  week: 'На этой неделе',
-  month: 'В этом месяце',
-  later: 'Позже',
-  past: 'Прошедшие',
 };
 
 export const formatDate = (dateInput) => {

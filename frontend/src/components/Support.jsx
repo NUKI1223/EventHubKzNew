@@ -1,87 +1,64 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import api from '../api';
 import { useAuthUser } from '../hooks/useAuthUser';
 import '../css/Support.css';
 
-const faqs = [
-  {
-    q: 'Как создать мероприятие?',
-    a: 'Перейдите на страницу «Создать событие» и заполните форму. После проверки модератором оно появится в списке.',
-  },
-  {
-    q: 'Как изменить пароль?',
-    a: 'Перейдите в настройки профиля и выберите «Редактировать профиль», затем смените пароль.',
-  },
-  {
-    q: 'Сколько времени занимает модерация?',
-    a: 'Обычно 1–2 рабочих дня. Мы уведомим вас по email о результате.',
-  },
-  {
-    q: 'Можно ли изменить событие после подачи заявки?',
-    a: 'Свяжитесь с нами через форму ниже или в Telegram, и мы поможем внести правки.',
-  },
-];
-
-const SUGGESTIONS = [
-  'Как подать заявку на мероприятие?',
-  'Сколько идёт модерация?',
-  'Почему мою заявку отклонили?',
-  'Где посмотреть мои события?',
-];
-
-const channels = [
-  {
-    key: 'chat',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-    ),
-    title: 'AI-чат',
-    desc: 'Ответ за пару секунд',
-  },
-  {
-    key: 'email',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-        <rect x="2" y="4" width="20" height="16" rx="2"/>
-        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-      </svg>
-    ),
-    title: 'Email',
-    desc: 'support@eventhub.kz',
-  },
-  {
-    key: 'telegram',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-        <path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/>
-      </svg>
-    ),
-    title: 'Telegram',
-    desc: '@eventhubkz',
-  },
-  {
-    key: 'faq',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-        <line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-    ),
-    title: 'FAQ',
-    desc: 'Частые вопросы и ответы',
-  },
-];
-
-const WELCOME = 'Здравствуйте! Я ИИ-помощник EventHub.kz. Помогу разобраться с заявками, профилем и платформой. Чем могу помочь?';
+const CHANNEL_ICONS = {
+  chat: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  ),
+  email: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  ),
+  telegram: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+      <path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/>
+    </svg>
+  ),
+  faq: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  ),
+};
 
 const Support = () => {
+  const { t } = useTranslation();
   const currentUser = useAuthUser();
   const isLoggedIn = !!currentUser;
+
+  const faqs = [
+    { q: t('support.faq1q'), a: t('support.faq1a') },
+    { q: t('support.faq2q'), a: t('support.faq2a') },
+    { q: t('support.faq3q'), a: t('support.faq3a') },
+    { q: t('support.faq4q'), a: t('support.faq4a') },
+  ];
+
+  const SUGGESTIONS = [
+    t('support.suggest1'),
+    t('support.suggest2'),
+    t('support.suggest3'),
+    t('support.suggest4'),
+  ];
+
+  const channels = [
+    { key: 'chat',     icon: CHANNEL_ICONS.chat,     title: t('support.chanChatTitle'), desc: t('support.chanChatDesc') },
+    { key: 'email',    icon: CHANNEL_ICONS.email,    title: 'Email',                    desc: 'support@eventhub.kz' },
+    { key: 'telegram', icon: CHANNEL_ICONS.telegram, title: 'Telegram',                 desc: '@eventhubkz' },
+    { key: 'faq',      icon: CHANNEL_ICONS.faq,      title: 'FAQ',                      desc: t('support.chanFaqDesc') },
+  ];
+
+  const WELCOME = t('support.welcome');
 
   const [messages, setMessages] = useState([
     { role: 'assistant', content: WELCOME },
@@ -92,7 +69,7 @@ const Support = () => {
   const listRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'Поддержка — EventHub.kz';
+    document.title = t('support.pageTitle');
   }, []);
 
   useEffect(() => {
@@ -105,7 +82,7 @@ const Support = () => {
     const trimmed = (text ?? input).trim();
     if (!trimmed || sending) return;
     if (!isLoggedIn) {
-      toast.error('Войдите, чтобы пользоваться чатом');
+      toast.error(t('support.toastLoginChat'));
       return;
     }
     const next = [...messages, { role: 'user', content: trimmed }];
@@ -114,13 +91,13 @@ const Support = () => {
     setSending(true);
     try {
       const res = await api.post('/api/support/chat', { messages: next });
-      const reply = res.data?.reply || 'Не получилось ответить. Нажмите «Передать админу».';
+      const reply = res.data?.reply || t('support.replyFallback');
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (err) {
       console.error('Ошибка AI-чата', err);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Сейчас не получилось ответить. Попробуйте ещё раз или нажмите «Передать админу».',
+        content: t('support.replyError'),
       }]);
     } finally {
       setSending(false);
@@ -129,7 +106,7 @@ const Support = () => {
 
   const escalate = async () => {
     if (!isLoggedIn) {
-      toast.error('Войдите, чтобы отправить сообщение');
+      toast.error(t('support.toastLoginSend'));
       return;
     }
     const conversation = messages
@@ -137,7 +114,7 @@ const Support = () => {
       .map(m => `${m.role === 'user' ? 'Я' : 'ИИ'}: ${m.content}`)
       .join('\n\n');
     if (!conversation || messages.length <= 1) {
-      toast.error('Сначала напишите вопрос в чат');
+      toast.error(t('support.toastWriteFirst'));
       return;
     }
     setEscalating(true);
@@ -147,14 +124,14 @@ const Support = () => {
         email: currentUser.email || '',
         message: `Чат с ИИ:\n\n${conversation}`,
       });
-      toast.success('Передано админу — мы ответим на ваш email');
+      toast.success(t('support.toastEscalated'));
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Готово, я передал ваш диалог админу. Скоро придёт ответ на ваш email.',
+        content: t('support.escalatedMsg'),
       }]);
     } catch (err) {
       console.error('Ошибка эскалации', err);
-      toast.error('Не удалось передать админу, попробуйте позже');
+      toast.error(t('support.toastEscalateFailed'));
     } finally {
       setEscalating(false);
     }
@@ -172,10 +149,10 @@ const Support = () => {
   return (
     <div className="sp">
       <div className="sp__hdr">
-        <div className="sp__eyebrow">Помощь</div>
-        <h1 className="sp__title">Поддержка</h1>
+        <div className="sp__eyebrow">{t('support.eyebrow')}</div>
+        <h1 className="sp__title">{t('support.title')}</h1>
         <p className="sp__sub">
-          Спросите у ИИ-помощника — он знает платформу. Если не справится, передадим админу.
+          {t('support.subtitle')}
         </p>
       </div>
 
@@ -196,8 +173,8 @@ const Support = () => {
           <div className="sp__chat-head">
             <div className="sp__chat-head-dot" />
             <div>
-              <div className="sp__chat-head-title">ИИ-помощник</div>
-              <div className="sp__chat-head-sub">на базе Gemini · отвечает мгновенно</div>
+              <div className="sp__chat-head-title">{t('support.chatHeadTitle')}</div>
+              <div className="sp__chat-head-sub">{t('support.chatHeadSub')}</div>
             </div>
           </div>
 
@@ -238,7 +215,7 @@ const Support = () => {
             <textarea
               className="sp__chat-input"
               rows={1}
-              placeholder={isLoggedIn ? 'Напишите вопрос…' : 'Войдите, чтобы пользоваться чатом'}
+              placeholder={isLoggedIn ? t('support.inputPlaceholder') : t('support.inputPlaceholderGuest')}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={onKeyDown}
@@ -249,7 +226,7 @@ const Support = () => {
               className="sp__chat-send"
               onClick={() => send()}
               disabled={!input.trim() || sending || !isLoggedIn}
-              aria-label="Отправить"
+              aria-label={t('support.sendLabel')}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
                 <path d="M5 12h14M13 5l7 7-7 7"/>
@@ -265,18 +242,18 @@ const Support = () => {
                 onClick={escalate}
                 disabled={escalating || messages.length <= 1}
               >
-                {escalating ? 'Отправляю…' : 'Передать админу'}
+                {escalating ? t('support.escalating') : t('support.escalate')}
               </button>
             ) : (
-              <Link to="/signin" className="sp__chat-escalate">Войти и продолжить</Link>
+              <Link to="/signin" className="sp__chat-escalate">{t('support.signInContinue')}</Link>
             )}
-            <div className="sp__chat-hint">Enter — отправить, Shift+Enter — новая строка</div>
+            <div className="sp__chat-hint">{t('support.hint')}</div>
           </div>
         </div>
 
         {/* FAQ */}
         <div className="sp__faq-card">
-          <div className="sp__faq-title">Частые вопросы</div>
+          <div className="sp__faq-title">{t('support.faqTitle')}</div>
           <div className="sp__faq-list">
             {faqs.map((item, i) => (
               <div key={i} className="sp__faq-item">

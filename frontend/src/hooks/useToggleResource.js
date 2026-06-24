@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 import toast from 'react-hot-toast';
 
@@ -16,7 +17,7 @@ export function useToggleResource({
   deleteUrl,
   msgOn,
   msgOff,
-  msgError = 'Не удалось выполнить действие',
+  msgError,
   onActiveChange,
   onBeforeActivate,
 }) {
@@ -24,6 +25,7 @@ export function useToggleResource({
   const [count, setCount] = useState(initialCount);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Синхронизация со значениями, которые мог передать родитель (список).
   useEffect(() => { setActive(initialActive); }, [initialActive]);
@@ -61,11 +63,11 @@ export function useToggleResource({
       setCount((c) => Math.max(0, c + (wasActive ? 1 : -1)));
       const status = err?.response?.status;
       const serverMsg = err?.response?.data?.message;
-      toast.error((serverMsg && serverMsg.trim()) || (status === 409 ? 'Действие недоступно' : msgError));
+      toast.error((serverMsg && serverMsg.trim()) || (status === 409 ? t('common.actionUnavailable') : (msgError || t('common.actionFailed'))));
     } finally {
       setBusy(false);
     }
-  }, [busy, currentUserId, active, postUrl, deleteUrl, msgOn, msgOff, msgError, onActiveChange, onBeforeActivate, navigate]);
+  }, [busy, currentUserId, active, postUrl, deleteUrl, msgOn, msgOff, msgError, onActiveChange, onBeforeActivate, navigate, t]);
 
   return { active, count, busy, toggle, setActive, setCount };
 }
