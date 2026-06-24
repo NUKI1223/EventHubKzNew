@@ -1,0 +1,37 @@
+/* Сегментированный переключатель языка RU/KK — в стиле чрома шапки. */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  padding: 2px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+}
+
+.lang-switch__btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--ink-400);
+  padding: 4px 9px;
+  border-radius: var(--r-pill);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.lang-switch__btn:hover {
+  color: var(--ink-900);
+}
+
+.lang-switch__btn--on {
+  background: var(--bg-card);
+  color: var(--ink-900);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import '../css/LanguageSwitcher.css';
 
 const LANGS = [
   { code: 'ru', label: 'RU' },
