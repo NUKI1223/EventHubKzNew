@@ -62,7 +62,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // cost factor 12 per OWASP 2024 recommendation
-        return new BCryptPasswordEncoder(12);
+        // cost factor 10: spike-hardening. bcrypt hashes are self-describing,
+        // so existing cost-12 passwords still verify; new ones use cost 10.
+        return new BCryptPasswordEncoder(10);
     }
 }
