@@ -258,6 +258,8 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       eureka-server:
@@ -265,6 +267,8 @@ services:
       postgres-registrations:
         condition: service_started
       kafka:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - eventhub-network

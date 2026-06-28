@@ -10,6 +10,8 @@ import org.ngcvfb.registrationservice.kafka.RegistrationKafkaProducer;
 import org.ngcvfb.registrationservice.model.EventRegistration;
 import org.ngcvfb.registrationservice.model.RegistrationStatus;
 import org.ngcvfb.registrationservice.repository.EventRegistrationRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class EventRegistrationService {
         return registrationRepository.existsByUserIdAndEventId(userId, eventId);
     }
 
+    @Cacheable(value = "registrationCount", key = "#eventId")
     public long getRegistrationCount(Long eventId) {
         return registrationRepository.countByEventId(eventId);
     }
@@ -90,6 +93,7 @@ public class EventRegistrationService {
         return event.getStaffIds() != null && event.getStaffIds().contains(requesterId);
     }
 
+    @CacheEvict(value = "registrationCount", key = "#eventId")
     public EventRegistration register(Long userId, Long eventId, String userEmail, String username,
                                       Map<String, String> answers) {
 
@@ -172,6 +176,7 @@ public class EventRegistrationService {
         return saved;
     }
 
+    @CacheEvict(value = "registrationCount", key = "#eventId")
     @Transactional
     public void cancel(Long userId, Long eventId) {
         registrationRepository.deleteByUserIdAndEventId(userId, eventId);
