@@ -60,6 +60,11 @@ public class EventSearchService {
         return eventSearchRepository.save(document);
     }
 
+    public Iterable<EventDocument> saveAll(java.util.List<EventDocument> documents) {
+        log.info("Bulk indexing {} events", documents.size());
+        return eventSearchRepository.saveAll(documents);
+    }
+
     public void deleteById(String id) {
         log.info("Deleting event from index: {}", id);
         eventSearchRepository.deleteById(id);
