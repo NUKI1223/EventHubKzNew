@@ -10,6 +10,10 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres123}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000   # wait up to 10s for a connection (queue, don't fail)
 
   jpa:
     hibernate:
@@ -49,6 +53,7 @@ eureka:
       defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
 
 security:
   jwt:
@@ -83,5 +88,5 @@ management:
 
 logging:
   level:
-    org.ngcvfb.authservice: DEBUG
-    org.springframework.security: DEBUG
+    org.ngcvfb.authservice: INFO
+    org.springframework.security: INFO
