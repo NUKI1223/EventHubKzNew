@@ -36,11 +36,11 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     container_name: api-gateway
-    mem_limit: 512m
+    mem_limit: 1g
     ports:
       - "8180:8080"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -63,11 +63,11 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     container_name: auth-service
-    mem_limit: 512m
+    mem_limit: 1g
     ports:
       - "8081:8081"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-users:5432/users_db
@@ -153,11 +153,11 @@ services:
       context: ./event-service
       dockerfile: Dockerfile
     container_name: event-service
-    mem_limit: 512m
+    mem_limit: 1g
     ports:
       - "8083:8083"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - DB_URL=jdbc:postgresql://postgres-events:5432/events_db
@@ -187,11 +187,11 @@ services:
       context: ./search-service
       dockerfile: Dockerfile
     container_name: search-service
-    mem_limit: 512m
+    mem_limit: 1g
     ports:
       - "8085:8085"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - ELASTICSEARCH_URIS=http://elasticsearch:9200
@@ -471,10 +471,10 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
     container_name: elasticsearch
-    mem_limit: 768m
+    mem_limit: 1500m
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms384m -Xmx384m
+      - ES_JAVA_OPTS=-Xms768m -Xmx768m
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
