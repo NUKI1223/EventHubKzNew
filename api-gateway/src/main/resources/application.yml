@@ -12,6 +12,10 @@ spring:
           enabled: true
           lower-case-service-id: true
 
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s   # let a queued (slow) login finish instead of 504
+
       routes:
         # Auth Service
         - id: auth-service
@@ -216,7 +220,7 @@ management:
       enabled: true
   tracing:
     sampling:
-      probability: 1.0
+      probability: 0.1
   zipkin:
     tracing:
       endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
@@ -231,5 +235,5 @@ management:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.ngcvfb.apigateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.ngcvfb.apigateway: INFO
