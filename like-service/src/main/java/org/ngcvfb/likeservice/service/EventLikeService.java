@@ -6,6 +6,8 @@ import org.ngcvfb.eventhubkz.common.events.EventLikedEvent;
 import org.ngcvfb.likeservice.kafka.LikeKafkaProducer;
 import org.ngcvfb.likeservice.model.EventLike;
 import org.ngcvfb.likeservice.repository.EventLikeRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class EventLikeService {
         return eventLikeRepository.existsByUserIdAndEventId(userId, eventId);
     }
 
+    @Cacheable(value = "likeCount", key = "#eventId")
     public long getLikeCount(Long eventId) {
         return eventLikeRepository.countByEventId(eventId);
     }
@@ -49,6 +52,7 @@ public class EventLikeService {
         return eventLikeRepository.findByUserId(userId);
     }
 
+    @CacheEvict(value = "likeCount", key = "#eventId")
     @Transactional
     public EventLike likeEvent(Long userId, Long eventId, String userEmail, String username,
                                Long organizerId, String organizerEmail, String eventTitle) {
@@ -73,12 +77,14 @@ public class EventLikeService {
         return saved;
     }
 
+    @CacheEvict(value = "likeCount", key = "#eventId")
     @Transactional
     public void unlikeEvent(Long userId, Long eventId) {
         eventLikeRepository.deleteByUserIdAndEventId(userId, eventId);
         log.info("User {} unliked event {}", userId, eventId);
     }
 
+    @CacheEvict(value = "likeCount", key = "#eventId")
     @Transactional
     public void deleteAllLikesForEvent(Long eventId) {
         eventLikeRepository.deleteByEventId(eventId);
