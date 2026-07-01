@@ -62,10 +62,9 @@ services:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
-    container_name: auth-service
+    deploy:
+      replicas: 2
     mem_limit: 1g
-    ports:
-      - "8081:8081"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - SPRING_PROFILES_ACTIVE=docker
@@ -152,10 +151,9 @@ services:
     build:
       context: ./event-service
       dockerfile: Dockerfile
-    container_name: event-service
+    deploy:
+      replicas: 2
     mem_limit: 1g
-    ports:
-      - "8083:8083"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - SPRING_PROFILES_ACTIVE=docker
