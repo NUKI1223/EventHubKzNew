@@ -187,6 +187,7 @@ public class EventService {
     }
 
     @Transactional
+    @CacheEvict(value = "events", key = "#eventId")
     public void incrementViewCount(Long eventId) {
         eventRepository.findById(eventId).ifPresent(event -> {
             int current = event.getViewCount() == null ? 0 : event.getViewCount();
