@@ -20,6 +20,7 @@ import Verify from './components/Verify';
 import Header from './components/Header';
 import MainPage from './components/MainPage';
 import Support from './components/Support';
+import NotFound from './components/NotFound';
 import { useAuthExpiryWatcher } from './hooks/useAuthExpiryWatcher';
 
 function AppContent() {
@@ -51,6 +52,7 @@ function AppContent() {
         <Route path="/signupnew" element={<SignUpNew />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
