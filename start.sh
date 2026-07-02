@@ -87,7 +87,10 @@ stop_all() {
 
   log "Останавливаю docker stack..."
   cd "$BACKEND_DIR"
-  docker compose down
+  # --profile observability обязателен: иначе контейнеры мониторинга (grafana/prometheus/
+  # zipkin/kafka-ui), поднятые с этим профилем, не попадут в down и удержат сеть
+  # eventhub-network ("has active endpoints"), из-за чего down падает с ошибкой.
+  docker compose --profile observability down
   ok "Всё остановлено"
 }
 
