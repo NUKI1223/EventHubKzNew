@@ -21,6 +21,7 @@ IT events in Kazakhstan are scattered across Telegram channels, Instagram pages 
 - **Event catalog** — full-text search (Elasticsearch, Russian morphology), filtering by tags / city / format (online/offline), sorting by date and popularity
 - **Organizer flow** — structured event submission, admin moderation with approve/reject + comments, organizer dashboard with attendee stats and Excel export
 - **Native RSVP** — one-click registration, per-event QR tickets, check-in codes for organizers, attendance tracking, capacity-aware counters
+- **Calendar export** — download any event as `.ics` or add it to Google Calendar in one click
 - **AI, integrated where it saves real work** (Google Gemini):
   - auto-suggest event tags from the description, strictly validated against the tag dictionary
   - support chat assistant with topic filtering and prompt-injection protection; one-click escalation of the full conversation to a human admin
@@ -160,7 +161,6 @@ CI (GitHub Actions) builds every service and the frontend, and runs the full tes
 - [ ] Public deployment (VPS + HTTPS) at eventhub.kz
 - [ ] AI ingestion of events from Telegram community channels (LLM-extracted, human-moderated)
 - [ ] Recommendations via embeddings of user tags × event descriptions
-- [ ] iCalendar (.ics) export
 - [ ] Flyway migrations, refresh tokens
 - [ ] Kubernetes (k3s + Helm) deployment
 - [ ] Telegram Mini App client
