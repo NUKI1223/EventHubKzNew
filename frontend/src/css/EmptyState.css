@@ -39,7 +39,8 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-xs);
-  background: var(--gradient-hero);
+  /* тёмный градиент: hero-градиент сливался с бежевым фоном страницы */
+  background: var(--gradient-button);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
