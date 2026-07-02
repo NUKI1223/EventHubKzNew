@@ -195,9 +195,9 @@ eureka:
 
 security:
   jwt:
-    # Должен совпадать с auth-service (тот же дефолт), иначе gateway не валидирует
-    # выданные auth-service токены, когда JWT_SECRET не задан в окружении.
-    secret-key: ${JWT_SECRET:***REMOVED***=}
+    # Должен совпадать с auth-service, иначе gateway не валидирует выданные им токены.
+    # Задаётся только через окружение (.env) — дефолта нет намеренно.
+    secret-key: ${JWT_SECRET}
 
 resilience4j:
   circuitbreaker:

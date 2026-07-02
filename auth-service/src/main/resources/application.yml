@@ -57,7 +57,7 @@ eureka:
 
 security:
   jwt:
-    secret-key: ${JWT_SECRET:***REMOVED***=}
+    secret-key: ${JWT_SECRET}
     expiration-time: ${JWT_EXPIRATION:3600000}
 
 management:

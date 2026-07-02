@@ -14,5 +14,6 @@ HELP.md
 backend/pgdata/
 backend/logs/
 node_modules/
+.env
 .env.local
 .claude/
