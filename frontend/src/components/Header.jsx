@@ -89,8 +89,9 @@ function Header() {
 
   const navItems = [
     { path: "/", labelKey: "header.home" },
+    // каталог публичный — гость должен видеть его из шапки, не только из hero-кнопки
+    { path: "/eventlist", labelKey: "header.events" },
     ...(token ? [
-      { path: "/eventlist", labelKey: "header.events" },
       { path: "/request-event", labelKey: "header.createRequest" },
       { path: "/support", labelKey: "header.support" },
       ...(currentUser?.role === "ADMIN" ? [{ path: "/admin", labelKey: "header.admin" }] : []),
