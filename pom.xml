@@ -22,6 +22,7 @@
         <module>search-service</module>
         <module>like-service</module>
         <module>registration-service</module>
+        <module>audit-service</module>
         <module>notification-service</module>
         <module>file-service</module>
     </modules>
