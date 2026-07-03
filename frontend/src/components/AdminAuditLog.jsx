@@ -27,15 +27,16 @@ const AdminAuditLog = () => {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
 
-  const load = useCallback(async (p = 0) => {
+  const load = useCallback(async (p = 0, f = null) => {
+    const eff = f ?? { action, actorId, from, to };
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({ page: p, size: 20 });
-      if (action) params.set('action', action);
-      if (actorId) params.set('actorId', actorId);
-      if (from) params.set('from', `${from}T00:00:00`);
-      if (to) params.set('to', `${to}T23:59:59`);
+      if (eff.action) params.set('action', eff.action);
+      if (eff.actorId) params.set('actorId', eff.actorId);
+      if (eff.from) params.set('from', `${eff.from}T00:00:00`);
+      if (eff.to) params.set('to', `${eff.to}T23:59:59`);
       const res = await api.get(`/api/admin/audit?${params}`);
       setRows(res.data.content);
       setTotalPages(res.data.totalPages);
@@ -50,7 +51,10 @@ const AdminAuditLog = () => {
 
   useEffect(() => { load(0); }, []); // первичная загрузка
 
-  const resetFilters = () => { setAction(''); setActorId(''); setFrom(''); setTo(''); };
+  const resetFilters = () => {
+    setAction(''); setActorId(''); setFrom(''); setTo('');
+    load(0, { action: '', actorId: '', from: '', to: '' });
+  };
 
   if (error) return <PageError message={error} onRetry={() => load(page)} />;
 
@@ -99,7 +103,7 @@ const AdminAuditLog = () => {
               ))}
             </tbody>
           </table>
-          <Pagination page={page} totalPages={totalPages} onChange={load} total={total} />
+          <Pagination page={page} totalPages={totalPages} onChange={(p) => load(p)} total={total} />
         </>
       )}
     </div>
