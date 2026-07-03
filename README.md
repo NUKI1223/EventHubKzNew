@@ -128,6 +128,10 @@ cp .env.example .env   # fill in secrets (JWT, SMTP, Gemini API key)
 ./start.sh --build --seed        # build jars & images, start stack, seed demo data
 ```
 
+> **Upgrading an existing stack?** The audit service needs its database once:
+> `docker exec postgres-notifications psql -U postgres -c "CREATE DATABASE audit_db;"`
+> (fresh volumes create it automatically via `db-init/`).
+
 The script waits for the gateway, seeds demo events/users (idempotent) and starts the Vite dev server:
 
 | URL | What |
