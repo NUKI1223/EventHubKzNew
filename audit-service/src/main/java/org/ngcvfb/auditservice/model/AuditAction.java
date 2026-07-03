@@ -1,0 +1,8 @@
+package org.ngcvfb.auditservice.model;
+
+public enum AuditAction {
+    USER_REGISTERED, USER_DELETED,
+    EVENT_CREATED, EVENT_UPDATED, EVENT_DELETED,
+    EVENT_LIKED, EVENT_RSVP,
+    REQUEST_CREATED, REQUEST_APPROVED, REQUEST_REJECTED
+}
