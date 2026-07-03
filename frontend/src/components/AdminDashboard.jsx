@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminEventRequests from './AdminEventRequests';
 import AdminSupportMessages from './AdminSupportMessages';
+import AdminUsers from './AdminUsers';
 import AdminAuditLog from './AdminAuditLog';
 import { useTranslation } from 'react-i18next';
 import '../css/AdminDashboard.css';
@@ -8,6 +9,7 @@ import '../css/AdminDashboard.css';
 const TABS = [
   { key: 'requests', labelKey: 'admin.tabRequests' },
   { key: 'support',  labelKey: 'admin.tabSupport' },
+  { key: 'users',    labelKey: 'admin.tabUsers' },
   { key: 'audit',    labelKey: 'admin.tabAudit' },
 ];
 
@@ -39,6 +41,7 @@ const AdminDashboard = () => {
 
       {tab === 'requests' && <AdminEventRequests />}
       {tab === 'support' && <AdminSupportMessages />}
+      {tab === 'users' && <AdminUsers />}
       {tab === 'audit' && <AdminAuditLog />}
     </div>
   );
