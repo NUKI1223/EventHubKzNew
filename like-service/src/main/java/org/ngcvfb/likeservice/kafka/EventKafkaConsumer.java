@@ -3,6 +3,7 @@ package org.ngcvfb.likeservice.kafka;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
+import org.ngcvfb.eventhubkz.common.events.UserDeletedEvent;
 import org.ngcvfb.likeservice.service.EventLikeService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,16 @@ public class EventKafkaConsumer {
             log.info("Deleted all likes for event: {}", event.getId());
         } catch (Exception e) {
             log.error("Failed to delete likes for event: {}", event.getId(), e);
+        }
+    }
+
+    @KafkaListener(topics = "user.deleted", groupId = "like-service-group")
+    public void handleUserDeleted(UserDeletedEvent event) {
+        log.info("Received user.deleted: {}", event.getUserId());
+        try {
+            eventLikeService.deleteAllLikesForUser(event.getUserId());
+        } catch (Exception e) {
+            log.error("Failed to delete likes for user: {}", event.getUserId(), e);
         }
     }
 }

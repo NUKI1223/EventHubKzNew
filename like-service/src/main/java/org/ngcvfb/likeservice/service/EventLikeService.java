@@ -6,6 +6,8 @@ import org.ngcvfb.eventhubkz.common.events.EventLikedEvent;
 import org.ngcvfb.likeservice.kafka.LikeKafkaProducer;
 import org.ngcvfb.likeservice.model.EventLike;
 import org.ngcvfb.likeservice.repository.EventLikeRepository;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ public class EventLikeService {
 
     private final EventLikeRepository eventLikeRepository;
     private final LikeKafkaProducer kafkaProducer;
+    private final CacheManager cacheManager;
 
     public boolean isLikedByUser(Long userId, Long eventId) {
         return eventLikeRepository.existsByUserIdAndEventId(userId, eventId);
@@ -89,5 +92,16 @@ public class EventLikeService {
     public void deleteAllLikesForEvent(Long eventId) {
         eventLikeRepository.deleteByEventId(eventId);
         log.info("Deleted all likes for event {}", eventId);
+    }
+
+    @Transactional
+    public void deleteAllLikesForUser(Long userId) {
+        List<EventLike> likes = eventLikeRepository.findByUserId(userId);
+        eventLikeRepository.deleteByUserId(userId);
+        Cache cache = cacheManager.getCache("likeCount");
+        if (cache != null) {
+            likes.forEach(like -> cache.evict(like.getEventId()));
+        }
+        log.info("Deleted {} likes of removed user {}", likes.size(), userId);
     }
 }
