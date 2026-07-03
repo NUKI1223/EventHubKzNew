@@ -97,4 +97,10 @@ public class NotificationService {
     public void deleteAllByUser(Long userId) {
         notificationRepository.deleteByUserId(userId);
     }
+
+    @Transactional
+    public void deleteAllForUser(Long userId) {
+        notificationRepository.deleteByUserId(userId);
+        log.info("Deleted notifications of removed user {}", userId);
+    }
 }

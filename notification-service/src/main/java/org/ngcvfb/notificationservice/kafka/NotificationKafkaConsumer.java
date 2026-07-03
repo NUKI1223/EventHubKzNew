@@ -8,6 +8,7 @@ import org.ngcvfb.eventhubkz.common.events.EventRegisteredEvent;
 import org.ngcvfb.eventhubkz.common.events.EventReminderEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
+import org.ngcvfb.eventhubkz.common.events.UserDeletedEvent;
 import org.ngcvfb.eventhubkz.common.events.UserRegisteredEvent;
 import org.ngcvfb.notificationservice.model.NotificationType;
 import org.ngcvfb.notificationservice.service.NotificationService;
@@ -219,6 +220,16 @@ public class NotificationKafkaConsumer {
             );
         } catch (Exception e) {
             log.error("Failed to create welcome notification: {}", e.getMessage(), e);
+        }
+    }
+
+    @KafkaListener(topics = "user.deleted", groupId = "notification-service-group")
+    public void handleUserDeleted(UserDeletedEvent event) {
+        log.info("Received user.deleted: {}", event.getUserId());
+        try {
+            notificationService.deleteAllForUser(event.getUserId());
+        } catch (Exception e) {
+            log.error("Failed to delete notifications for user: {}", event.getUserId(), e);
         }
     }
 }
