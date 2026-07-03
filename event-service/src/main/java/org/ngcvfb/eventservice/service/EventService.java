@@ -168,6 +168,16 @@ public class EventService {
         kafkaProducer.sendEventDeleted(EventDeletedEvent.create(id));
     }
 
+    @Transactional
+    public void deleteAllForUser(Long userId) {
+        List<Event> events = eventRepository.findByOrganizerId(userId);
+        log.info("Deleting {} events of removed user {}", events.size(), userId);
+        for (Event event : events) {
+            // deleteEvent эмитит event.deleted — поиск и регистрации почистятся сами
+            deleteEvent(event.getId(), userId, "ADMIN");
+        }
+    }
+
     // Редактировать/удалять мероприятие может только его организатор или администратор.
     private void requireEventOwnerOrAdmin(Event event, Long requesterId, String role) {
         boolean isAdmin = "ADMIN".equalsIgnoreCase(role);

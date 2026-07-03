@@ -20,4 +20,6 @@ public interface EventRequestRepository extends JpaRepository<EventRequest, Long
     Page<EventRequest> findByStatus(RequestStatus status, Pageable pageable);
 
     List<EventRequest> findByRequesterIdAndStatusOrderByCreatedAtDesc(Long requesterId, RequestStatus status);
+
+    void deleteByRequesterId(Long requesterId);
 }
