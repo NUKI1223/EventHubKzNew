@@ -53,6 +53,7 @@ flowchart LR
     REG -- "event.registered" --> K
     K --> SEARCH
     K --> NOTIF
+    K --> AUDIT[audit-service]
 
     EVENT --> PG[(PostgreSQL ×5)]
     SEARCH --> ES[(Elasticsearch)]
@@ -76,6 +77,7 @@ Every service registers in **Eureka** and is reachable only through the **Spring
 | notification-service | 8086 | In-app + email notifications, idempotent Kafka consumers |
 | tag-service | 8087 | Tag dictionary |
 | file-service | 8088 | Uploads to MinIO via presigned URLs |
+| audit-service | 8091 | Immutable audit trail of all domain events (admin journal) |
 
 ### Kafka topics
 
@@ -85,7 +87,9 @@ Every service registers in **Eureka** and is reachable only through the **Spring
 | `event.created` / `event.updated` / `event.deleted` | event-service | search-service, notification-service, registration-service |
 | `event.liked` | like-service | notification-service, event-service |
 | `event.registered` | registration-service | notification-service |
+| `event-request.created` | event-service | audit-service |
 | `event-request.reviewed` | event-service | notification-service |
+| `user.deleted` | user-service | event-service, like-service, registration-service, notification-service, audit-service |
 
 Consumers are **idempotent**: notifications are deduplicated by a deterministic key (user, type, related entity), so Kafka redeliveries and consumer restarts never produce duplicates. The search consumer batches messages and writes to Elasticsearch via the bulk API.
 
@@ -100,7 +104,7 @@ Consumers are **idempotent**: notifications are deduplicated by a deterministic 
 | AI | Google Gemini 2.5 Flash Lite |
 | Observability | Prometheus, Grafana (4 dashboards), Zipkin (distributed tracing), Micrometer |
 | Testing | JUnit 5, Mockito, Testcontainers (real PostgreSQL/Kafka/ES in tests), k6 |
-| Delivery | Docker Compose (23 containers), GitHub Actions CI |
+| Delivery | Docker Compose (24 containers), GitHub Actions CI |
 
 ## Performance
 
