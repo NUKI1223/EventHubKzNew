@@ -2,7 +2,7 @@
 
 **All IT events of Kazakhstan — in one place.**
 
-A full-stack event platform where communities publish meetups, hackathons and conferences, and attendees discover, register and check in — built as an 11-service Spring Cloud microservice system with an event-driven Kafka backbone, AI-assisted moderation and full observability.
+A full-stack event platform where communities publish meetups, hackathons and conferences, and attendees discover, register and check in — built as a 12-service Spring Cloud microservice system with an event-driven Kafka backbone, AI-assisted moderation and full observability.
 
 ![CI](https://github.com/NUKI1223/EventHubKzNew/actions/workflows/ci.yml/badge.svg)
 ![Java](https://img.shields.io/badge/Java-21-orange)
