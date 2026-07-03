@@ -3,11 +3,16 @@ package org.ngcvfb.userservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.dto.UserDTO;
+import org.ngcvfb.eventhubkz.common.events.UserDeletedEvent;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
+import org.ngcvfb.userservice.kafka.UserKafkaProducer;
+import org.ngcvfb.userservice.model.Role;
 import org.ngcvfb.userservice.model.User;
 import org.ngcvfb.userservice.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserKafkaProducer kafkaProducer;
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
@@ -107,12 +113,31 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User", "id", id);
+    public void deleteUser(Long id, Long requesterId, String requesterRole, String reason) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        boolean self = id.equals(requesterId);
+        if (!self && user.getRole() == Role.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Нельзя удалить другого администратора");
         }
+        String username = user.getUsername();
+        String email = user.getEmail();
         userRepository.deleteById(id);
-        log.info("User deleted: {}", id);
+        kafkaProducer.sendUserDeleted(
+                UserDeletedEvent.create(id, username, email, requesterId, reason));
+        log.info("User deleted: {} by {} (reason: {})", id, requesterId, reason);
+    }
+
+    // Админский список: email и роль включены — не использовать в публичных ответах.
+    public List<UserDTO> getAdminUserList(String q) {
+        List<User> users = (q == null || q.isBlank())
+                ? userRepository.findAll()
+                : userRepository.findAll().stream()
+                    .filter(u -> u.getUsername().toLowerCase().contains(q.toLowerCase())
+                              || u.getEmail().toLowerCase().contains(q.toLowerCase()))
+                    .toList();
+        return users.stream().map(this::mapToAdminDTO).toList();
     }
 
     public boolean existsByEmail(String email) {
@@ -167,6 +192,17 @@ public class UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .build();
+    }
+
+    // Только для GET /admin/list — единственное место, где публичный список получает email/role.
+    private UserDTO mapToAdminDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
     }
 }

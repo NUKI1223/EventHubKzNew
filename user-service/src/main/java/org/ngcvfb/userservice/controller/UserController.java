@@ -69,11 +69,22 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
             @PathVariable Long id,
+            @RequestParam(required = false) String reason,
             @RequestHeader("X-User-Id") Long requesterId,
             @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
         requireSelfOrAdmin(id, requesterId, role);
-        userService.deleteUser(id);
+        userService.deleteUser(id, requesterId, role, reason);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/admin/list")
+    public ResponseEntity<List<UserDTO>> getAdminUserList(
+            @RequestParam(required = false) String q,
+            @RequestHeader(value = "X-User-Role", defaultValue = "USER") String role) {
+        if (!"ADMIN".equalsIgnoreCase(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Только для администратора");
+        }
+        return ResponseEntity.ok(userService.getAdminUserList(q));
     }
 
     private void requireSelfOrAdmin(Long targetUserId, Long requesterId, String role) {
