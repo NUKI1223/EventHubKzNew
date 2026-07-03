@@ -151,6 +151,14 @@ spring:
           predicates:
             - Path=/api/tags/**
 
+        # Audit Service — admin-only journal (MUST precede the /api/admin/** rewrite route)
+        - id: audit-service-admin
+          uri: lb://AUDIT-SERVICE
+          predicates:
+            - Path=/api/admin/audit/**,/api/admin/audit
+          filters:
+            - name: AuthenticationFilter
+
         # Admin - Event Requests (routes to event-service)
         - id: admin-service
           uri: lb://EVENT-SERVICE

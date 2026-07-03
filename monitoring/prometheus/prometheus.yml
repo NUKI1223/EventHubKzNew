@@ -57,6 +57,13 @@ scrape_configs:
       - targets: ['registration-service:8089']
     scrape_interval: 10s
 
+  # Audit Service
+  - job_name: 'audit-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['audit-service:8091']
+    scrape_interval: 10s
+
   # Search Service
   - job_name: 'search-service'
     metrics_path: '/actuator/prometheus'
