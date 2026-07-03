@@ -81,7 +81,7 @@ const AdminUsers = () => {
                 <td>{u.email}</td>
                 <td>{u.role}</td>
                 <td>
-                  {u.role !== 'ADMIN' && u.id !== currentUserId && (
+                  {u.role !== 'ADMIN' && currentUserId != null && String(u.id) !== String(currentUserId) && (
                     <button className="adm-users__delete" onClick={() => setTarget(u)}>
                       {t('admin.usersDelete')}
                     </button>
