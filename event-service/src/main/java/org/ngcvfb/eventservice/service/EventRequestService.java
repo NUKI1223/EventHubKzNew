@@ -3,6 +3,7 @@ package org.ngcvfb.eventservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.dto.EventDTO;
+import org.ngcvfb.eventhubkz.common.events.EventRequestCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.exception.ResourceNotFoundException;
 import org.ngcvfb.eventservice.kafka.EventKafkaProducer;
@@ -75,6 +76,11 @@ public class EventRequestService {
         request.setStatus(RequestStatus.PENDING);
         EventRequest saved = eventRequestRepository.save(request);
         log.info("Created event request: {} by user {}", saved.getId(), saved.getRequesterId());
+
+        kafkaProducer.sendEventRequestCreated(EventRequestCreatedEvent.create(
+                saved.getId(), saved.getRequesterId(), saved.getRequesterEmail(),
+                saved.getTitle()));
+
         return saved;
     }
 

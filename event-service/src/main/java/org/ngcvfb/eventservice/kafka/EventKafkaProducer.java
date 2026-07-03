@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ngcvfb.eventhubkz.common.events.EventCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventDeletedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventReminderEvent;
+import org.ngcvfb.eventhubkz.common.events.EventRequestCreatedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventRequestReviewedEvent;
 import org.ngcvfb.eventhubkz.common.events.EventUpdatedEvent;
 import org.ngcvfb.eventhubkz.common.events.SupportMessageResolvedEvent;
@@ -20,6 +21,7 @@ public class EventKafkaProducer {
     private static final String TOPIC_EVENT_UPDATED = "event.updated";
     private static final String TOPIC_EVENT_DELETED = "event.deleted";
     private static final String TOPIC_EVENT_REQUEST_REVIEWED = "event-request.reviewed";
+    private static final String TOPIC_EVENT_REQUEST_CREATED = "event-request.created";
     private static final String TOPIC_SUPPORT_RESOLVED = "support.resolved";
     private static final String TOPIC_EVENT_REMINDER = "event.reminder";
 
@@ -43,6 +45,12 @@ public class EventKafkaProducer {
     public void sendEventRequestReviewed(EventRequestReviewedEvent event) {
         log.info("Sending event-request.reviewed: request={}, approved={}", event.getRequestId(), event.isApproved());
         kafkaTemplate.send(TOPIC_EVENT_REQUEST_REVIEWED, String.valueOf(event.getRequestId()), event);
+    }
+
+    public void sendEventRequestCreated(EventRequestCreatedEvent event) {
+        log.info("Sending event-request.created: requestId={}", event.getRequestId());
+        kafkaTemplate.send(TOPIC_EVENT_REQUEST_CREATED,
+                String.valueOf(event.getRequestId()), event);
     }
 
     public void sendSupportResolved(SupportMessageResolvedEvent event) {
