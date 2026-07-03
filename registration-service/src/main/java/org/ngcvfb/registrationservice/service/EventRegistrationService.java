@@ -10,6 +10,8 @@ import org.ngcvfb.registrationservice.kafka.RegistrationKafkaProducer;
 import org.ngcvfb.registrationservice.model.EventRegistration;
 import org.ngcvfb.registrationservice.model.RegistrationStatus;
 import org.ngcvfb.registrationservice.repository.EventRegistrationRepository;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,6 +35,7 @@ public class EventRegistrationService {
     private final RegistrationKafkaProducer kafkaProducer;
     private final EventClient eventClient;
     private final AnswerValidator answerValidator;
+    private final CacheManager cacheManager;
 
     public boolean isRegistered(Long userId, Long eventId) {
         return registrationRepository.existsByUserIdAndEventId(userId, eventId);
@@ -187,6 +190,17 @@ public class EventRegistrationService {
     public void deleteAllRegistrationsForEvent(Long eventId) {
         registrationRepository.deleteByEventId(eventId);
         log.info("Deleted all registrations for event {}", eventId);
+    }
+
+    @Transactional
+    public void deleteAllRegistrationsForUser(Long userId) {
+        List<EventRegistration> registrations = registrationRepository.findByUserId(userId);
+        registrationRepository.deleteByUserId(userId);
+        Cache cache = cacheManager.getCache("registrationCount");
+        if (cache != null) {
+            registrations.forEach(registration -> cache.evict(registration.getEventId()));
+        }
+        log.info("Deleted {} registrations of removed user {}", registrations.size(), userId);
     }
 
 
