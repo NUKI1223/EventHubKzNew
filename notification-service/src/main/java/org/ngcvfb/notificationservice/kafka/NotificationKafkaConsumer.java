@@ -228,6 +228,7 @@ public class NotificationKafkaConsumer {
         log.info("Received user.deleted: {}", event.getUserId());
         try {
             notificationService.deleteAllForUser(event.getUserId());
+            log.info("Deleted notifications for user: {}", event.getUserId());
         } catch (Exception e) {
             log.error("Failed to delete notifications for user: {}", event.getUserId(), e);
         }
