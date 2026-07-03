@@ -103,7 +103,7 @@ const AdminAuditLog = () => {
               ))}
             </tbody>
           </table>
-          <Pagination page={page} totalPages={totalPages} onChange={(p) => load(p)} total={total} />
+          <Pagination page={page} totalPages={totalPages} onChange={(p) => load(p)} total={total} pageSize={20} />
         </>
       )}
     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { EVENTS_PER_PAGE } from '../constants';
 
-const Pagination = ({ page, totalPages, onChange, total }) => {
+const Pagination = ({ page, totalPages, onChange, total, pageSize = EVENTS_PER_PAGE }) => {
   const { t } = useTranslation();
   if (totalPages <= 1) return null;
   return (
@@ -32,8 +32,8 @@ const Pagination = ({ page, totalPages, onChange, total }) => {
       </button>
       <span className="pagination__info">
         {t('common.pageRange', {
-          from: page * EVENTS_PER_PAGE + 1,
-          to: Math.min((page + 1) * EVENTS_PER_PAGE, total),
+          from: page * pageSize + 1,
+          to: Math.min((page + 1) * pageSize, total),
           total,
         })}
       </span>
