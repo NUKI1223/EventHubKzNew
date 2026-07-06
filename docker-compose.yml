@@ -44,6 +44,7 @@ services:
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET}
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
@@ -76,6 +77,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_PORT=${MAIL_PORT}
       - MAIL_USERNAME=${MAIL_USERNAME}
@@ -167,6 +169,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     depends_on:
@@ -228,6 +231,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       eureka-server:
@@ -261,6 +265,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       eureka-server:
@@ -532,6 +537,7 @@ services:
   redis:
     image: redis:6.2
     container_name: redis
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-}"]
     mem_limit: 256m
     ports:
       - "6380:6379"
