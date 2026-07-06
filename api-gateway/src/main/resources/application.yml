@@ -201,6 +201,10 @@ eureka:
   instance:
     prefer-ip-address: true
 
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
+
 security:
   jwt:
     # Должен совпадать с auth-service, иначе gateway не валидирует выданные им токены.
