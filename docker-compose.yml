@@ -43,6 +43,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET}
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - APP_CORS_ORIGINS=${APP_CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     depends_on:
       eureka-server:
         condition: service_healthy

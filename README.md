@@ -164,14 +164,18 @@ database stays on the internal network.
 2. Copy `.env.prod.example` → `.env.prod`, fill STRONG values, `chmod 600 .env.prod`.
    **Rotate** the three secrets that were briefly in git history: `JWT_SECRET`
    (`openssl rand -base64 32`), the Gmail app-password, and the Gemini API key.
-3. Build the frontend for same-origin API: `cd frontend && npx vite build` (with
-   `VITE_API_URL=/api`).
+3. Build the frontend: `cd frontend && VITE_API_URL=https://eventhub.kz npx vite build`
+   (use your `APP_DOMAIN`). `VITE_API_URL` must be the full origin (scheme+host),
+   not a path — call sites already prepend `/api` and `/auth`, so a value like
+   `/api` produces broken double-prefixed URLs (`/api/api/events`).
 4. Deploy:
    ```bash
    docker compose --env-file .env.prod \
      -f docker-compose.yml -f docker-compose.caddy.yml up -d --build
    ```
    Caddy obtains a Let's Encrypt certificate automatically on first request.
+   (`GRAFANA_PASSWORD` in `.env.prod` only applies if you also opt into the
+   `observability` profile — Grafana isn't started by this base command.)
 5. Verify with `scripts/prod-smoke.sh <domain>` (see below).
 
 Set 1 hardens network isolation, TLS, and infra credentials. Elasticsearch

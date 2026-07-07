@@ -18,6 +18,13 @@
 		reverse_proxy api-gateway:8080
 	}
 
+	# Public file storage (avatars, event images) → MinIO. handle_path strips
+	# the /files prefix, so MinIO sees /{bucket}/{key} — matches the anonymous
+	# "download" bucket policy and AWS_S3_PUBLIC_URL=https://<domain>/files.
+	handle_path /files/* {
+		reverse_proxy minio:9000
+	}
+
 	# Everything else → the built SPA, with client-side routing fallback.
 	handle {
 		root * /srv
