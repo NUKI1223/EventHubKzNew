@@ -13,7 +13,7 @@ ok()   { echo "  ✓ $*"; }
 bad()  { echo "  ✗ $*"; fail=1; }
 
 echo "== 1. Isolation: debug ports must NOT answer from the host =="
-for port in 8082 8091 8084 8089 8086 8088 8087 5434 9200 8090 3000 6380; do
+for port in 8761 8180 8082 8087 8085 8084 8089 8091 8086 8088 9100 9101 5437 5434 5435 5439 5436 9200 6380 2181 9092 29092 8090 9090 3000 9411; do
   if timeout 2 bash -c "</dev/tcp/${DOMAIN}/${port}" 2>/dev/null; then
     bad "port ${port} is reachable (should be closed)"
   else
@@ -22,23 +22,23 @@ for port in 8082 8091 8084 8089 8086 8088 8087 5434 9200 8090 3000 6380; do
 done
 
 echo "== 2. HTTP redirects to HTTPS =="
-code=$(curl -s -o /dev/null -w '%{http_code}' "http://${DOMAIN}/" || echo 000)
+code=$(curl --connect-timeout 5 --max-time 10 -s -o /dev/null -w '%{http_code}' "http://${DOMAIN}/" || echo 000)
 case "$code" in 301|302|308) ok "HTTP → HTTPS ($code)";; *) bad "expected redirect, got $code";; esac
 
 echo "== 3. HTTPS serves the SPA =="
-code=$(curl $CURL_TLS -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/")
+code=$(curl $CURL_TLS --connect-timeout 5 --max-time 10 -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/")
 [ "$code" = "200" ] && ok "SPA 200" || bad "SPA got $code"
 
 echo "== 4. Actuator blocked at the proxy =="
-code=$(curl $CURL_TLS -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/actuator/health")
+code=$(curl $CURL_TLS --connect-timeout 5 --max-time 10 -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/actuator/health")
 [ "$code" = "403" ] && ok "actuator 403" || bad "actuator got $code (expected 403)"
 
 echo "== 5. End-to-end: public catalog through Caddy =="
-code=$(curl $CURL_TLS -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/api/events?page=0&size=1")
+code=$(curl $CURL_TLS --connect-timeout 5 --max-time 10 -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/api/events?page=0&size=1")
 [ "$code" = "200" ] && ok "catalog 200" || bad "catalog got $code"
 
 echo "== 6. Security headers present =="
-hdrs=$(curl $CURL_TLS -sI "https://${DOMAIN}/")
+hdrs=$(curl $CURL_TLS --connect-timeout 5 --max-time 10 -sI "https://${DOMAIN}/")
 echo "$hdrs" | grep -qi "x-frame-options: DENY" && ok "X-Frame-Options" || bad "missing X-Frame-Options"
 echo "$hdrs" | grep -qi "x-content-type-options: nosniff" && ok "X-Content-Type-Options" || bad "missing X-Content-Type-Options"
 
