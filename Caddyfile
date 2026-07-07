@@ -1,0 +1,35 @@
+{$APP_DOMAIN} {
+	encode gzip
+
+	# Block the actuator surface at the proxy (fuller reduction is set 2).
+	# NOTE: must be a `handle` block (not a top-level `respond`) so it
+	# participates in the same mutually-exclusive, textual-order-matched
+	# handle chain as the routes below — otherwise the catch-all SPA
+	# handle{} below wins and /actuator/* falls through to 200.
+	handle /actuator/* {
+		respond 403
+	}
+
+	# API + auth → gateway over the internal network.
+	handle /api/* {
+		reverse_proxy api-gateway:8080
+	}
+	handle /auth/* {
+		reverse_proxy api-gateway:8080
+	}
+
+	# Everything else → the built SPA, with client-side routing fallback.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}

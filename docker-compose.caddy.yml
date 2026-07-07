@@ -1,0 +1,31 @@
+# Production overlay: adds Caddy (TLS reverse proxy + static SPA host).
+# Deploy: docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d
+# Requires: frontend built to ./frontend/dist and APP_DOMAIN set in .env.prod.
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/dist:/srv:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api-gateway
+    networks:
+      - eventhub-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+volumes:
+  caddy-data:
+  caddy-config:
