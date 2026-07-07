@@ -14,7 +14,10 @@ public class RateLimitConfig {
     static String clientIp(ServerWebExchange exchange) {
         String xff = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
         if (xff != null && !xff.isBlank()) {
-            return xff.split(",")[0].trim();
+            String first = xff.split(",")[0].trim();
+            if (!first.isEmpty()) {
+                return first;
+            }
         }
         var addr = exchange.getRequest().getRemoteAddress();
         if (addr != null && addr.getAddress() != null) {

@@ -37,6 +37,16 @@ class RateLimitConfigTest {
     }
 
     @Test
+    void ipResolverSkipsEmptyLeadingXffTokenAndFallsBack() {
+        var exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.post("/auth/login")
+                        .header("X-Forwarded-For", ",10.0.0.1")
+                        .remoteAddress(new java.net.InetSocketAddress("192.168.1.77", 12345)));
+        // empty leading token must be skipped → fall back to socket address, never ""
+        assertThat(ip.resolve(exchange).block()).isEqualTo("192.168.1.77");
+    }
+
+    @Test
     void userResolverUsesUserIdHeader() {
         var exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.post("/api/support/chat").header("X-User-Id", "42"));
