@@ -154,6 +154,31 @@ Useful flags:
 
 By default the stack runs in *lite* mode (~6 GB RAM, no monitoring containers) so it fits on a laptop.
 
+## Production deployment
+
+Local dev publishes debug ports to `127.0.0.1` via `docker-compose.override.yml`
+(auto-loaded). Production publishes **only** Caddy's 80/443 — every service and
+database stays on the internal network.
+
+1. Point your domain's A record at the server; set `APP_DOMAIN` in `.env.prod`.
+2. Copy `.env.prod.example` → `.env.prod`, fill STRONG values, `chmod 600 .env.prod`.
+   **Rotate** the three secrets that were briefly in git history: `JWT_SECRET`
+   (`openssl rand -base64 32`), the Gmail app-password, and the Gemini API key.
+3. Build the frontend for same-origin API: `cd frontend && npx vite build` (with
+   `VITE_API_URL=/api`).
+4. Deploy:
+   ```bash
+   docker compose --env-file .env.prod \
+     -f docker-compose.yml -f docker-compose.caddy.yml up -d --build
+   ```
+   Caddy obtains a Let's Encrypt certificate automatically on first request.
+5. Verify with `scripts/prod-smoke.sh <domain>` (see below).
+
+Set 1 hardens network isolation, TLS, and infra credentials. Elasticsearch
+`xpack.security` stays disabled by design — network isolation removes its
+exposure; revisit if ES ever leaves the internal network. Rate limiting, inbound
+`X-User-*` stripping, refresh-token revocation, and Flyway are tracked as set 2/3.
+
 ## Testing
 
 ```bash

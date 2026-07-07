@@ -16,4 +16,5 @@ backend/logs/
 node_modules/
 .env
 .env.local
+.env.prod
 .claude/
