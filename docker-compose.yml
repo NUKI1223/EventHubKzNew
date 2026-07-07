@@ -16,8 +16,6 @@ services:
       dockerfile: Dockerfile
     container_name: eureka-server
     mem_limit: 512m
-    ports:
-      - "8761:8761"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
     networks:
@@ -37,8 +35,6 @@ services:
       dockerfile: Dockerfile
     container_name: api-gateway
     mem_limit: 1g
-    ports:
-      - "8180:8080"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
@@ -103,8 +99,6 @@ services:
       dockerfile: Dockerfile
     container_name: user-service
     mem_limit: 512m
-    ports:
-      - "8082:8082"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -132,8 +126,6 @@ services:
       dockerfile: Dockerfile
     container_name: tag-service
     mem_limit: 512m
-    ports:
-      - "8087:8087"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -192,8 +184,6 @@ services:
       dockerfile: Dockerfile
     container_name: search-service
     mem_limit: 1g
-    ports:
-      - "8085:8085"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx512m -XX:+UseG1GC
       - SPRING_PROFILES_ACTIVE=docker
@@ -219,8 +209,6 @@ services:
       dockerfile: Dockerfile
     container_name: like-service
     mem_limit: 512m
-    ports:
-      - "8084:8084"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -253,8 +241,6 @@ services:
       dockerfile: Dockerfile
     container_name: registration-service
     mem_limit: 512m
-    ports:
-      - "8089:8089"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -287,8 +273,6 @@ services:
       dockerfile: Dockerfile
     container_name: audit-service
     mem_limit: 512m
-    ports:
-      - "8091:8091"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -316,8 +300,6 @@ services:
       dockerfile: Dockerfile
     container_name: notification-service
     mem_limit: 512m
-    ports:
-      - "8086:8086"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -349,8 +331,6 @@ services:
       dockerfile: Dockerfile
     container_name: file-service
     mem_limit: 512m
-    ports:
-      - "8088:8088"
     environment:
       - JAVA_TOOL_OPTIONS=-Xmx256m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=docker
@@ -380,9 +360,6 @@ services:
     environment:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${AWS_SECRET_KEY:-minioadmin123}
-    ports:
-      - "9100:9000"
-      - "9101:9001"
     volumes:
       - minio-data:/data
     networks:
@@ -426,8 +403,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - users-data:/var/lib/postgresql/data
-    ports:
-      - "5437:5432"
     networks:
       - eventhub-network
     logging: *default-logging
@@ -448,8 +423,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - events-data:/var/lib/postgresql/data
-    ports:
-      - "5434:5432"
     networks:
       - eventhub-network
     logging: *default-logging
@@ -470,8 +443,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - likes-data:/var/lib/postgresql/data
-    ports:
-      - "5435:5432"
     networks:
       - eventhub-network
     logging: *default-logging
@@ -487,8 +458,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - registrations-data:/var/lib/postgresql/data
-    ports:
-      - "5439:5432"
     networks:
       - eventhub-network
     logging: *default-logging
@@ -505,8 +474,6 @@ services:
     volumes:
       - notifications-data:/var/lib/postgresql/data
       - ./db-init/audit:/docker-entrypoint-initdb.d
-    ports:
-      - "5436:5432"
     networks:
       - eventhub-network
     logging: *default-logging
@@ -520,8 +487,6 @@ services:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms768m -Xmx768m
       - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
     volumes:
       - es-data:/usr/share/elasticsearch/data
     networks:
@@ -541,8 +506,6 @@ services:
     mem_limit: 256m
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-    ports:
-      - "6380:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -565,8 +528,6 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       KAFKA_HEAP_OPTS: "-Xmx256m"
-    ports:
-      - "2181:2181"
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-logs:/var/lib/zookeeper/log
@@ -581,9 +542,6 @@ services:
     mem_limit: 768m
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
-      - "29092:29092"
     environment:
       KAFKA_HEAP_OPTS: "-Xmx512m -Xms256m"
       KAFKA_BROKER_ID: 1
@@ -611,8 +569,6 @@ services:
     container_name: kafka-ui
     profiles: ["observability"]
     mem_limit: 384m
-    ports:
-      - "8090:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: eventhubkz
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
@@ -630,8 +586,6 @@ services:
     image: prom/prometheus:v2.47.0
     container_name: prometheus
     profiles: ["observability"]
-    ports:
-      - "9090:9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -648,8 +602,6 @@ services:
     image: grafana/grafana:10.1.0
     container_name: grafana
     profiles: ["observability"]
-    ports:
-      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
@@ -669,8 +621,6 @@ services:
     container_name: zipkin
     profiles: ["observability"]
     mem_limit: 384m
-    ports:
-      - "9411:9411"
     environment:
       - STORAGE_TYPE=mem
     networks:

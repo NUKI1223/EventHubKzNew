@@ -1,0 +1,53 @@
+# Local-dev port publishing. Docker Compose auto-loads this file on
+# `docker compose up`. Bound to 127.0.0.1 so debug ports never reach the LAN.
+# Production does NOT name this file — the base (docker-compose.yml) publishes
+# nothing; only Caddy (docker-compose.caddy.yml) exposes 80/443.
+services:
+  eureka-server:
+    ports: ["127.0.0.1:8761:8761"]
+  api-gateway:
+    ports: ["127.0.0.1:8180:8080"]
+  user-service:
+    ports: ["127.0.0.1:8082:8082"]
+  tag-service:
+    ports: ["127.0.0.1:8087:8087"]
+  search-service:
+    ports: ["127.0.0.1:8085:8085"]
+  like-service:
+    ports: ["127.0.0.1:8084:8084"]
+  registration-service:
+    ports: ["127.0.0.1:8089:8089"]
+  audit-service:
+    ports: ["127.0.0.1:8091:8091"]
+  notification-service:
+    ports: ["127.0.0.1:8086:8086"]
+  file-service:
+    ports: ["127.0.0.1:8088:8088"]
+  minio:
+    ports: ["127.0.0.1:9100:9000", "127.0.0.1:9101:9001"]
+  postgres-users:
+    ports: ["127.0.0.1:5437:5432"]
+  postgres-events:
+    ports: ["127.0.0.1:5434:5432"]
+  postgres-likes:
+    ports: ["127.0.0.1:5435:5432"]
+  postgres-registrations:
+    ports: ["127.0.0.1:5439:5432"]
+  postgres-notifications:
+    ports: ["127.0.0.1:5436:5432"]
+  elasticsearch:
+    ports: ["127.0.0.1:9200:9200"]
+  redis:
+    ports: ["127.0.0.1:6380:6379"]
+  zookeeper:
+    ports: ["127.0.0.1:2181:2181"]
+  kafka:
+    ports: ["127.0.0.1:9092:9092", "127.0.0.1:29092:29092"]
+  kafka-ui:
+    ports: ["127.0.0.1:8090:8080"]
+  prometheus:
+    ports: ["127.0.0.1:9090:9090"]
+  grafana:
+    ports: ["127.0.0.1:3000:3000"]
+  zipkin:
+    ports: ["127.0.0.1:9411:9411"]
