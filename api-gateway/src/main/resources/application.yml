@@ -17,6 +17,34 @@ spring:
         response-timeout: 30s   # let a queued (slow) login finish instead of 504
 
       routes:
+        # Auth - login/signup: rate limit per client IP (brute-force guard)
+        - id: auth-login-signup-rl
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/login,/auth/signup
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                redis-rate-limiter.requestedTokens: 1
+            - RewritePath=/auth/(?<segment>.*), /api/auth/${segment}
+
+        # Auth - resend: strict rate limit per IP (email-bomb guard)
+        - id: auth-resend-rl
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/resend
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 3
+                redis-rate-limiter.requestedTokens: 1
+            - RewritePath=/auth/(?<segment>.*), /api/auth/${segment}
+
         # Auth Service
         - id: auth-service
           uri: lb://AUTH-SERVICE
@@ -51,6 +79,25 @@ spring:
             - Path=/api/users/**
           filters:
             - name: AuthenticationFilter
+
+        # AI - tag suggestion: authenticated, rate limit per user (Gemini quota guard)
+        - id: ai-suggest-tags-rl
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/events/suggest-tags
+            - Method=POST
+          filters:
+            - name: AuthenticationFilter
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@userKeyResolver}"
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 5
+                redis-rate-limiter.requestedTokens: 1
+            - name: CircuitBreaker
+              args:
+                name: eventServiceCircuitBreaker
+                fallbackUri: forward:/fallback/events
 
         # Event Service - POST/PUT/DELETE (authenticated)
         - id: event-service-write
@@ -167,6 +214,21 @@ spring:
           filters:
             - RewritePath=/api/admin/(?<segment>.*), /api/event-requests/${segment}
             - name: AuthenticationFilter
+
+        # AI - support chat: authenticated, rate limit per user (Gemini quota guard)
+        - id: ai-support-chat-rl
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/support/chat
+            - Method=POST
+          filters:
+            - name: AuthenticationFilter
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@userKeyResolver}"
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 5
+                redis-rate-limiter.requestedTokens: 1
 
         # Support Messages (event-service)
         - id: support-service
