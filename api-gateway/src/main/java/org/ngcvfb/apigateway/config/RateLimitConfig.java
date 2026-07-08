@@ -3,6 +3,7 @@ package org.ngcvfb.apigateway.config;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +27,14 @@ public class RateLimitConfig {
         return "unknown";
     }
 
+    // @Primary: GatewayAutoConfiguration autowires a single default KeyResolver bean
+    // (used only if a route's RequestRateLimiter filter omits key-resolver); with two
+    // KeyResolver beans and no @Primary, context startup fails with a
+    // NoUniqueBeanDefinitionException. Every route in application.yml specifies its own
+    // key-resolver via SpEL, so this default is never actually applied — it just breaks
+    // the ambiguity for bean wiring. IP is the safer no-auth-required default.
     @Bean
+    @Primary
     public KeyResolver ipKeyResolver() {
         return exchange -> Mono.just(clientIp(exchange));
     }
