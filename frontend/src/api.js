@@ -1,4 +1,6 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import i18n from './i18n';
 
 function isTokenExpired(token) {
   try {
@@ -43,6 +45,9 @@ api.interceptors.response.use(
       if (window.location.pathname !== '/signin' && window.location.pathname !== '/signupnew') {
         window.location.href = '/signin';
       }
+    }
+    if (error.response && error.response.status === 429) {
+      toast.error(i18n.t('common.rateLimited'));
     }
     return Promise.reject(error);
   }

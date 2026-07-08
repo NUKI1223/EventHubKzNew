@@ -10,7 +10,8 @@
     "pageRange": "{{from}}–{{to}} из {{total}}",
     "actionFailed": "Не удалось выполнить действие",
     "actionUnavailable": "Действие недоступно",
-    "sessionExpired": "Сессия истекла, войдите снова"
+    "sessionExpired": "Сессия истекла, войдите снова",
+    "rateLimited": "Слишком много запросов, попробуйте позже"
   },
   "header": {
     "home": "Главная",

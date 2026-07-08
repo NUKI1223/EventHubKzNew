@@ -10,7 +10,8 @@
     "pageRange": "{{from}}–{{to}} / {{total}}",
     "actionFailed": "Әрекетті орындау мүмкін болмады",
     "actionUnavailable": "Әрекет қолжетімсіз",
-    "sessionExpired": "Сессия аяқталды, қайта кіріңіз"
+    "sessionExpired": "Сессия аяқталды, қайта кіріңіз",
+    "rateLimited": "Сұраныстар тым көп, сәл кейінірек көріңіз"
   },
   "header": {
     "home": "Басты бет",
