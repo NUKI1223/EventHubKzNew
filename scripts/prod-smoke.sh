@@ -42,5 +42,14 @@ hdrs=$(curl $CURL_TLS --connect-timeout 5 --max-time 10 -sI "https://${DOMAIN}/"
 echo "$hdrs" | grep -qi "x-frame-options: DENY" && ok "X-Frame-Options" || bad "missing X-Frame-Options"
 echo "$hdrs" | grep -qi "x-content-type-options: nosniff" && ok "X-Content-Type-Options" || bad "missing X-Content-Type-Options"
 
+echo "== 7. Rate limiting active (login burst yields 429) =="
+saw429=0
+for i in $(seq 1 25); do
+  code=$(curl $CURL_TLS --connect-timeout 5 --max-time 10 -s -o /dev/null -w '%{http_code}' \
+    -X POST "https://${DOMAIN}/auth/login" -H 'Content-Type: application/json' -d '{}')
+  [ "$code" = "429" ] && { saw429=1; break; }
+done
+[ "$saw429" = 1 ] && ok "rate limiter returned 429 under burst" || bad "no 429 seen in 25 login attempts"
+
 echo
 [ "$fail" = 0 ] && echo "ALL CHECKS PASSED" || { echo "SOME CHECKS FAILED"; exit 1; }
