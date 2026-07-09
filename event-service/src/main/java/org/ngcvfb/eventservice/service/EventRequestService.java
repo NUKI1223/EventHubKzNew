@@ -121,14 +121,18 @@ public class EventRequestService {
                 : approved.getRequesterEmail();
         eventService.createEvent(dto, approved.getRequesterId(), organizerEmail);
 
-        kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
-                approved.getId(),
-                approved.getRequesterId(),
-                approved.getRequesterEmail(),
-                approved.getTitle(),
-                true,
-                approved.getAdminComment()
-        ));
+        if (approved.getRequesterId() != null) {
+            kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
+                    approved.getId(),
+                    approved.getRequesterId(),
+                    approved.getRequesterEmail(),
+                    approved.getTitle(),
+                    true,
+                    approved.getAdminComment()
+            ));
+        } else {
+            log.info("Skipping reviewed-notification for organizer-less (AI_INGEST) request {}", approved.getId());
+        }
 
         log.info("Approved event request: {} by admin {}, event created from it", approved.getId(), adminId);
 
@@ -155,18 +159,18 @@ public class EventRequestService {
 
         EventRequest rejected = eventRequestRepository.save(request);
 
-        if (rejected.getRequesterId() == null) {
-            log.warn("Rejected request {} has no requesterId, organizer will not receive a notification",
-                    rejected.getId());
+        if (rejected.getRequesterId() != null) {
+            kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
+                    rejected.getId(),
+                    rejected.getRequesterId(),
+                    rejected.getRequesterEmail(),
+                    rejected.getTitle(),
+                    false,
+                    rejected.getAdminComment()
+            ));
+        } else {
+            log.info("Skipping reviewed-notification for organizer-less (AI_INGEST) request {}", rejected.getId());
         }
-        kafkaProducer.sendEventRequestReviewed(EventRequestReviewedEvent.create(
-                rejected.getId(),
-                rejected.getRequesterId(),
-                rejected.getRequesterEmail(),
-                rejected.getTitle(),
-                false,
-                rejected.getAdminComment()
-        ));
 
         log.info("Rejected event request: {} by admin {}, notify={}",
                 rejected.getId(), adminId, rejected.getRequesterId());
