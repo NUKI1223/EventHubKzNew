@@ -19,6 +19,8 @@ services:
     ports: ["127.0.0.1:8089:8089"]
   audit-service:
     ports: ["127.0.0.1:8091:8091"]
+  ingestion-service:
+    ports: ["127.0.0.1:8092:8092"]
   notification-service:
     ports: ["127.0.0.1:8086:8086"]
   file-service:

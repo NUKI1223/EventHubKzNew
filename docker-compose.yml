@@ -294,6 +294,30 @@ services:
       - eventhub-network
     logging: *default-logging
 
+  # Ingestion Service
+  ingestion-service:
+    build:
+      context: ./ingestion-service
+      dockerfile: Dockerfile
+    container_name: ingestion-service
+    mem_limit: 512m
+    environment:
+      - INGESTION_DB_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres-notifications:5432/ingestion_db
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    depends_on:
+      postgres-notifications:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - eventhub-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
   # Notification Service
   notification-service:
     build:
@@ -474,7 +498,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - notifications-data:/var/lib/postgresql/data
-      - ./db-init/audit:/docker-entrypoint-initdb.d
+      - ./db-init/audit/01-create-audit-db.sql:/docker-entrypoint-initdb.d/01-create-audit-db.sql
+      - ./db-init/ingestion/01-create-ingestion-db.sql:/docker-entrypoint-initdb.d/02-create-ingestion-db.sql
     networks:
       - eventhub-network
     logging: *default-logging
