@@ -81,11 +81,22 @@ public class EventRequest {
     @Column(name = "registration_type")
     private String registrationType;
 
-    @Column(name = "requester_id", nullable = false)
+    @Column(name = "requester_id")
     private Long requesterId;
 
     @Column(name = "requester_email")
     private String requesterEmail;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    @Builder.Default
+    private RequestSource source = RequestSource.MANUAL;
+
+    @Column(name = "source_url", length = 500)
+    private String sourceUrl;
+
+    @Column(name = "source_channel", length = 200)
+    private String sourceChannel;
 
     @Column(name = "contact_email")
     private String contactEmail;
@@ -110,5 +121,6 @@ public class EventRequest {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         status = RequestStatus.PENDING;
+        if (source == null) source = RequestSource.MANUAL;
     }
 }
