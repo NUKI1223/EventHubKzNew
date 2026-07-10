@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -22,4 +23,7 @@ public interface EventRequestRepository extends JpaRepository<EventRequest, Long
     List<EventRequest> findByRequesterIdAndStatusOrderByCreatedAtDesc(Long requesterId, RequestStatus status);
 
     void deleteByRequesterId(Long requesterId);
+
+    List<EventRequest> findByStatusAndTitleIgnoreCaseAndEventDateBetween(
+            RequestStatus status, String title, LocalDateTime from, LocalDateTime to);
 }

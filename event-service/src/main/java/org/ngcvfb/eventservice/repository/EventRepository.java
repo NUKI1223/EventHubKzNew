@@ -37,4 +37,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e FROM Event e ORDER BY e.likeCount DESC")
     Page<Event> findMostPopular(Pageable pageable);
+
+    List<Event> findByTitleIgnoreCaseAndEventDateBetween(String title, LocalDateTime from, LocalDateTime to);
 }
