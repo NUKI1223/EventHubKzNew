@@ -2,7 +2,7 @@
 
 **All IT events of Kazakhstan — in one place.**
 
-A full-stack event platform where communities publish meetups, hackathons and conferences, and attendees discover, register and check in — built as a 12-service Spring Cloud microservice system with an event-driven Kafka backbone, AI-assisted moderation and full observability.
+A full-stack event platform where communities publish meetups, hackathons and conferences, and attendees discover, register and check in — built as a 13-service polyglot microservice system (Spring Cloud + a Python ingestion service) with an event-driven Kafka backbone, an AI parser that seeds the catalog from public Telegram channels, AI-assisted moderation and full observability.
 
 ![CI](https://github.com/NUKI1223/EventHubKzNew/actions/workflows/ci.yml/badge.svg)
 ![Java](https://img.shields.io/badge/Java-21-orange)
@@ -55,11 +55,16 @@ flowchart LR
     K --> NOTIF
     K --> AUDIT[audit-service]
 
+    TG([Telegram t.me/s]) -. scrape .-> INGEST[ingestion-service]
+    INGEST -- "event.candidate.found" --> K
+    K --> EVENT
+
     EVENT --> PG[(PostgreSQL ×5)]
     SEARCH --> ES[(Elasticsearch)]
     LIKE --> RD[(Redis)]
     FILE --> S3[(MinIO)]
     EVENT -. Gemini API .-> AI([Google Gemini])
+    INGEST -. Gemini API .-> AI
 ```
 
 Every service registers in **Eureka** and is reachable only through the **Spring Cloud Gateway** (JWT check, circuit breakers, rate-aware routing; `auth-service` and `event-service` run as 2 load-balanced replicas). Services own their data (database-per-service, 5 PostgreSQL instances) and communicate asynchronously through Kafka.
@@ -78,6 +83,7 @@ Every service registers in **Eureka** and is reachable only through the **Spring
 | tag-service | 8087 | Tag dictionary |
 | file-service | 8088 | Uploads to MinIO via presigned URLs |
 | audit-service | 8091 | Immutable audit trail of all domain events (admin journal) |
+| ingestion-service | 8092 | AI parser (Python/FastAPI): reads public Telegram channels via the `t.me/s` web mirror, extracts structured events with Gemini, dedupes and feeds candidates into the moderation queue |
 
 ### Kafka topics
 
@@ -90,6 +96,7 @@ Every service registers in **Eureka** and is reachable only through the **Spring
 | `event-request.created` | event-service | audit-service |
 | `event-request.reviewed` | event-service | notification-service |
 | `user.deleted` | user-service | event-service, like-service, registration-service, notification-service, audit-service |
+| `event.candidate.found` | ingestion-service | event-service |
 
 Consumers are **idempotent**: notifications are deduplicated by a deterministic key (user, type, related entity), so Kafka redeliveries and consumer restarts never produce duplicates. The search consumer batches messages and writes to Elasticsearch via the bulk API.
 
@@ -98,13 +105,14 @@ Consumers are **idempotent**: notifications are deduplicated by a deterministic 
 | Layer | Technologies |
 |---|---|
 | Backend | Java 21, Spring Boot 3.4, Spring Cloud (Gateway, Eureka, OpenFeign, Resilience4j) |
+| Ingestion | Python 3.12, FastAPI, httpx + BeautifulSoup (Telegram `t.me/s` scraping), APScheduler, kafka-python |
 | Frontend | React 19, Vite, react-i18next |
 | Data | PostgreSQL ×5, Elasticsearch 8 (Russian analyzer), Redis, MinIO (S3) |
 | Messaging | Apache Kafka |
 | AI | Google Gemini 2.5 Flash Lite |
 | Observability | Prometheus, Grafana (4 dashboards), Zipkin (distributed tracing), Micrometer |
 | Testing | JUnit 5, Mockito, Testcontainers (real PostgreSQL/Kafka/ES in tests), k6 |
-| Delivery | Docker Compose (24 containers), GitHub Actions CI |
+| Delivery | Docker Compose (25 containers), GitHub Actions CI |
 
 ## Performance
 
