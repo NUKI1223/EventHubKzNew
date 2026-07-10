@@ -249,6 +249,14 @@ spring:
               args:
                 maxSize: 10MB
 
+        # Ingestion Service (admin-only; Python service reads X-User-Role, gateway injects it)
+        - id: ingestion-service
+          uri: http://ingestion-service:8092
+          predicates:
+            - Path=/api/ingestion/**
+          filters:
+            - name: AuthenticationFilter
+
       default-filters: []
 
   data:

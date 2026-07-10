@@ -13,6 +13,14 @@ class FakeRepo:
 def test_add_and_list_source():
     app.dependency_overrides[get_repo] = lambda: FakeRepo()
     c = TestClient(app)
-    r = c.post("/api/ingestion/sources", json={"name":"KZ","tmeUrl":"https://t.me/s/kz"})
+    r = c.post("/api/ingestion/sources", json={"name":"KZ","tmeUrl":"https://t.me/s/kz"},
+               headers={"X-User-Role":"ADMIN"})
     assert r.status_code == 201 and r.json()["name"] == "KZ"
+    app.dependency_overrides.clear()
+
+def test_non_admin_forbidden():
+    app.dependency_overrides[get_repo] = lambda: FakeRepo()
+    c = TestClient(app)
+    r = c.get("/api/ingestion/sources")  # no X-User-Role header
+    assert r.status_code == 403
     app.dependency_overrides.clear()

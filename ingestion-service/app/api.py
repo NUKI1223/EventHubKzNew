@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/api/ingestion")
+def require_admin(x_user_role: str = Header(default="")):
+    if x_user_role.upper() != "ADMIN":
+        raise HTTPException(status_code=403, detail="admin only")
+
+router = APIRouter(prefix="/api/ingestion", dependencies=[Depends(require_admin)])
 
 class SourceIn(BaseModel):
     name: str
