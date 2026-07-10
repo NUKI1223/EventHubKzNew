@@ -14,7 +14,7 @@ class FakeRepo:
 
 class FakeProducer:
     def __init__(self): self.sent=[]
-    def send(self, topic, key, value): self.sent.append(value)
+    def send(self, topic, key, value, headers=None): self.sent.append(value)
     def flush(self): pass
 
 def test_sweep_publishes_valid_event(monkeypatch):
