@@ -49,3 +49,17 @@ def test_seen_post_skipped(monkeypatch):
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch,
                                    extractor=lambda *a, **k: None))
     assert counts["candidates_published"] == 0
+
+
+def test_transient_extract_error_leaves_post_unseen(monkeypatch):
+    from app import pipeline
+    async def fake_fetch(url, timeout): return "<html/>"
+    def fake_parse(html, channel):
+        from app.telegram import Post
+        return [Post(ref="kz/10", text="Митап по Go 15 сентября 2026 Алматы регистрация", date=None)]
+    def boom(*a, **k): raise RuntimeError("429 quota")
+    monkeypatch.setattr(pipeline, "parse_posts", fake_parse)
+    repo, prod = FakeRepo(), FakeProducer()
+    class S: fetch_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
+    asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch, extractor=boom))
+    assert "kz/10" not in repo.seen  # transient failure must not burn the post

@@ -26,7 +26,9 @@ class Candidate:
     external_link: str | None
 
 def _default_post(url, headers, json):  # noqa: A002
-    return httpx.post(url, headers=headers, json=json, timeout=30).json()
+    r = httpx.post(url, headers=headers, json=json, timeout=30)
+    r.raise_for_status()  # 429/5xx raise → treated as transient by the caller (post retried)
+    return r.json()
 
 def extract_event(text, api_key, model, http_post=_default_post) -> Candidate | None:
     body = {
@@ -35,8 +37,11 @@ def extract_event(text, api_key, model, http_post=_default_post) -> Candidate | 
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.1,
                              "maxOutputTokens": 800, "thinkingConfig": {"thinkingBudget": 0}},
     }
+    # A transient failure (network, HTTP 429 quota, 5xx) propagates so the pipeline can
+    # retry the post on a later sweep instead of burning it. Only a *reached* response
+    # that is unparseable / not-an-event returns None (a real "skip this post" decision).
+    resp = http_post(API_URL.format(model=model), {"x-goog-api-key": api_key}, body)
     try:
-        resp = http_post(API_URL.format(model=model), {"x-goog-api-key": api_key}, body)
         raw = resp["candidates"][0]["content"]["parts"][0]["text"]
         data = json.loads(raw)
     except Exception:
@@ -46,6 +51,8 @@ def extract_event(text, api_key, model, http_post=_default_post) -> Candidate | 
     ed = data.get("eventDate")
     try:
         event_date = datetime.fromisoformat(ed) if ed else None
+        if event_date is not None and event_date.tzinfo is not None:
+            event_date = event_date.replace(tzinfo=None)  # EventRequest.eventDate is naive LocalDateTime
     except (TypeError, ValueError):
         event_date = None
     tags = data.get("tags") or []

@@ -31,9 +31,9 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, ex
                     counts["passed_prefilter"] += 1
                     try:
                         cand = extractor(post.text, settings.gemini_api_key, settings.gemini_model)
-                    except Exception as e:  # per-post failure never aborts the run
-                        log.warning("extract failed for %s: %s", post.ref, e)
-                        cand = None
+                    except Exception as e:  # transient (network/quota/5xx): retry next sweep, don't burn the post
+                        log.warning("extract failed for %s: %s — will retry next sweep", post.ref, e)
+                        continue  # skip mark_post_seen so the post is reprocessed later
                     if cand is not None:
                         counts["extracted"] += 1
                         payload = to_valid_candidate(cand, post.text)
