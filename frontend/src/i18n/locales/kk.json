@@ -456,7 +456,20 @@
     "usersDeleteConfirm": "Біржола жою",
     "usersDeleteCancel": "Болдырмау",
     "usersDeleteSuccess": "Пайдаланушы жойылды",
-    "usersDeleteError": "Пайдаланушыны жою мүмкін болмады"
+    "usersDeleteError": "Пайдаланушыны жою мүмкін болмады",
+    "tabSources": "Дереккөздер (парсер)",
+    "sourcesAdd": "Арна қосу",
+    "sourcesName": "Атауы",
+    "sourcesUrl": "Сілтеме t.me/s/…",
+    "sourcesEnabled": "Белсенді",
+    "sourcesRun": "Парсерді іске қосу",
+    "sourcesRunning": "Жинау жүріп жатыр…",
+    "sourcesLastRun": "Соңғы іске қосу",
+    "sourcesFound": "кандидат табылды",
+    "sourcesEmpty": "Әзірге дереккөздер жоқ",
+    "sourcesLoadError": "Дереккөздерді жүктеу мүмкін болмады",
+    "reqFromParser": "Парсер тапты",
+    "reqSourceLink": "Түпнұсқа посты"
   },
   "auth": {
     "signInTitle": "Кіру — EventHub.kz",

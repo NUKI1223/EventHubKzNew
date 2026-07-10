@@ -3,6 +3,7 @@ import AdminEventRequests from './AdminEventRequests';
 import AdminSupportMessages from './AdminSupportMessages';
 import AdminUsers from './AdminUsers';
 import AdminAuditLog from './AdminAuditLog';
+import AdminIngestionSources from './AdminIngestionSources';
 import { useTranslation } from 'react-i18next';
 import '../css/AdminDashboard.css';
 
@@ -11,6 +12,7 @@ const TABS = [
   { key: 'support',  labelKey: 'admin.tabSupport' },
   { key: 'users',    labelKey: 'admin.tabUsers' },
   { key: 'audit',    labelKey: 'admin.tabAudit' },
+  { key: 'sources',  labelKey: 'admin.tabSources' },
 ];
 
 const AdminDashboard = () => {
@@ -43,6 +45,7 @@ const AdminDashboard = () => {
       {tab === 'support' && <AdminSupportMessages />}
       {tab === 'users' && <AdminUsers />}
       {tab === 'audit' && <AdminAuditLog />}
+      {tab === 'sources' && <AdminIngestionSources />}
     </div>
   );
 };

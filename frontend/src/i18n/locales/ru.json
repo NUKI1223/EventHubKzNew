@@ -456,7 +456,20 @@
     "usersDeleteConfirm": "Удалить навсегда",
     "usersDeleteCancel": "Отмена",
     "usersDeleteSuccess": "Пользователь удалён",
-    "usersDeleteError": "Не удалось удалить пользователя"
+    "usersDeleteError": "Не удалось удалить пользователя",
+    "tabSources": "Источники (парсер)",
+    "sourcesAdd": "Добавить канал",
+    "sourcesName": "Название",
+    "sourcesUrl": "Ссылка t.me/s/…",
+    "sourcesEnabled": "Активен",
+    "sourcesRun": "Запустить парсер",
+    "sourcesRunning": "Идёт сбор…",
+    "sourcesLastRun": "Последний запуск",
+    "sourcesFound": "найдено кандидатов",
+    "sourcesEmpty": "Источников пока нет",
+    "sourcesLoadError": "Не удалось загрузить источники",
+    "reqFromParser": "Найдено парсером",
+    "reqSourceLink": "Оригинал поста"
   },
   "auth": {
     "signInTitle": "Войти — EventHub.kz",

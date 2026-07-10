@@ -115,7 +115,12 @@ const AdminEventRequests = () => {
           {eventRequests.map(request => (
             <div key={request.id} className="adm__card">
               <div className="adm__card-hdr">
-                <div className="adm__card-title">{request.title}</div>
+                <div className="adm__card-title">
+                  {request.title}
+                  {request.source === 'AI_INGEST' && (
+                    <span className="adm__badge adm__badge--ai">{t('admin.reqFromParser')}</span>
+                  )}
+                </div>
                 <span className={`adm__status adm__status--${statusMod[request.status] || 'pending'}`}>
                   {statusLabelKey[request.status] ? t(statusLabelKey[request.status]) : request.status}
                 </span>
@@ -178,6 +183,17 @@ const AdminEventRequests = () => {
                       <span className="adm__meta-value">
                         <a href={request.externalLink} target="_blank" rel="noopener noreferrer">
                           {t('admin.openLink')}
+                        </a>
+                      </span>
+                    </div>
+                  )}
+
+                  {request.sourceUrl && (
+                    <div className="adm__meta-row">
+                      <span className="adm__meta-label">{t('admin.reqSourceLink')}</span>
+                      <span className="adm__meta-value">
+                        <a href={request.sourceUrl} target="_blank" rel="noreferrer">
+                          {request.sourceChannel || t('admin.reqSourceLink')}
                         </a>
                       </span>
                     </div>
