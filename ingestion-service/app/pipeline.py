@@ -29,10 +29,15 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, ex
                         repo.mark_post_seen(src.id, post.ref)
                         continue
                     counts["passed_prefilter"] += 1
+                    transient = False
                     try:
                         cand = extractor(post.text, settings.gemini_api_key, settings.gemini_model)
                     except Exception as e:  # transient (network/quota/5xx): retry next sweep, don't burn the post
                         log.warning("extract failed for %s: %s — will retry next sweep", post.ref, e)
+                        cand, transient = None, True
+                    # Throttle Gemini calls to respect the free-tier per-minute rate limit.
+                    await asyncio.sleep(settings.gemini_delay_seconds)
+                    if transient:
                         continue  # skip mark_post_seen so the post is reprocessed later
                     if cand is not None:
                         counts["extracted"] += 1

@@ -30,7 +30,7 @@ def test_sweep_publishes_valid_event(monkeypatch):
                          datetime(2026,9,15,18), "Алматы","SmartPoint",False,["backend"],None)
     monkeypatch.setattr(pipeline, "parse_posts", fake_parse)
     repo, prod = FakeRepo(), FakeProducer()
-    class S: fetch_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
+    class S: fetch_delay_seconds=0; gemini_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch, extractor=fake_extract))
     assert counts["candidates_published"] == 1
     assert prod.sent[0]["title"] == "Go Meetup"
@@ -45,7 +45,7 @@ def test_seen_post_skipped(monkeypatch):
         return [Post(ref="kz/10", text="x", date=None)]
     monkeypatch.setattr(pipeline, "parse_posts", fake_parse)
     repo, prod = FakeRepo(), FakeProducer(); repo.seen.add("kz/10")
-    class S: fetch_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
+    class S: fetch_delay_seconds=0; gemini_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch,
                                    extractor=lambda *a, **k: None))
     assert counts["candidates_published"] == 0
@@ -60,6 +60,6 @@ def test_transient_extract_error_leaves_post_unseen(monkeypatch):
     def boom(*a, **k): raise RuntimeError("429 quota")
     monkeypatch.setattr(pipeline, "parse_posts", fake_parse)
     repo, prod = FakeRepo(), FakeProducer()
-    class S: fetch_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
+    class S: fetch_delay_seconds=0; gemini_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
     asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch, extractor=boom))
     assert "kz/10" not in repo.seen  # transient failure must not burn the post

@@ -13,9 +13,18 @@ class FakeRepo:
 def test_add_and_list_source():
     app.dependency_overrides[get_repo] = lambda: FakeRepo()
     c = TestClient(app)
-    r = c.post("/api/ingestion/sources", json={"name":"KZ","tmeUrl":"https://t.me/s/kz"},
+    r = c.post("/api/ingestion/sources", json={"name":"KZ","tmeUrl":"t.me/kzdev"},
                headers={"X-User-Role":"ADMIN"})
     assert r.status_code == 201 and r.json()["name"] == "KZ"
+    assert r.json()["tme_url"] == "https://t.me/s/kzdev"  # normalized to web-mirror URL
+    app.dependency_overrides.clear()
+
+def test_add_invalid_url_rejected():
+    app.dependency_overrides[get_repo] = lambda: FakeRepo()
+    c = TestClient(app)
+    r = c.post("/api/ingestion/sources", json={"name":"bad","tmeUrl":"https://example.com/foo"},
+               headers={"X-User-Role":"ADMIN"})
+    assert r.status_code == 400
     app.dependency_overrides.clear()
 
 def test_non_admin_forbidden():

@@ -35,7 +35,7 @@ const AdminIngestionSources = () => {
     if (!name.trim() || !url.trim()) return;
     try { await api.post('/api/ingestion/sources', { name: name.trim(), tmeUrl: url.trim() });
       setName(''); setUrl(''); load(); }
-    catch { toast.error(t('admin.sourcesLoadError')); }
+    catch (err) { toast.error(err?.response?.data?.detail || t('admin.sourcesInvalidUrl')); }
   };
 
   const toggle = async (s) => {
@@ -45,8 +45,8 @@ const AdminIngestionSources = () => {
 
   const run = async () => {
     setRunning(true);
-    try { const r = await api.post('/api/ingestion/run');
-      toast.success(`${t('admin.sourcesFound')}: ${r.data.candidates_published ?? 0}`); load(); }
+    try { await api.post('/api/ingestion/run');
+      toast.success(t('admin.sourcesRunStarted')); }
     catch { toast.error(t('admin.sourcesLoadError')); }
     finally { setRunning(false); }
   };

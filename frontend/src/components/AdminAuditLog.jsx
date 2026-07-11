@@ -60,20 +60,20 @@ const AdminAuditLog = () => {
 
   return (
     <div className="adm-audit">
-      <div className="adm-audit__filters">
+      <form className="adm-audit__filters" onSubmit={e => { e.preventDefault(); load(0); }}>
         <select value={action} onChange={e => setAction(e.target.value)} aria-label={t('admin.auditColAction')}>
           <option value="">{t('admin.auditFilterAction')}</option>
           {ACTIONS.map(a => <option key={a} value={a}>{t(`admin.auditAction_${a}`)}</option>)}
         </select>
-        <input type="number" value={actorId} onChange={e => setActorId(e.target.value)}
+        <input type="number" min="1" value={actorId} onChange={e => setActorId(e.target.value)}
                placeholder={t('admin.auditFilterActor')} />
         <input type="date" value={from} onChange={e => setFrom(e.target.value)}
                aria-label={t('admin.auditFilterFrom')} />
         <input type="date" value={to} onChange={e => setTo(e.target.value)}
                aria-label={t('admin.auditFilterTo')} />
-        <button onClick={() => load(0)}>{t('admin.auditApply')}</button>
-        <button onClick={resetFilters}>{t('admin.auditReset')}</button>
-      </div>
+        <button type="submit">{t('admin.auditApply')}</button>
+        <button type="button" onClick={resetFilters}>{t('admin.auditReset')}</button>
+      </form>
 
       {loading ? <Skeleton /> : rows.length === 0 ? (
         <EmptyState icon="inbox" title={t('admin.auditEmpty')} />

@@ -514,6 +514,15 @@
   cursor: not-allowed;
 }
 
+.pagination__ellipsis {
+  display: inline-flex;
+  align-items: flex-end;
+  height: 36px;
+  padding: 0 4px;
+  color: var(--text-muted, #888);
+  user-select: none;
+}
+
 .pagination__info {
   font-size: 13px;
   color: var(--ink-400);
