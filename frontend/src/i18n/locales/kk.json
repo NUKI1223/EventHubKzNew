@@ -471,6 +471,12 @@
     "sourcesInvalidUrl": "Жарамсыз Telegram-арна сілтемесі (мысалы: https://t.me/s/durov)",
     "sourcesRunStarted": "Жинау басталды — нәтиже соңғы іске қосу мәртебесінде көрінеді",
     "sourcesRunStats": "посттар алынды {{fetched}}, сүзгіден өтті {{filtered}}, оқиға шығарылды {{extracted}}, кандидат қосылды {{published}}",
+    "sourcesReasonRateLimited": "⚠ ЖИ сұраныс лимиті таусылды: {{n}} пост кейінге қалдырылды — жинауды кейінірек қайталаңыз",
+    "sourcesReasonAiError": "ЖИ уақытша қолжетімсіз: {{n}} пост кейінге қалдырылды (келесі жинауда қайталанады)",
+    "sourcesReasonPast": "Тек өткен іс-шаралар: {{n}} (күндері өтіп кеткен)",
+    "sourcesReasonInvalid": "Тексеруден өтпеді: {{n}} (күні/орны/сипаттамасы жоқ)",
+    "sourcesReasonSource": "Дереккөз қолжетімсіз: {{err}}",
+    "sourcesReasonPublished": "✓ Модерация кезегіне қосылды: {{n}}",
     "reqFromParser": "Парсер тапты",
     "reqSourceLink": "Түпнұсқа посты"
   },

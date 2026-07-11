@@ -471,6 +471,12 @@
     "sourcesInvalidUrl": "Некорректная ссылка на Telegram-канал (пример: https://t.me/s/durov)",
     "sourcesRunStarted": "Сбор запущен — результат появится в статусе последнего запуска",
     "sourcesRunStats": "получено постов {{fetched}}, прошло фильтр {{filtered}}, извлечено событий {{extracted}}, добавлено кандидатов {{published}}",
+    "sourcesReasonRateLimited": "⚠ Лимит ИИ-запросов исчерпан: {{n}} постов отложено — повторите сбор позже",
+    "sourcesReasonAiError": "ИИ временно недоступен: {{n}} постов отложено (повторятся в следующем сборе)",
+    "sourcesReasonPast": "Только прошедшие мероприятия: {{n}} (даты уже прошли)",
+    "sourcesReasonInvalid": "Не прошло проверку: {{n}} (нет даты/локации/описания)",
+    "sourcesReasonSource": "Источник недоступен: {{err}}",
+    "sourcesReasonPublished": "✓ Добавлено в очередь модерации: {{n}}",
     "reqFromParser": "Найдено парсером",
     "reqSourceLink": "Оригинал поста"
   },

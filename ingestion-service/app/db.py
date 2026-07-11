@@ -27,8 +27,21 @@ CREATE TABLE IF NOT EXISTS ingestion_runs (
     passed_prefilter INT DEFAULT 0,
     extracted INT DEFAULT 0,
     candidates_published INT DEFAULT 0,
+    gemini_rate_limited INT DEFAULT 0,
+    gemini_errors INT DEFAULT 0,
+    dropped_past INT DEFAULT 0,
+    dropped_invalid INT DEFAULT 0,
     error TEXT
 );
+"""
+
+# Idempotent self-migration for the per-run breakdown columns on tables that
+# predate them (nullable-with-default adds are safe on populated tables).
+MIGRATIONS = """
+ALTER TABLE ingestion_runs ADD COLUMN IF NOT EXISTS gemini_rate_limited INT DEFAULT 0;
+ALTER TABLE ingestion_runs ADD COLUMN IF NOT EXISTS gemini_errors INT DEFAULT 0;
+ALTER TABLE ingestion_runs ADD COLUMN IF NOT EXISTS dropped_past INT DEFAULT 0;
+ALTER TABLE ingestion_runs ADD COLUMN IF NOT EXISTS dropped_invalid INT DEFAULT 0;
 """
 
 def connect(dsn: str) -> psycopg.Connection:
@@ -37,3 +50,4 @@ def connect(dsn: str) -> psycopg.Connection:
 def create_schema(conn: psycopg.Connection) -> None:
     with conn.cursor() as cur:
         cur.execute(SCHEMA)
+        cur.execute(MIGRATIONS)

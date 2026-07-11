@@ -20,4 +20,8 @@ class Run:
     passed_prefilter: int
     extracted: int
     candidates_published: int
+    gemini_rate_limited: int
+    gemini_errors: int
+    dropped_past: int
+    dropped_invalid: int
     error: str | None

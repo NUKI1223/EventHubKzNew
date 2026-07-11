@@ -75,18 +75,47 @@ const AdminIngestionSources = () => {
         </button>
       </form>
       {status && status.trigger && (
-        <p className="adm-sources__status">
-          <strong>{t('admin.sourcesLastRun')}:</strong>{' '}
-          {status.finished_at
-            ? t('admin.sourcesRunStats', {
-                fetched: status.posts_fetched ?? 0,
-                filtered: status.passed_prefilter ?? 0,
-                extracted: status.extracted ?? 0,
-                published: status.candidates_published ?? 0,
-              })
-            : t('admin.sourcesRunning')}
-          {status.error && <span className="adm-sources__err"> · {status.error}</span>}
-        </p>
+        <div className="adm-sources__status">
+          <div className="adm-sources__status-line">
+            <strong>{t('admin.sourcesLastRun')}:</strong>{' '}
+            {status.finished_at
+              ? t('admin.sourcesRunStats', {
+                  fetched: status.posts_fetched ?? 0,
+                  filtered: status.passed_prefilter ?? 0,
+                  extracted: status.extracted ?? 0,
+                  published: status.candidates_published ?? 0,
+                })
+              : t('admin.sourcesRunning')}
+          </div>
+          {status.finished_at && (
+            <ul className="adm-sources__reasons">
+              {status.gemini_rate_limited > 0 && (
+                <li className="adm-sources__reason adm-sources__reason--warn">
+                  {t('admin.sourcesReasonRateLimited', { n: status.gemini_rate_limited })}
+                </li>
+              )}
+              {status.gemini_errors > 0 && (
+                <li className="adm-sources__reason">{t('admin.sourcesReasonAiError', { n: status.gemini_errors })}</li>
+              )}
+              {status.dropped_past > 0 && (
+                <li className="adm-sources__reason">{t('admin.sourcesReasonPast', { n: status.dropped_past })}</li>
+              )}
+              {status.dropped_invalid > 0 && (
+                <li className="adm-sources__reason">{t('admin.sourcesReasonInvalid', { n: status.dropped_invalid })}</li>
+              )}
+              {status.error && (
+                <li className="adm-sources__reason adm-sources__reason--warn">
+                  {t('admin.sourcesReasonSource', { err: status.error })}
+                </li>
+              )}
+              {status.candidates_published > 0 && (
+                <li className="adm-sources__reason adm-sources__reason--ok">
+                  {t('admin.sourcesReasonPublished', { n: status.candidates_published })}
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
       )}
       {loading ? <Skeleton /> : sources.length === 0 ? (
         <EmptyState icon="inbox" title={t('admin.sourcesEmpty')} />

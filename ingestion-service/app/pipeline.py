@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime
 from app.telegram import fetch_channel, parse_posts
 from app.prefilter import looks_like_event
 from app.extractor import extract_event
@@ -10,7 +11,8 @@ log = logging.getLogger("pipeline")
 
 async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, extractor=extract_event):
     run_id = repo.start_run(trigger)
-    counts = dict(sources_swept=0, posts_fetched=0, passed_prefilter=0, extracted=0, candidates_published=0)
+    counts = dict(sources_swept=0, posts_fetched=0, passed_prefilter=0, extracted=0, candidates_published=0,
+                  gemini_rate_limited=0, gemini_errors=0, dropped_past=0, dropped_invalid=0)
     error = None
     try:
         for src in repo.list_sources(enabled_only=True):
@@ -33,6 +35,11 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, ex
                     try:
                         cand = extractor(post.text, settings.gemini_api_key, settings.gemini_model)
                     except Exception as e:  # transient (network/quota/5xx): retry next sweep, don't burn the post
+                        status = getattr(getattr(e, "response", None), "status_code", None)
+                        if status == 429:
+                            counts["gemini_rate_limited"] += 1  # AI quota / per-minute limit hit
+                        else:
+                            counts["gemini_errors"] += 1
                         log.warning("extract failed for %s: %s — will retry next sweep", post.ref, e)
                         cand, transient = None, True
                     # Throttle Gemini calls to respect the free-tier per-minute rate limit.
@@ -47,6 +54,10 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, ex
                             payload["sourceUrl"] = f"https://t.me/{post.ref}"
                             publish_candidate(producer, payload)
                             counts["candidates_published"] += 1
+                        elif cand.event_date is None or cand.event_date <= datetime.now():
+                            counts["dropped_past"] += 1   # extracted but date is past / missing
+                        else:
+                            counts["dropped_invalid"] += 1  # extracted but failed other constraints
                     repo.mark_post_seen(src.id, post.ref)
                     await asyncio.sleep(0)  # cooperative
                 if newest_ref:
