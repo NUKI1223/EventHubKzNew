@@ -4,13 +4,15 @@ from app.models import Source
 
 class FakeRepo:
     def __init__(self):
-        self.seen=set(); self.published=[]; self.runs=[]; self.last={}
+        self.seen=set(); self.published=[]; self.runs=[]; self.last={}; self.processed=[]
     def start_run(self,t): self.runs.append(t); return 1
     def list_sources(self, enabled_only=False): return [Source(1,"KZ","https://t.me/s/kz",True,None)]
     def is_post_seen(self,sid,ref): return ref in self.seen
     def mark_post_seen(self,sid,ref): self.seen.add(ref)
     def update_last_seen(self,sid,ref): self.last[sid]=ref
     def finish_run(self, rid, **c): self.finished=c
+    def record_processed(self, run_id, source_id, channel, post_ref, post_url, stage, **k):
+        self.processed.append({"ref": post_ref, "stage": stage, **k})
 
 class FakeProducer:
     def __init__(self): self.sent=[]
@@ -98,3 +100,28 @@ def test_past_event_counted_dropped_past(monkeypatch):
     class S: fetch_delay_seconds=0; gemini_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch, extractor=past_extract))
     assert counts["extracted"] == 1 and counts["candidates_published"] == 0 and counts["dropped_past"] == 1
+
+
+def test_records_per_post_stages(monkeypatch):
+    from app import pipeline
+    from app.extractor import Candidate
+    from datetime import datetime, timedelta
+    async def fake_fetch(url, timeout): return "<html/>"
+    def fake_parse(html, channel):
+        from app.telegram import Post
+        return [
+            Post(ref="kz/1", text="Скидка 50% купи сейчас", date=None),                       # prefilter reject
+            Post(ref="kz/2", text="Митап по Go 20 декабря 2099 Алматы регистрация", date=None), # published
+        ]
+    def fake_extract(text, key, model, http_post=None):
+        return Candidate("Go Meetup","short desc here","full description long enough here",
+                         datetime.now()+timedelta(days=20), "Алматы","Astana Hub",False,[],None)
+    monkeypatch.setattr(pipeline, "parse_posts", fake_parse)
+    repo, prod = FakeRepo(), FakeProducer()
+    class S: fetch_delay_seconds=0; gemini_delay_seconds=0; http_timeout_seconds=5; gemini_api_key="k"; gemini_model="m"
+    asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=fake_fetch, extractor=fake_extract))
+    stages = {p["ref"]: p["stage"] for p in repo.processed}
+    assert stages["kz/1"] == "PREFILTER_REJECTED"
+    assert stages["kz/2"] == "PUBLISHED"
+    published = next(p for p in repo.processed if p["ref"] == "kz/2")
+    assert published["title"] == "Go Meetup"

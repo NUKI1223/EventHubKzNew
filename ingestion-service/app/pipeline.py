@@ -9,6 +9,12 @@ from app.producer import publish_candidate
 
 log = logging.getLogger("pipeline")
 
+def _cand_fields(cand):
+    if cand is None:
+        return (None, None, None, None)
+    ed = cand.event_date.isoformat() if cand.event_date else None
+    return (cand.title, ed, cand.city, cand.location)
+
 async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, extractor=extract_event):
     run_id = repo.start_run(trigger)
     counts = dict(sources_swept=0, posts_fetched=0, passed_prefilter=0, extracted=0, candidates_published=0,
@@ -27,7 +33,16 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, ex
                     if repo.is_post_seen(src.id, post.ref):
                         continue
                     newest_ref = post.ref
+                    snippet = (post.text or "")[:300]
+                    post_url = f"https://t.me/{post.ref}"
+
+                    def record(stage, cand=None):
+                        t, ed, city, loc = _cand_fields(cand)
+                        repo.record_processed(run_id, src.id, channel, post.ref, post_url, stage,
+                                              title=t, event_date=ed, city=city, location=loc, snippet=snippet)
+
                     if not looks_like_event(post.text):
+                        record("PREFILTER_REJECTED")  # heuristic: no date+event keyword
                         repo.mark_post_seen(src.id, post.ref)
                         continue
                     counts["passed_prefilter"] += 1
@@ -36,28 +51,32 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel, ex
                         cand = extractor(post.text, settings.gemini_api_key, settings.gemini_model)
                     except Exception as e:  # transient (network/quota/5xx): retry next sweep, don't burn the post
                         status = getattr(getattr(e, "response", None), "status_code", None)
-                        if status == 429:
-                            counts["gemini_rate_limited"] += 1  # AI quota / per-minute limit hit
-                        else:
-                            counts["gemini_errors"] += 1
+                        counts["gemini_rate_limited" if status == 429 else "gemini_errors"] += 1
+                        record("RATE_LIMITED" if status == 429 else "AI_ERROR")
                         log.warning("extract failed for %s: %s — will retry next sweep", post.ref, e)
                         cand, transient = None, True
                     # Throttle Gemini calls to respect the free-tier per-minute rate limit.
                     await asyncio.sleep(settings.gemini_delay_seconds)
                     if transient:
                         continue  # skip mark_post_seen so the post is reprocessed later
-                    if cand is not None:
-                        counts["extracted"] += 1
-                        payload = to_valid_candidate(cand, post.text)
-                        if payload is not None:
-                            payload["sourceChannel"] = channel
-                            payload["sourceUrl"] = f"https://t.me/{post.ref}"
-                            publish_candidate(producer, payload)
-                            counts["candidates_published"] += 1
-                        elif cand.event_date is None or cand.event_date <= datetime.now():
-                            counts["dropped_past"] += 1   # extracted but date is past / missing
-                        else:
-                            counts["dropped_invalid"] += 1  # extracted but failed other constraints
+                    if cand is None:
+                        record("NOT_EVENT")  # Gemini decided the post is not an event
+                        repo.mark_post_seen(src.id, post.ref)
+                        continue
+                    counts["extracted"] += 1
+                    payload = to_valid_candidate(cand, post.text)
+                    if payload is not None:
+                        payload["sourceChannel"] = channel
+                        payload["sourceUrl"] = post_url
+                        publish_candidate(producer, payload)
+                        counts["candidates_published"] += 1
+                        record("PUBLISHED", cand)
+                    elif cand.event_date is None or cand.event_date <= datetime.now():
+                        counts["dropped_past"] += 1     # extracted but date is past / missing
+                        record("DROPPED_PAST", cand)
+                    else:
+                        counts["dropped_invalid"] += 1  # extracted but failed other constraints
+                        record("DROPPED_INVALID", cand)
                     repo.mark_post_seen(src.id, post.ref)
                     await asyncio.sleep(0)  # cooperative
                 if newest_ref:

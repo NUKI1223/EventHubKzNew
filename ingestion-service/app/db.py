@@ -33,6 +33,23 @@ CREATE TABLE IF NOT EXISTS ingestion_runs (
     dropped_invalid INT DEFAULT 0,
     error TEXT
 );
+CREATE TABLE IF NOT EXISTS processed_posts (
+    id BIGSERIAL PRIMARY KEY,
+    run_id BIGINT,
+    source_id BIGINT REFERENCES sources(id) ON DELETE CASCADE,
+    channel TEXT,
+    post_ref TEXT NOT NULL,
+    post_url TEXT,
+    stage TEXT NOT NULL,          -- PREFILTER_REJECTED/NOT_EVENT/RATE_LIMITED/AI_ERROR/DROPPED_PAST/DROPPED_INVALID/PUBLISHED
+    title TEXT,
+    event_date TEXT,
+    city TEXT,
+    location TEXT,
+    text_snippet TEXT,
+    processed_at TIMESTAMP NOT NULL DEFAULT now(),
+    UNIQUE (source_id, post_ref)
+);
+CREATE INDEX IF NOT EXISTS idx_processed_posts_recent ON processed_posts (processed_at DESC);
 """
 
 # Idempotent self-migration for the per-run breakdown columns on tables that

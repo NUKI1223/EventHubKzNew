@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import Skeleton from './Skeleton';
 import EmptyState from './EmptyState';
 import PageError from './PageError';
+import AdminIngestionItems from './AdminIngestionItems';
 import { useTranslation } from 'react-i18next';
 
 const AdminIngestionSources = () => {
@@ -133,6 +134,8 @@ const AdminIngestionSources = () => {
           </tbody>
         </table>
       )}
+
+      <AdminIngestionItems />
     </div>
   );
 };

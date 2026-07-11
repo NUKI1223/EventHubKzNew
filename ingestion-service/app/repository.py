@@ -48,6 +48,33 @@ class Repository:
              counts.get("dropped_past",0), counts.get("dropped_invalid",0),
              counts.get("error"), run_id))
 
+    def record_processed(self, run_id, source_id, channel, post_ref, post_url, stage,
+                         title=None, event_date=None, city=None, location=None, snippet=None):
+        """Upsert the latest outcome of a single post so the admin can audit what the
+        AI extracted and why each post was accepted or filtered out."""
+        self.conn.execute(
+            """INSERT INTO processed_posts
+                   (run_id, source_id, channel, post_ref, post_url, stage, title, event_date, city, location, text_snippet)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (source_id, post_ref) DO UPDATE SET
+                   run_id=EXCLUDED.run_id, channel=EXCLUDED.channel, post_url=EXCLUDED.post_url,
+                   stage=EXCLUDED.stage, title=EXCLUDED.title, event_date=EXCLUDED.event_date,
+                   city=EXCLUDED.city, location=EXCLUDED.location, text_snippet=EXCLUDED.text_snippet,
+                   processed_at=now()""",
+            (run_id, source_id, channel, post_ref, post_url, stage, title, event_date, city, location, snippet))
+
+    def list_processed(self, limit=200, stage=None) -> list[dict]:
+        q = ("SELECT channel, post_ref, post_url, stage, title, event_date, city, location, "
+             "text_snippet, processed_at FROM processed_posts")
+        params = []
+        if stage:
+            q += " WHERE stage=%s"
+            params.append(stage)
+        q += " ORDER BY processed_at DESC LIMIT %s"
+        params.append(limit)
+        cols = ["channel","post_ref","post_url","stage","title","event_date","city","location","snippet","processed_at"]
+        return [dict(zip(cols, r)) for r in self.conn.execute(q, tuple(params)).fetchall()]
+
     def latest_run(self) -> Run | None:
         r = self.conn.execute(
             "SELECT id,trigger,started_at,finished_at,sources_swept,posts_fetched,"

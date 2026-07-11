@@ -67,4 +67,10 @@ def build_router(get_repo, run_sweep_now):
         r = repo.latest_run()
         return vars(r) if r else {"trigger": None}
 
+    @router.get("/items")
+    def items(stage: str = "", repo=Depends(get_repo)):
+        # Per-post audit trail: what the AI extracted from each post and the stage
+        # at which it was accepted or filtered out. Optional ?stage= filter.
+        return repo.list_processed(limit=200, stage=stage or None)
+
     return router
