@@ -31,8 +31,15 @@ def _default_post(url, headers, json):  # noqa: A002
     return r.json()
 
 def extract_event(text, api_key, model, http_post=_default_post) -> Candidate | None:
+    today = datetime.now().date().isoformat()
+    system_text = (
+        SYSTEM
+        + f" Сегодня {today}. Если в посте указаны день и месяц без года — выбери БЛИЖАЙШУЮ БУДУЩУЮ"
+        " дату: если в этом году она ещё не наступила, ставь текущий год, иначе следующий."
+        " Никогда не возвращай прошедшую дату для анонса будущего мероприятия."
+    )
     body = {
-        "systemInstruction": {"parts": [{"text": SYSTEM}]},
+        "systemInstruction": {"parts": [{"text": system_text}]},
         "contents": [{"role": "user", "parts": [{"text": text}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.1,
                              "maxOutputTokens": 800, "thinkingConfig": {"thinkingBudget": 0}},
