@@ -470,6 +470,7 @@
     "sourcesLoadError": "Дереккөздерді жүктеу мүмкін болмады",
     "sourcesInvalidUrl": "Жарамсыз Telegram-арна сілтемесі (мысалы: https://t.me/s/durov)",
     "sourcesRunStarted": "Жинау басталды — нәтиже соңғы іске қосу мәртебесінде көрінеді",
+    "sourcesRunStats": "посттар алынды {{fetched}}, сүзгіден өтті {{filtered}}, оқиға шығарылды {{extracted}}, кандидат қосылды {{published}}",
     "reqFromParser": "Парсер тапты",
     "reqSourceLink": "Түпнұсқа посты"
   },

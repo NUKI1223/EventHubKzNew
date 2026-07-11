@@ -45,9 +45,20 @@ const AdminIngestionSources = () => {
 
   const run = async () => {
     setRunning(true);
-    try { await api.post('/api/ingestion/run');
-      toast.success(t('admin.sourcesRunStarted')); }
-    catch { toast.error(t('admin.sourcesLoadError')); }
+    const prevId = status?.id;
+    try {
+      await api.post('/api/ingestion/run');
+      toast.success(t('admin.sourcesRunStarted'));
+      // The sweep runs in the background (throttled Gemini calls take minutes).
+      // Poll the last-run status until a new, finished run appears.
+      for (let i = 0; i < 90; i++) {
+        await new Promise(r => setTimeout(r, 4000));
+        const st = await api.get('/api/ingestion/status');
+        setStatus(st.data);
+        if (st.data.id && st.data.id !== prevId && st.data.finished_at) break;
+      }
+      load();
+    } catch { toast.error(t('admin.sourcesLoadError')); }
     finally { setRunning(false); }
   };
 
@@ -65,7 +76,16 @@ const AdminIngestionSources = () => {
       </form>
       {status && status.trigger && (
         <p className="adm-sources__status">
-          {t('admin.sourcesLastRun')}: {status.candidates_published ?? 0} {t('admin.sourcesFound')}
+          <strong>{t('admin.sourcesLastRun')}:</strong>{' '}
+          {status.finished_at
+            ? t('admin.sourcesRunStats', {
+                fetched: status.posts_fetched ?? 0,
+                filtered: status.passed_prefilter ?? 0,
+                extracted: status.extracted ?? 0,
+                published: status.candidates_published ?? 0,
+              })
+            : t('admin.sourcesRunning')}
+          {status.error && <span className="adm-sources__err"> · {status.error}</span>}
         </p>
       )}
       {loading ? <Skeleton /> : sources.length === 0 ? (

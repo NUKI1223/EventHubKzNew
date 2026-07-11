@@ -45,6 +45,8 @@ class Repository:
 
     def latest_run(self) -> Run | None:
         r = self.conn.execute(
-            "SELECT id,trigger,candidates_published,finished_at FROM ingestion_runs ORDER BY id DESC LIMIT 1"
+            "SELECT id,trigger,started_at,finished_at,sources_swept,posts_fetched,"
+            "passed_prefilter,extracted,candidates_published,error "
+            "FROM ingestion_runs ORDER BY id DESC LIMIT 1"
         ).fetchone()
         return Run(*r) if r else None

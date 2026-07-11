@@ -470,6 +470,7 @@
     "sourcesLoadError": "Не удалось загрузить источники",
     "sourcesInvalidUrl": "Некорректная ссылка на Telegram-канал (пример: https://t.me/s/durov)",
     "sourcesRunStarted": "Сбор запущен — результат появится в статусе последнего запуска",
+    "sourcesRunStats": "получено постов {{fetched}}, прошло фильтр {{filtered}}, извлечено событий {{extracted}}, добавлено кандидатов {{published}}",
     "reqFromParser": "Найдено парсером",
     "reqSourceLink": "Оригинал поста"
   },

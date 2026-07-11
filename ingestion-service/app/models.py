@@ -13,5 +13,11 @@ class Source:
 class Run:
     id: int
     trigger: str
-    candidates_published: int
+    started_at: datetime | None
     finished_at: datetime | None
+    sources_swept: int
+    posts_fetched: int
+    passed_prefilter: int
+    extracted: int
+    candidates_published: int
+    error: str | None
