@@ -53,3 +53,26 @@ def test_clean_image_url():
     assert clean_image_url("https://cdn4.telesco.pe/file/x.jpg") == "https://cdn4.telesco.pe/file/x.jpg"
     assert clean_image_url("not a url") is None
     assert clean_image_url(None) is None
+
+
+def test_resolve_year_rolls_wrong_year_to_next_occurrence():
+    from app.validate import resolve_year
+    # post published July 2026, event "27 февраля" (LLM guessed 2026) → next Feb 27 = 2027
+    assert resolve_year(datetime(2026, 2, 27, 16, 0), datetime(2026, 7, 10, 12, 0)) == datetime(2027, 2, 27, 16, 0)
+
+
+def test_resolve_year_keeps_genuinely_past_event():
+    from app.validate import resolve_year
+    # posted late June, event July 3 → stays July 3 2026 (past relative to now → will be dropped)
+    assert resolve_year(datetime(2026, 7, 3, 15, 0), datetime(2026, 6, 28, 10, 0)) == datetime(2026, 7, 3, 15, 0)
+
+
+def test_resolve_year_future_date_unchanged():
+    from app.validate import resolve_year
+    assert resolve_year(datetime(2026, 7, 23, 0, 0), datetime(2026, 7, 10, 12, 0)) == datetime(2026, 7, 23, 0, 0)
+
+
+def test_resolve_year_no_post_date_uses_now():
+    from app.validate import resolve_year
+    got = resolve_year(datetime(2000, 3, 15, 10, 0), None)  # ancient month/day, no post date
+    assert got >= datetime.now()  # rolled to the next future 15 March

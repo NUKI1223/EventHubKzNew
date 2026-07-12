@@ -4,7 +4,7 @@ from datetime import datetime
 from app.telegram import fetch_channel, parse_posts
 from app.prefilter import looks_like_event
 from app.extractor import extract_events_batch
-from app.validate import to_valid_candidate, clean_image_url
+from app.validate import to_valid_candidate, clean_image_url, resolve_year
 from app.producer import publish_candidate
 
 log = logging.getLogger("pipeline")
@@ -76,6 +76,8 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel,
                             repo.mark_post_seen(src.id, post.ref)
                             continue
                         counts["extracted"] += 1
+                        if cand.event_date is not None:  # fix LLM year guesses from the post date
+                            cand.event_date = resolve_year(cand.event_date, post.date)
                         payload = to_valid_candidate(cand, post.text)
                         if payload is not None:
                             payload["sourceChannel"] = channel

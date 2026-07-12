@@ -21,6 +21,25 @@ def clean_image_url(u: str | None) -> str | None:
     u = (u or "").strip()
     return u if _IMG.match(u) else None
 
+def _safe_replace_year(dt: datetime, year: int) -> datetime:
+    try:
+        return dt.replace(year=year)
+    except ValueError:  # Feb 29 in a non-leap year
+        return dt.replace(year=year, day=28)
+
+def resolve_year(event_date: datetime, posted_at: datetime | None) -> datetime:
+    """LLMs fumble the YEAR for dates written without one (e.g. «27 февраля»). The intended
+    date is the first occurrence of that (month, day) on/after when the POST was published —
+    deterministic, so it doesn't depend on the model getting the year right. Genuinely-past
+    events (posted just before they happened) correctly stay in the past and get dropped."""
+    ref = posted_at or datetime.now()
+    if ref.tzinfo:
+        ref = ref.replace(tzinfo=None)
+    corrected = _safe_replace_year(event_date, ref.year)
+    if corrected < ref:
+        corrected = _safe_replace_year(event_date, ref.year + 1)
+    return corrected
+
 def _clip(s: str, lo: int, hi: int) -> str | None:
     s = (s or "").strip()
     if len(s) < lo:

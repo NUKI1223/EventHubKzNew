@@ -83,9 +83,10 @@ def test_rate_limit_counted(monkeypatch):
 def test_past_event_counted_dropped_past(monkeypatch):
     from app import pipeline
     monkeypatch.setattr(pipeline, "parse_posts",
-        lambda html, ch: [Post(ref="kz/11", text="Митап по Go 1 января 2020 Алматы регистрация", date=None)])
+        lambda html, ch: [Post(ref="kz/11", text="Митап по Go 1 января 2020 Алматы регистрация",
+                               date=datetime(2020, 1, 1))])
     past = Candidate("Old Meetup","short desc here","full description long enough here",
-                     datetime.now()-timedelta(days=10), "Алматы","Astana Hub",False,[],None)
+                     datetime(2020, 1, 5, 12, 0), "Алматы","Astana Hub",False,[],None)
     repo, prod = FakeRepo(), FakeProducer()
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=_fetch,
                                    batch_extractor=lambda texts, base, k, m: [past]))

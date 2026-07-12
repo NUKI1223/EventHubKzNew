@@ -16,12 +16,13 @@ _FIELDS = (
 
 
 def _year_rule() -> str:
-    today = datetime.now().date().isoformat()
-    return (
-        f" Сегодня {today}. Если в посте указаны день и месяц без года — выбери БЛИЖАЙШУЮ БУДУЩУЮ дату "
-        "(в этом году, если она ещё не прошла; иначе в следующем). "
-        "Никогда не возвращай прошедшую дату для анонса будущего мероприятия."
-    )
+    year = datetime.now().year
+    # The year is corrected deterministically in code from the post's publication date
+    # (resolve_year), so the model must NOT guess a future year — that would fabricate
+    # dates for events that already happened. Just take the day+month as written.
+    return (f" eventDate: бери день, месяц и время ровно как в посте. Если год НЕ указан — "
+            f"просто поставь {year}; год будет уточнён автоматически по дате публикации поста, "
+            "поэтому НЕ пытайся угадывать будущий год сам.")
 
 
 def _single_system() -> str:
