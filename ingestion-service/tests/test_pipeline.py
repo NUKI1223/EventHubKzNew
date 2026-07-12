@@ -24,8 +24,8 @@ class FakeProducer:
     def flush(self): pass
 
 class S:
-    fetch_delay_seconds=0; gemini_delay_seconds=0; http_timeout_seconds=5
-    gemini_api_key="k"; gemini_model="m"; batch_size=8
+    fetch_delay_seconds=0; llm_delay_seconds=0; http_timeout_seconds=5
+    llm_base_url="http://llm"; llm_api_key="k"; llm_model="m"; batch_size=8
 
 async def _fetch(url, timeout): return "<html/>"
 
@@ -40,7 +40,7 @@ def test_sweep_publishes_valid_event(monkeypatch):
         lambda html, ch: [Post(ref="kz/10", text="Митап по Go 15 сентября 2099 Алматы регистрация", date=None)])
     repo, prod = FakeRepo(), FakeProducer()
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=_fetch,
-                                   batch_extractor=lambda texts, k, m: [_future_cand()]))
+                                   batch_extractor=lambda texts, base, k, m: [_future_cand()]))
     assert counts["candidates_published"] == 1
     assert prod.sent[0]["title"] == "Go Meetup"
     assert prod.sent[0]["sourceChannel"] == "kz"
@@ -52,7 +52,7 @@ def test_seen_post_skipped(monkeypatch):
     monkeypatch.setattr(pipeline, "parse_posts", lambda html, ch: [Post(ref="kz/10", text="x", date=None)])
     repo, prod = FakeRepo(), FakeProducer(); repo.seen.add("kz/10")
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=_fetch,
-                                   batch_extractor=lambda texts, k, m: [None]))
+                                   batch_extractor=lambda texts, base, k, m: [None]))
     assert counts["candidates_published"] == 0
 
 
@@ -88,7 +88,7 @@ def test_past_event_counted_dropped_past(monkeypatch):
                      datetime.now()-timedelta(days=10), "Алматы","Astana Hub",False,[],None)
     repo, prod = FakeRepo(), FakeProducer()
     counts = asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=_fetch,
-                                   batch_extractor=lambda texts, k, m: [past]))
+                                   batch_extractor=lambda texts, base, k, m: [past]))
     assert counts["extracted"] == 1 and counts["candidates_published"] == 0 and counts["dropped_past"] == 1
 
 
@@ -101,7 +101,7 @@ def test_batch_covers_multiple_posts_in_one_call(monkeypatch):
         Post(ref="kz/3", text="Воркшоп по Kotlin 5 ноября 2099 Астана регистрация", date=None),  # event
     ])
     calls = []
-    def fake_batch(texts, k, m):
+    def fake_batch(texts, base, k, m):
         calls.append(list(texts))
         return [_future_cand("Go Meetup"), _future_cand("Kotlin Workshop")]
     repo, prod = FakeRepo(), FakeProducer()
@@ -119,7 +119,7 @@ def test_batch_respects_batch_size(monkeypatch):
     monkeypatch.setattr(pipeline, "parse_posts", lambda html, ch: posts)
     class S2(S): batch_size = 2
     calls = []
-    def fake_batch(texts, k, m):
+    def fake_batch(texts, base, k, m):
         calls.append(len(texts)); return [_future_cand() for _ in texts]
     repo, prod = FakeRepo(), FakeProducer()
     asyncio.run(run_sweep(repo, prod, S2(), "MANUAL", fetcher=_fetch, batch_extractor=fake_batch))
@@ -133,5 +133,5 @@ def test_image_url_flows_to_payload(monkeypatch):
              date=None, image_url="https://cdn4.telesco.pe/file/x.jpg")])
     repo, prod = FakeRepo(), FakeProducer()
     asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=_fetch,
-                          batch_extractor=lambda texts, k, m: [_future_cand()]))
+                          batch_extractor=lambda texts, base, k, m: [_future_cand()]))
     assert prod.sent[0]["mainImageUrl"] == "https://cdn4.telesco.pe/file/x.jpg"

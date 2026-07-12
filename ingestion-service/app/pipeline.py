@@ -58,7 +58,7 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel,
                 for chunk in _chunks(pending, settings.batch_size):
                     try:
                         cands = batch_extractor([p.text for p in chunk],
-                                                settings.gemini_api_key, settings.gemini_model)
+                                                settings.llm_base_url, settings.llm_api_key, settings.llm_model)
                     except Exception as e:  # transient (429/5xx/network): whole batch retried next sweep
                         status = getattr(getattr(e, "response", None), "status_code", None)
                         stage = "RATE_LIMITED" if status == 429 else "AI_ERROR"
@@ -66,9 +66,9 @@ async def run_sweep(repo, producer, settings, trigger, fetcher=fetch_channel,
                         for post in chunk:
                             record(src.id, channel, post, stage)  # deferred — NOT marked seen
                         log.warning("batch extract failed (%s posts): %s — will retry next sweep", len(chunk), e)
-                        await asyncio.sleep(settings.gemini_delay_seconds)
+                        await asyncio.sleep(settings.llm_delay_seconds)
                         continue
-                    await asyncio.sleep(settings.gemini_delay_seconds)  # throttle between batches
+                    await asyncio.sleep(settings.llm_delay_seconds)  # throttle between batches
 
                     for post, cand in zip(chunk, cands):
                         if cand is None:

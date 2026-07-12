@@ -3,8 +3,6 @@ from datetime import datetime
 import json
 import httpx
 
-API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-
 # Shared field spec + extraction quality guidance (used by both single and batch prompts).
 _FIELDS = (
     "Поля события: title (краткое понятное название без эмодзи и хэштегов), "
@@ -33,8 +31,8 @@ def _single_system() -> str:
 
 def _batch_system() -> str:
     return ("Ты извлекаешь IT-мероприятия из НЕСКОЛЬКИХ постов Telegram (они пронумерованы: ### ПОСТ 0, ### ПОСТ 1, ...). "
-            "Верни СТРОГО JSON-массив: по одному объекту на КАЖДЫЙ пост, с обязательными полями "
-            "index (номер поста из заголовка) и isEvent(bool). " + _FIELDS + _year_rule())
+            "Верни СТРОГО JSON-объект с полем \"events\" — массив, по одному объекту на КАЖДЫЙ пост, "
+            "с обязательными полями index (номер поста из заголовка) и isEvent(bool). " + _FIELDS + _year_rule())
 
 
 @dataclass
@@ -56,17 +54,26 @@ def _default_post(url, headers, json):  # noqa: A002
     return r.json()
 
 
-def _body(system_text: str, user_text: str, max_tokens: int = 800) -> dict:
-    return {
-        "systemInstruction": {"parts": [{"text": system_text}]},
-        "contents": [{"role": "user", "parts": [{"text": user_text}]}],
-        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.1,
-                             "maxOutputTokens": max_tokens, "thinkingConfig": {"thinkingBudget": 0}},
+def _chat(base_url, api_key, model, system_text, user_text, max_tokens, http_post):
+    """One OpenAI-compatible chat/completions call (works with Groq, Cerebras, OpenRouter,
+    Mistral, OpenAI). Returns the raw response dict; HTTP errors propagate as transient."""
+    url = base_url.rstrip("/") + "/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_text},
+            {"role": "user", "content": user_text},
+        ],
+        "temperature": 0.1,
+        "max_tokens": max_tokens,
+        "response_format": {"type": "json_object"},
     }
+    return http_post(url, headers, body)
 
 
 def _reply_text(resp: dict) -> str:
-    return resp["candidates"][0]["content"]["parts"][0]["text"]
+    return resp["choices"][0]["message"]["content"]
 
 
 def _parse_candidate(data) -> Candidate | None:
@@ -90,10 +97,10 @@ def _parse_candidate(data) -> Candidate | None:
         tags=[str(t) for t in tags], external_link=data.get("externalLink"))
 
 
-def extract_event(text, api_key, model, http_post=_default_post) -> Candidate | None:
+def extract_event(text, base_url, api_key, model, http_post=_default_post) -> Candidate | None:
     """Single-post extraction. Transient HTTP failures propagate; an unparseable or
     not-an-event response returns None."""
-    resp = http_post(API_URL.format(model=model), {"x-goog-api-key": api_key}, _body(_single_system(), text))
+    resp = _chat(base_url, api_key, model, _single_system(), text, 800, http_post)
     try:
         data = json.loads(_reply_text(resp))
     except Exception:
@@ -101,16 +108,14 @@ def extract_event(text, api_key, model, http_post=_default_post) -> Candidate | 
     return _parse_candidate(data)
 
 
-def extract_events_batch(texts, api_key, model, http_post=_default_post) -> list[Candidate | None]:
-    """Extract from several posts in ONE Gemini call (≈10x fewer calls than per-post →
-    the free-tier quota lasts far longer). Returns a list aligned with `texts`
-    (None where the post isn't an event). A transient HTTP failure propagates so the
-    whole batch is retried on a later sweep."""
+def extract_events_batch(texts, base_url, api_key, model, http_post=_default_post) -> list[Candidate | None]:
+    """Extract from several posts in ONE LLM call (≈Nx fewer calls than per-post → the
+    free tier lasts far longer). Returns a list aligned with `texts` (None where the post
+    isn't an event). A transient HTTP failure propagates so the whole batch is retried."""
     if not texts:
         return []
     joined = "\n\n".join(f"### ПОСТ {i}\n{t}" for i, t in enumerate(texts))
-    body = _body(_batch_system(), joined, max_tokens=350 * len(texts) + 400)
-    resp = http_post(API_URL.format(model=model), {"x-goog-api-key": api_key}, body)
+    resp = _chat(base_url, api_key, model, _batch_system(), joined, 350 * len(texts) + 400, http_post)
     try:
         data = json.loads(_reply_text(resp))
     except Exception:
