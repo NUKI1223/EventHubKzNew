@@ -1,9 +1,19 @@
 import logging
+import re
 import uuid
 from datetime import datetime
 from app.extractor import Candidate
 
 log = logging.getLogger("validate")
+
+# Must match EventRequest.externalLink's @Pattern on the Java side, otherwise the
+# candidate is rejected with a ConstraintViolationException at persist time. The field
+# is nullable, so an LLM-extracted link that doesn't match is safer dropped to null.
+_URL = re.compile(r"^https?://[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#][^\s]*)?$")
+
+def _clean_url(u: str | None) -> str | None:
+    u = (u or "").strip()
+    return u if _URL.match(u) else None
 
 def _clip(s: str, lo: int, hi: int) -> str | None:
     s = (s or "").strip()
@@ -38,6 +48,6 @@ def to_valid_candidate(c: Candidate, post_text: str) -> dict | None:
         "title": title, "shortDescription": short, "fullDescription": full,
         "eventDate": c.event_date.isoformat(),
         "city": c.city, "location": location[:200], "online": bool(c.online),
-        "tags": c.tags, "externalLink": c.external_link,
+        "tags": c.tags, "externalLink": _clean_url(c.external_link),
         "sourceUrl": None, "sourceChannel": None,  # filled by the orchestrator per post
     }

@@ -31,3 +31,13 @@ def test_no_location_no_city_rejected():
 def test_short_full_description_falls_back_to_post():
     d = to_valid_candidate(_cand(full_description="short"), "a sufficiently long original telegram post body")
     assert d is not None and len(d["fullDescription"]) >= 20
+
+
+def test_invalid_external_link_nulled():
+    d = to_valid_candidate(_cand(external_link="регистрация по ссылке в описании"), "post")
+    assert d is not None and d["externalLink"] is None
+
+
+def test_valid_external_link_kept():
+    d = to_valid_candidate(_cand(external_link="https://astanahub.com/event"), "post")
+    assert d["externalLink"] == "https://astanahub.com/event"

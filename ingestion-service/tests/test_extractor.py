@@ -1,5 +1,6 @@
 import json
-from app.extractor import extract_event, Candidate
+import pytest
+from app.extractor import extract_event, extract_events_batch, Candidate
 
 def _gemini_reply(payload: dict) -> dict:
     # shape of Gemini generateContent response
@@ -46,3 +47,46 @@ def test_transient_http_error_propagates():
         raise RuntimeError("HTTP 429 quota exhausted")
     with pytest.raises(RuntimeError):
         extract_event("x", "k", "m", http_post=boom)
+
+
+def test_batch_extracts_and_maps_by_index():
+    def fake_post(url, headers, json):  # noqa: A002
+        return _gemini_reply([
+            {"index": 0, "isEvent": True, "title": "Go Meetup",
+             "shortDescription": "two talks", "fullDescription": "long enough description here",
+             "eventDate": "2026-09-15T18:00:00", "city": "Алматы", "location": "SmartPoint",
+             "online": False, "tags": ["go"], "externalLink": None},
+            {"index": 1, "isEvent": False},
+        ])
+    res = extract_events_batch(["go meetup post", "ad spam"], "k", "m", http_post=fake_post)
+    assert len(res) == 2
+    assert isinstance(res[0], Candidate) and res[0].title == "Go Meetup" and res[0].city == "Алматы"
+    assert res[1] is None
+
+
+def test_batch_index_out_of_order():
+    def fake_post(url, headers, json):  # noqa: A002
+        return _gemini_reply([
+            {"index": 1, "isEvent": True, "title": "Second"},
+            {"index": 0, "isEvent": False},
+        ])
+    res = extract_events_batch(["a", "b"], "k", "m", http_post=fake_post)
+    assert res[0] is None
+    assert res[1].title == "Second"
+
+
+def test_batch_transient_propagates():
+    def boom(url, headers, json):  # noqa: A002
+        raise RuntimeError("429")
+    with pytest.raises(RuntimeError):
+        extract_events_batch(["a", "b"], "k", "m", http_post=boom)
+
+
+def test_batch_unparseable_returns_all_none():
+    def fake_post(url, headers, json):  # noqa: A002
+        return {"candidates": [{"content": {"parts": [{"text": "not json"}]}}]}
+    assert extract_events_batch(["a", "b"], "k", "m", http_post=fake_post) == [None, None]
+
+
+def test_batch_empty_no_call():
+    assert extract_events_batch([], "k", "m", http_post=lambda *a: None) == []
