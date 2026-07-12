@@ -28,6 +28,7 @@ public class EventCandidateFoundEvent extends BaseEvent {
     private boolean online;
     private Set<String> tags;
     private String externalLink;
+    private String mainImageUrl;
     private String sourceUrl;
     private String sourceChannel;
 

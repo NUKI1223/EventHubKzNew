@@ -56,7 +56,7 @@ public class Event {
 
     private LocalDateTime registrationDeadline;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 1024)  // Telegram CDN poster URLs exceed the 255 default
     private String mainImageUrl;
 
     private String externalLink;

@@ -124,3 +124,14 @@ def test_batch_respects_batch_size(monkeypatch):
     repo, prod = FakeRepo(), FakeProducer()
     asyncio.run(run_sweep(repo, prod, S2(), "MANUAL", fetcher=_fetch, batch_extractor=fake_batch))
     assert calls == [2, 2, 1]  # 5 posts chunked by 2
+
+
+def test_image_url_flows_to_payload(monkeypatch):
+    from app import pipeline
+    monkeypatch.setattr(pipeline, "parse_posts", lambda html, ch: [
+        Post(ref="kz/10", text="Митап по Go 15 сентября 2099 Алматы регистрация",
+             date=None, image_url="https://cdn4.telesco.pe/file/x.jpg")])
+    repo, prod = FakeRepo(), FakeProducer()
+    asyncio.run(run_sweep(repo, prod, S(), "MANUAL", fetcher=_fetch,
+                          batch_extractor=lambda texts, k, m: [_future_cand()]))
+    assert prod.sent[0]["mainImageUrl"] == "https://cdn4.telesco.pe/file/x.jpg"

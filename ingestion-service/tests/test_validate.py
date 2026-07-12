@@ -41,3 +41,15 @@ def test_invalid_external_link_nulled():
 def test_valid_external_link_kept():
     d = to_valid_candidate(_cand(external_link="https://astanahub.com/event"), "post")
     assert d["externalLink"] == "https://astanahub.com/event"
+
+
+def test_main_image_url_key_present_and_null():
+    d = to_valid_candidate(_cand(), "post")
+    assert "mainImageUrl" in d and d["mainImageUrl"] is None  # stamped later by the pipeline
+
+
+def test_clean_image_url():
+    from app.validate import clean_image_url
+    assert clean_image_url("https://cdn4.telesco.pe/file/x.jpg") == "https://cdn4.telesco.pe/file/x.jpg"
+    assert clean_image_url("not a url") is None
+    assert clean_image_url(None) is None

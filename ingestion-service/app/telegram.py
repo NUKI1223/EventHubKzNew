@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+import re
 import httpx
 from bs4 import BeautifulSoup
+
+_BG_IMAGE = re.compile(r"background-image:url\('([^']+)'\)")
 
 
 @dataclass
@@ -10,6 +13,7 @@ class Post:
     text: str
     date: datetime | None
     links: list[str] = field(default_factory=list)
+    image_url: str | None = None
 
 
 async def fetch_channel(url: str, timeout: float) -> str:
@@ -36,5 +40,11 @@ def parse_posts(html: str, channel: str) -> list[Post]:
             except ValueError:
                 date = None
         links = [a["href"] for a in (text_el.select("a[href]") if text_el else []) if a.get("href")]
-        posts.append(Post(ref=ref, text=text, date=date, links=links))
+        image_url = None
+        photo = block.select_one(".tgme_widget_message_photo_wrap")
+        if photo and photo.get("style"):
+            m = _BG_IMAGE.search(photo["style"])
+            if m:
+                image_url = m.group(1)
+        posts.append(Post(ref=ref, text=text, date=date, links=links, image_url=image_url))
     return posts

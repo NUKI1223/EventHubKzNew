@@ -46,7 +46,7 @@ public class CandidateService {
                 .fullDescription(c.getFullDescription()).location(c.getLocation())
                 .online(c.isOnline()).eventDate(c.getEventDate())
                 .tags(c.getTags() == null ? new HashSet<>() : new HashSet<>(c.getTags()))
-                .externalLink(c.getExternalLink())
+                .externalLink(c.getExternalLink()).mainImageUrl(c.getMainImageUrl())
                 .source(RequestSource.AI_INGEST).sourceUrl(c.getSourceUrl())
                 .sourceChannel(c.getSourceChannel()).requesterId(null)
                 .status(RequestStatus.PENDING).build();

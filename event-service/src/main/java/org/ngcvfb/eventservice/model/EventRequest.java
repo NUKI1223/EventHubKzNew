@@ -70,6 +70,7 @@ public class EventRequest {
     @Pattern(
             regexp = "^$|^https?://.+",
             message = "URL изображения должен начинаться с http:// или https://")
+    @Column(length = 1024)  // Telegram CDN poster URLs run ~350–450 chars (>255 default)
     private String mainImageUrl;
 
     @Pattern(

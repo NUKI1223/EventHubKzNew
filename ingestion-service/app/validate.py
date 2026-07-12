@@ -10,10 +10,16 @@ log = logging.getLogger("validate")
 # candidate is rejected with a ConstraintViolationException at persist time. The field
 # is nullable, so an LLM-extracted link that doesn't match is safer dropped to null.
 _URL = re.compile(r"^https?://[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:[:/?#][^\s]*)?$")
+# EventRequest.mainImageUrl @Pattern is lenient: ^$|^https?://.+
+_IMG = re.compile(r"^https?://.+")
 
 def _clean_url(u: str | None) -> str | None:
     u = (u or "").strip()
     return u if _URL.match(u) else None
+
+def clean_image_url(u: str | None) -> str | None:
+    u = (u or "").strip()
+    return u if _IMG.match(u) else None
 
 def _clip(s: str, lo: int, hi: int) -> str | None:
     s = (s or "").strip()
@@ -49,5 +55,6 @@ def to_valid_candidate(c: Candidate, post_text: str) -> dict | None:
         "eventDate": c.event_date.isoformat(),
         "city": c.city, "location": location[:200], "online": bool(c.online),
         "tags": c.tags, "externalLink": _clean_url(c.external_link),
+        "mainImageUrl": None,  # filled by the orchestrator from the post's photo
         "sourceUrl": None, "sourceChannel": None,  # filled by the orchestrator per post
     }
