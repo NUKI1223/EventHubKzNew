@@ -65,7 +65,11 @@ eureka:
 security:
   jwt:
     secret-key: ${JWT_SECRET}
-    expiration-time: ${JWT_EXPIRATION:3600000}
+    expiration-time: ${JWT_EXPIRATION:900000}   # 15 min — short-lived access token
+  refresh:
+    expiration: ${REFRESH_EXPIRATION:604800000}  # 7 days — refresh token TTL (Redis)
+  cookie:
+    secure: ${COOKIE_SECURE:false}               # true in prod (behind Caddy TLS)
 
 management:
   endpoints:

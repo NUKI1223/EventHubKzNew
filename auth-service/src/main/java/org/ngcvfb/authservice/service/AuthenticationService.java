@@ -74,18 +74,25 @@ public class AuthenticationService {
                 )
         );
 
-        String token = jwtService.generateToken(user);
-
         log.info("User authenticated: {}", user.getEmail());
+        return buildResponse(user);
+    }
 
+    /** Build a fresh access-token response for a user (used by login and by /auth/refresh). */
+    public AuthResponse buildResponse(AuthUser user) {
         return AuthResponse.builder()
-                .token(token)
+                .token(jwtService.generateToken(user))
                 .expiresIn(jwtService.getExpirationTime())
                 .userId(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    public AuthUser getById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Transactional
