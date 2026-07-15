@@ -70,7 +70,9 @@ function Header() {
   }, [showNotifications, showDropdown]);
 
   const confirmLogout = () => {
+    api.post("/auth/logout").catch(() => {});   // best-effort: revoke refresh token + clear cookie
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     setUser(null);
     setShowDropdown(false);
     setShowLogoutConfirm(false);
