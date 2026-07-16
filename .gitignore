@@ -22,3 +22,6 @@ __pycache__/
 .env.local
 .env.prod
 .claude/
+
+# DB backups (local; ship offsite separately)
+backups/
